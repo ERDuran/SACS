@@ -319,7 +319,7 @@ end
 SC_north_trans_nc = SC_north_trans_nc_mcps .* 10^-6;
 SC_south_trans_nc = SC_south_trans_nc_mcps .* 10^-6;
 
-[SC_north_trans, SC_south_trans] = deal(NaN(1, length(lon_u)));
+[SC_north_trans, SC_south_trans] = deal(NaN(1, length(lon_v)));
 
 SC_north_trans(57) = SC_north_trans_nc(57);
 SC_south_trans(57) = SC_south_trans_nc(57);
@@ -373,7 +373,7 @@ SC_W_trans_nc_mcps_indiv = SC_w_star .* dy_v .* dx_u;
 SC_W_trans_nc_mcps = nansum(SC_W_trans_nc_mcps_indiv,1);
 SC_W_trans_nc = SC_W_trans_nc_mcps * 10^-6;
 
-SC_W_trans = NaN(1, length(lon_u));
+SC_W_trans = NaN(1, length(lon_v));
 SC_W_trans(57) = SC_W_trans_nc(57);
 for jj = ALLC_lon_u_ind(2:end)
     SC_W_trans(jj) = ...
@@ -383,7 +383,7 @@ end
 
 
 %
-SC_W_trans_prime = NaN(1, length(lon_u));
+SC_W_trans_prime = NaN(1, length(lon_v));
 for jj = ALLC_lon_u_ind(1:end-1)
     SC_W_trans_prime(jj) = - (-SC_U_trans(jj+1) + SC_U_trans(57) ...
         + SC_north_trans(jj) + SC_south_trans(jj));
@@ -411,10 +411,13 @@ plot(lon_u, SC_U_trans, 'linewidth', 2)
 
 hold all
 plot(lon_u, SC_U_trans_prime, 'linewidth', 2)
-plot(lon_u, SC_north_trans, '--', 'linewidth', 2)
-plot(lon_u, SC_south_trans, '--', 'linewidth', 2)
-plot(lon_u, SC_W_trans, ':', 'linewidth', 2)
-plot(lon_u, SC_W_trans_prime, ':', 'linewidth', 2)
+plot(lon_v, SC_north_trans, '--', 'linewidth', 2)
+plot(lon_v, SC_south_trans, '--', 'linewidth', 2)
+plot(lon_v, SC_W_trans, ':', 'linewidth', 2)
+plot(lon_v, SC_W_trans_prime, ':', 'linewidth', 2)
+
+plot(lon_v, (SC_W_trans-SC_W_trans_prime), '-.', 'linewidth', 2)
+plot(lon_u, -(SC_U_trans-SC_U_trans_prime), '-.', 'linewidth', 2)
 
 
 legend('U_{SBC}', 'U''_{SBC}', 'V_{SA}', 'V_{SBC}', 'W_{SBC}', 'W''_{SBC}')
