@@ -3,17 +3,12 @@ clc
 path(pathdef)
 
 % set up main directory
-cd /home/z5100174/Desktop/MATLAB
+cd ~/SACS_work/programs/mean
+% cd /home/z5100174/Desktop/MATLAB
 % cd D:/
 
 % Add path to the data to be loaded
-addpath(genpath('functions'))
-
-% Add path to the data to be loaded
-addpath cars_out
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
+addpath(genpath('~/Dropbox/SACS_work'))
 
 clear 
 % vn is a function that can store the name of a variable
