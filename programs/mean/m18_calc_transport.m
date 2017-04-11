@@ -3,12 +3,12 @@ clc
 path(pathdef)
 
 % set up main directory
-cd ~/SACS_work/programs/mean
+cd ~
 % cd /home/z5100174/Desktop/MATLAB
 % cd D:/
 
 % Add path to the data to be loaded
-addpath(genpath('~/Dropbox/SACS_work'))
+addpath(genpath('Dropbox/SACS_work'))
 
 clear 
 % vn is a function that can store the name of a variable
@@ -77,9 +77,6 @@ U_ek = aus8_ZD_method.U_ek;
 V_ek = aus8_ZD_method.V_ek;
 U_ek(isnan(U_ek)) = 0;
 V_ek(isnan(V_ek)) = 0;
-
-U_prime = aus8_ZD_method.U_prime;
-V_prime = aus8_ZD_method.V_prime;
 
 % div(U',V')
 div_UV_prime = aus8_ZD_method.div_UV_prime;
@@ -168,7 +165,7 @@ SC_V_trans_mcps_indiv = SC_V_prime .* dx_v;
 
 %% V SC
 % V SA
-SC_north_trans_nc_mcps = NaN(1, length(lon_u));
+SC_north_trans_nc_mcps = NaN(1, length(lon_v));
 for jj = 1 : length(SC_lon_u_repelem(1:end-1))
     lon_u_repelem_ind = find(lon_u == SC_lon_u_repelem(jj));
     
@@ -390,7 +387,7 @@ end
 SC_U_trans_prime = NaN(1, length(lon_u));
 SC_U_trans_prime(57) = SC_U_trans(57);
 for jj = ALLC_lon_u_ind(1:end-1)
-    SC_U_trans_prime(jj+1) = SC_U_trans(57) + ...
+    SC_U_trans_prime(jj+1) = SC_U_trans_prime(57) + ...
         + SC_north_trans(jj) + SC_south_trans(jj) + ...
         SC_W_trans(jj);
     
@@ -399,7 +396,7 @@ end
 
 %%
 % close all
-figure
+fig1 = figure;
 set(gcf,'units','normalized','outerposition',[0 0 1 1])
 
 plot(lon_u, SC_U_trans, 'linewidth', 2)
@@ -419,5 +416,9 @@ legend('U_{SBC}', 'U''_{SBC}', 'V_{SA}', 'V_{SBC}', 'W_{SBC}', 'W''_{SBC}')
 axis([115 147 -2 2])
 grid
 
-
+% export_fig(fig1, ['Dropbox/SACS_work/figures/' ...
+% 'm18_calc_transport/trans'], ...
+%     '-m2', '-nocrop')
+% 
+% close
 
