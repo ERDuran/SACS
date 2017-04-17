@@ -62,11 +62,11 @@ fig1 = figure(1);
 %     'paperOrientation', 'portrait', ...
 %     'paperunits','centimeters', ...
 %     'PaperPosition',[0, 0, (21-4)/2, (29.7-4)]*magn);
-set(gcf, 'units', 'normalized', 'outerposition', [0 0 0.8 1]);
+set(gcf, 'units', 'normalized', 'outerposition', [0 0 0.7 0.95]);
 rowN = 2; colN = 2;
 col_ind = (repmat(1:colN,rowN,1))';
 row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
-gap_w = 0.02; % gap width between subplots
+gap_w = - 0.04; % gap width between subplots
 gap_h = 0.04; % gap height between subplots
 marg_b = 0.03; % bottom margin
 marg_t = 0.03; % top margin
@@ -110,8 +110,7 @@ hold on
 caxis([asal_contours(1) asal_contours(end)]);
 axis([110 152 -47 -31])
 cbar = colorbar;
-cbarrow
-set(cbar, 'YTick',asal_contours(2:end-1));
+set(cbar, 'visible', 'off');
 
 % 5) Theta contours set-up
 Theta_contours = 10:1:21;
@@ -229,8 +228,7 @@ hold on
 caxis([asal_contours(1) asal_contours(end)]);
 axis([110 152 -47 -31])
 cbar = colorbar;
-cbarrow
-set(cbar, 'YTick',asal_contours(2:end-1));
+set(cbar, 'visible', 'off');
 Theta_contours = 9:0.2:12;
 [c, h] = contour(...
     lon_CARS, ...
@@ -319,8 +317,4 @@ export_fig(fig1, ['Dropbox/SACS_work/figures/f1_mean_TSV_maps/p_' ...
     num2str(pres_now)], ...
     '-m4', '-nocrop')
 close
-
-
-
-
 
