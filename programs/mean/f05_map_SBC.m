@@ -38,32 +38,50 @@ SBC_v_g_prime_ind = aus8_currents.SC.v_g_prime_ind;
 U_ek = aus8_ZD_method.U_ek;
 V_ek = aus8_ZD_method.V_ek;
 
+SC_lat_v_north = aus8_currents.SC.lat_v_north;
+SC_lat_v_south = aus8_currents.SC.lat_v_south;
+SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem;
+SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem;
+SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem;
+
 u_dz = repmat(permute(depth_thicknesses, [3 2 1]), [size(U_ek), 1]);
 u_g_prime_times_dz = u_g_prime .* u_dz;
+SBC_U_g_prime = NaN(length(lat_u), length(lon_u));
 for ii = 1 : length(lat_u)
     for jj = 1 : length(lon_u)
-        u_g_prime_times_dz_now = u_g_prime_times_dz(ii,jj,:);
-        SBC_u_g_prime_ind_now = SBC_u_g_prime_ind(ii,jj,:);
-        SBC_U_g_prime(ii,jj) = nansum(u_g_prime_times_dz, 3);
+        u_g_prime_times_dz_now = squeeze(u_g_prime_times_dz(ii,jj,:));
+        SBC_u_g_prime_ind_now = squeeze(SBC_u_g_prime_ind(ii,jj,:));
+        SBC_U_g_prime(ii,jj) = ...
+            nansum(u_g_prime_times_dz_now(SBC_u_g_prime_ind_now));
     end
 end
-SBC_U_g_prime = nansum(u_g_prime_times_dz, 3);
-SBC_U_g_prime(SBC_U_g_prime==0) = NaN;
+SBC_U_g_prime(isnan(U_ek)) = NaN;
+
+SBC_U_g_prime_mask = SBC_U_g_prime==0;
 SBC_U_prime = SBC_U_g_prime + U_ek;
+SBC_U_prime(SBC_U_g_prime==0) = 0;
 
 v_dz = repmat(permute(depth_thicknesses, [3 2 1]), [size(V_ek), 1]);
 v_g_prime_times_dz = v_g_prime .* v_dz;
-SBC_V_g_prime = nansum(SBC_v_g_prime_times_dz, 3);
+SBC_V_g_prime = NaN(length(lat_v), length(lon_v));
+for ii = 1 : length(lat_v)
+    for jj = 1 : length(lon_v)
+        v_g_prime_times_dz_now = v_g_prime_times_dz(ii,jj,:);
+        SBC_v_g_prime_ind_now = squeeze(SBC_v_g_prime_ind(ii,jj,:));
+        SBC_V_g_prime(ii,jj) = ...
+            nansum(v_g_prime_times_dz(ii,jj,SBC_v_g_prime_ind_now));
+    end
+end
 SBC_V_g_prime(SBC_V_g_prime==0) = NaN;
 SBC_V_prime = SBC_V_g_prime + V_ek;
 
 lon_hr = lon(1) : 0.1 : lon(end);
 lat_hr = (lat(1) : -0.1 : lat(end))';
 
-SBC_U_prime_interp2_hr = interp2(lon_u, lat_u, SBC_U_prime, ...
-    lon_hr, lat_hr);
-SBC_V_prime_interp2_hr = interp2(lon_v, lat_v, SBC_V_prime, ...
-    lon_hr, lat_hr);
+SBC_U_prime_interp2 = interp2(lon_u, lat_u, SBC_U_prime, ...
+    lon, lat);
+SBC_V_prime_interp2 = interp2(lon_v, lat_v, SBC_V_prime, ...
+    lon, lat);
 
 
 %% plot map
@@ -71,7 +89,7 @@ SBC_V_prime_interp2_hr = interp2(lon_v, lat_v, SBC_V_prime, ...
 close all
 font_size = 8;
 fig1 = figure(1);
-set(gcf, 'units', 'normalized', 'outerposition', [0 0 0.35 0.475]);
+set(gcf, 'units', 'normalized', 'outerposition', [0 0 0.6 0.475]);
 rowN = 1; colN = 1;
 col_ind = (repmat(1:colN,rowN,1))';
 row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
@@ -113,7 +131,7 @@ pcolor(...
 shading interp
 hold on
 caxis([Reds_cont(1) Reds_cont(end)]);
-axis([110 152 -47 -31])
+axis([114 148 -45 -33])
 freezeColors
 
 cmap = colormap(Reds);
@@ -122,34 +140,43 @@ Reds_linspace = ...
 cbar = colorbar;
 set(cbar, 'YTick',Reds_linspace, 'YTickLabel',Reds_cont/magnif);
 
+% 5) plot SBC boundaries
+hold on
+plot([SC_lon_u_repelem(1,1) SC_lon_u_repelem(1,1)], ...
+    [SC_lat_v_north(1,1) SC_lat_v_south(1,1)], ...
+    'g','linewidth',0.5,'linestyle','-')
+plot(SC_lon_u_repelem(1,:), ...
+    SC_lat_v_north_repelem(1,:), ...
+    'g','linewidth',0.5,'linestyle','-')
+plot(SC_lon_u_repelem(1,:), ...
+    SC_lat_v_south_repelem(1,:), ...
+    'g','linewidth',0.5,'linestyle','-')
+plot([SC_lon_u_repelem(1,end) SC_lon_u_repelem(1,end)], ...
+    [SC_lat_v_north(1,end) SC_lat_v_south(1,end)], ...
+    'g','linewidth',0.5,'linestyle','-')
+
 % 7) UV quiver set-up
-[lon_mg, lat_mg]=meshgrid(lon_hr,lat_hr);
+[lon_mg, lat_mg]=meshgrid(lon,lat);
 quiv_S = 5;
-nn = 2;
+nn = 1;
 
 % 8) plot directional U and V
 quiver(...
     lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
-    SBC_U_prime_interp2_hr(1:nn:end, 1:nn:end), ...
-    SBC_V_prime_interp2_hr(1:nn:end, 1:nn:end), ...
+    SBC_U_prime_interp2(1:nn:end, 1:nn:end), ...
+    SBC_V_prime_interp2(1:nn:end, 1:nn:end), ...
     quiv_S, 'k');
 % reference arrow goes here
 
 % 9) title, grid, background and fonts
-title('CARS surface')
+title('SBC current')
 grid
 set(gca,'layer','top','color',[0.7 0.7 0.7],...
     'fontsize',font_size,'fontweight','bold')
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
-
-% print(gcf,'-r300','-dpng', ...
-%     ['Dropbox/SACS_work/figures/f1_mean_TSV_maps/p_' ...
-%     num2str(pres_now)])
-
-% export_fig(fig1, ['Dropbox/SACS_work/figures/f1_mean_TSV_maps/p_' ...
-%     num2str(pres_now)], ...
-%     '-m4', '-nocrop')
-% close
+export_fig(fig1, ['Dropbox/SACS_work/figures/f05_map_SBC/U'], ...
+    '-m4', '-nocrop')
+close
 

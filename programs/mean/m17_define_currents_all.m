@@ -3,22 +3,16 @@ clc
 path(pathdef)
 
 % set up main directory
-cd /home/z5100174/Desktop/MATLAB
+cd ~
 % cd D:/
 
 % Add path to the data to be loaded
-addpath(genpath('functions'))
+addpath(genpath('Dropbox/SACS_work'))
+addpath(genpath(['/Users/earl/Dropbox/' ...
+    'LeeuwinUndercurrent_HonoursProject/' ...
+    'matlab/OFAM/ofam_out']))
 
-% Add path to the data to be loaded
-addpath cars_out
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
+clear
 
 load aus8_ZD_method
 load aus8_currents
@@ -231,7 +225,6 @@ SC_lat_v_south_repelem = ...
     repelem(SC_lat_v_south, 1, 2);
 
 
-
 %%% SAVE
 aus8_currents.SC.u_g_prime_ind = SC_u_ind;
 aus8_currents.SC.v_g_prime_ind = SC_v_ind;
@@ -380,22 +373,22 @@ scatter(lon_v_g_prime_NaN, lat_v_g_prime_NaN, 4, ...
 
 hold on
 nn = 1;
-[lon_mg, lat_mg]=meshgrid(lon_u(lon_u_ind),lat_u(lat_u_ind));
-v_g_0 = zeros(size(data.SC_u));
-quivers(...
-    lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
-    data.SC_u(1:nn:end, 1:nn:end), ...
-    v_g_0(1:nn:end, 1:nn:end), ...
-    quiv_S, 1, 'm/s', 'r');
-% 
-% hold on
-% [lon_mg, lat_mg]=meshgrid(lon_v(lon_v_ind),lat_v(lat_v_ind));
-% u_g_0 = zeros(size(data.SC_v_grid));
+
+% [lon_mg, lat_mg]=meshgrid(lon_u(lon_u_ind),lat_u(lat_u_ind));
+% v_g_0 = zeros(size(data.SC_u));
 % quivers(...
 %     lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
-%     u_g_0(1:nn:end, 1:nn:end), ...
-%     data.SC_v_grid(1:nn:end, 1:nn:end), ...
-%     quiv_S, 3, 'm/s', 'b');
+%     data.SC_u(1:nn:end, 1:nn:end), ...
+%     v_g_0(1:nn:end, 1:nn:end), ...
+%     quiv_S, 1, 'm/s', 'r');
+
+[lon_mg, lat_mg]=meshgrid(lon_v(lon_v_ind),lat_v(lat_v_ind));
+u_g_0 = zeros(size(data.SC_v));
+quivers(...
+    lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
+    u_g_0(1:nn:end, 1:nn:end), ...
+    data.SC_v(1:nn:end, 1:nn:end), ...
+    quiv_S, 1, 'm/s', 'b');
 
 % [SC_u_interp2, SC_v_interp2] = ...
 %     deal(NaN(length(lat_u_zoom), length(lon_v_zoom), length(pres_mid)));
@@ -430,11 +423,169 @@ font_size = 10;
 set(gca,'layer','top','color',[0.7 0.7 0.7],...
     'fontsize',font_size,'fontweight','bold')
 
-export_fig(fig1, ['figures/m17_define_currents_all/' dn '_' ...
+export_fig(fig1, ['Dropbox/SACS_work/figures/m17_define_currents_all/v'...
     num2str(pres_mid_now)], ...
     '-m3', '-nocrop')
 
-% close
+close
+
+
+%% plot maps of U and V SBC
+close all
+fig1 = figure(1);
+
+set(gcf,'units','normalized','outerposition',[0 0 1 1])
+
+rowN = 1; colN = 1;
+col_ind = (repmat(1:colN,rowN,1))';
+row_ind = (flipud(repmat((1:rowN)',1,colN)))';
+gap_w = 0.02; % gap width between subplots
+gap_h = 0.06; % gap height between subplots
+marg_b = 0.03; % bottom margin
+marg_t = 0.03; % top margin
+marg_l = 0.02; % left margin
+marg_r = 0.005; % right margin
+x_sp = (1 - marg_l - marg_r - gap_w*(colN-1))/colN; % x subplot length
+y_sp = (1 - marg_b - marg_t - gap_h*(rowN-1))/rowN; % y subplot length
+
+h_axes_sp = tight_subplot(rowN, colN, ...
+    [gap_h gap_w], [marg_b marg_t], [marg_l marg_r]);
+
+axes(h_axes_sp(1))
+
+colormap(cmap_custom);
+h_pcolor = pcolor(...
+    lon_F(lon_F_ind)-0.0625, ...
+    lat_F(lat_F_ind)+0.0625, ...
+    data.(dn)(lat_F_ind,lon_F_ind)*magnif);
+
+set(h_pcolor,'linewidth',0.1)
+
+% shading flat
+caxis([Blues_cont(1) Reds_cont(end)]);
+freezeColors
+
+hold on
+% west
+plot([SC_lon_u(1,1) SC_lon_u(1,1)], ...
+    [SC_lat_v_north(p_ind,1) SC_lat_v_south(p_ind,1)], ...
+    'g','linewidth',0.5,'linestyle','-')
+% north
+plot(SC_lon_u_repelem(p_ind,:), ...
+    SC_lat_v_north_repelem(p_ind,:), ...
+    'g','linewidth',0.5,'linestyle','-')
+% south
+plot(SC_lon_u_repelem(p_ind,:), ...
+    SC_lat_v_south_repelem(p_ind,:), ...
+    'g','linewidth',0.5,'linestyle','-')
+% east
+plot([SC_lon_u(1,end) SC_lon_u(1,end)], ...
+    [SC_lat_v_north(p_ind,end) SC_lat_v_south(p_ind,end)], ...
+    'g','linewidth',0.5,'linestyle','-')
+
+hold on
+[lat_u_g_prime_NaN_ind, lon_u_g_prime_NaN_ind] = ...
+    find(isnan(u_g_prime(lat_u_ind,lon_u_ind,p_ind)));
+
+lat_u_zoom = lat_u(lat_u_ind);
+lon_u_zoom = lon_u(lon_u_ind);
+
+lat_u_g_prime_NaN = lat_u_zoom(lat_u_g_prime_NaN_ind);
+lon_u_g_prime_NaN = lon_u_zoom(lon_u_g_prime_NaN_ind);
+
+scatter(lon_u_g_prime_NaN, lat_u_g_prime_NaN, 4, ...
+    'o', 'k');
+
+hold on
+[lat_v_g_prime_NaN_ind, lon_v_g_prime_NaN_ind] = ...
+    find(isnan(v_g_prime(lat_v_ind,lon_v_ind,p_ind)));
+
+lat_v_zoom = lat_v(lat_v_ind);
+lon_v_zoom = lon_v(lon_v_ind);
+
+lat_v_g_prime_NaN = lat_v_zoom(lat_v_g_prime_NaN_ind);
+lon_v_g_prime_NaN = lon_v_zoom(lon_v_g_prime_NaN_ind);
+
+scatter(lon_v_g_prime_NaN, lat_v_g_prime_NaN, 4, ...
+    'o', 'k');
+
+hold on
+nn = 1;
+quiv_S = 5;
+SBC_U_g_times_depth = SC_u.*depth_h_u;
+SBC_U_g = nansum(SBC_U_g_times_depth,3);
+SBC_U_g_mask = SBC_U_g==0;
+SBC_U0 = SBC_U_g + U_ek;
+SBC_U0(SBC_U_g_mask) = 0;
+SBC_U = SBC_U0(lat_u_ind,lon_u_ind);
+[lon_mg, lat_mg]=meshgrid(lon_u(lon_u_ind),lat_u(lat_u_ind));
+v_g_0 = zeros(size(SBC_U));
+quivers(...
+    lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
+    SBC_U(1:nn:end, 1:nn:end), ...
+    v_g_0(1:nn:end, 1:nn:end), ...
+    quiv_S, 1, 'm/s', 'r');
+
+SBC_V_g_times_depth = SC_v.*depth_h_v;
+SBC_V_g_raw = nansum(SBC_V_g_times_depth,3);
+SBC_V_g_raw_mask = SBC_V_g_raw==0;
+SBC_V_raw0 = SBC_V_g_raw + V_ek;
+SBC_V_raw0(SBC_V_g_raw_mask) = 0;
+SBC_V_raw = SBC_V_raw0(lat_v_ind,lon_v_ind);
+
+SBC_V = NaN(size(SBC_V_raw));
+for jj = 1 : length(lon_v_zoom)
+    first_now = find(SBC_V_raw(:,jj)~=0,1,'first');
+    last_now = find(SBC_V_raw(:,jj)~=0,1,'last');
+    SBC_V([first_now,last_now],jj) = SBC_V_raw([first_now,last_now],jj);
+end
+
+[lon_mg, lat_mg]=meshgrid(lon_v(lon_v_ind),lat_v(lat_v_ind));
+u_g_0 = zeros(size(SBC_V));
+quivers(...
+    lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
+    u_g_0(1:nn:end, 1:nn:end), ...
+    SBC_V(1:nn:end, 1:nn:end), ...
+    quiv_S, 1, 'm/s', 'b');
+
+% [SC_u_interp2, SC_v_interp2] = ...
+%     deal(NaN(length(lat_u_zoom), length(lon_v_zoom), length(pres_mid)));
+% for kk = 1 : length(pres_mid)
+%     SC_u_interp2(:,:,kk) = ...
+%         interp2(lon_u_zoom, lat_u_zoom, data.SC_u, lon_v_zoom, lat_u_zoom);
+%     SC_v_interp2(:,:,kk) = ...
+%         interp2(lon_v_zoom, lat_v_zoom, data.SC_v, lon_v_zoom, lat_u_zoom);
+% end
+% [lon_mg, lat_mg]=meshgrid(lon_v_zoom,lat_u_zoom);
+% quivers(...
+%     lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
+%     SC_u_interp2(1:nn:end, 1:nn:end, p_ind), ...
+%     SC_v_interp2(1:nn:end, 1:nn:end, p_ind), ...
+%     quiv_S, 3, 'm/s', 'k');
+
+if strcmp(dn_units, 'm^2/s')
+    title([dn ' (' dn_units ')'])
+else
+    title(['Fluxes at ' num2str(pres_mid_now) ' dbar'])
+end
+
+cmap = colormap(BluesReds);
+BluesReds_linspace = ...
+    linspace(Blues_cont(1), Reds_cont(end), BluesReds_cont_length);
+% cbar = colorbar;
+% cbarrow
+% set(cbar, 'YTick',BluesReds_linspace, 'YTickLabel',BluesReds_cont/magnif);
+
+% grid 
+font_size = 10;
+set(gca,'layer','top','color',[0.7 0.7 0.7],...
+    'fontsize',font_size,'fontweight','bold')
+
+export_fig(fig1, ['Dropbox/SACS_work/figures/m17_define_currents_all/V_'...
+    num2str(pres_mid_now)], ...
+    '-m3', '-nocrop')
+
+close
 
 
 %%

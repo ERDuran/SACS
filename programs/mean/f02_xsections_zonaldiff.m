@@ -18,7 +18,7 @@ clear
 vn = @(x) inputname(1);
 
 load aus8_geostrophy
-
+load aus8_TEOS10
 load ofam_mean
 
 
