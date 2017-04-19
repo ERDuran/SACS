@@ -1,18 +1,5 @@
 %% fig 1: map of SBC currents
-clc
-path(pathdef)
-
-% set up main directory
-cd ~
-% cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('Dropbox/SACS_work'))
-addpath(genpath(['/Users/earl/Dropbox/' ...
-    'LeeuwinUndercurrent_HonoursProject/' ...
-    'matlab/OFAM/ofam_out']))
-
-clear
+clearvars('-except', 'outputpath')
 
 load aus8_ZD_method
 load aus8_currents
@@ -176,7 +163,7 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
-export_fig(fig1, ['Dropbox/SACS_work/figures/f05_map_SBC/U'], ...
+export_fig(fig1, [outputpath 'f05_map_SBC/U'], ...
     '-m4', '-nocrop')
 close
 
