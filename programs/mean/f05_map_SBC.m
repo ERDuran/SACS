@@ -163,7 +163,12 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
-export_fig(fig1, [outputpath 'f05_map_SBC/U'], ...
+
+outputls = ls([pwd '/' outputpath]);
+if ~strfind(outputls, mfilename)
+    mkdir(outputpath, mfilename)
+end
+export_fig(fig1, [outputpath mfilename '/U'], ...
     '-m4', '-nocrop')
 close
 
