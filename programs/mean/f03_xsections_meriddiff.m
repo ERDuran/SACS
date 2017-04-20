@@ -1,24 +1,7 @@
 %% fig 3: meridional cross sections of meridional velocity differences
-clc
-path(pathdef)
-
-% set up main directory
-cd ~
-% cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('Dropbox/SACS_work'))
-addpath(genpath(['/Users/earl/Dropbox/' ...
-    'LeeuwinUndercurrent_HonoursProject/' ...
-    'matlab/OFAM/ofam_out']))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
-
+clearvars('-except', 'outputpath')
+load aus8_TEOS10
 load aus8_geostrophy
-
 load ofam_mean
 
 
@@ -322,9 +305,13 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 
-export_fig(fig1, ...
-['Dropbox/SACS_work/figures/f03_xsections_meriddiff/v' ...
-    ], ...
-    '-m4', '-nocrop')
+% Save
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
+end
+export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
 close
 

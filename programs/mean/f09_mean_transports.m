@@ -66,7 +66,6 @@ V_ek(isnan(V_ek)) = 0;
 % div(U',V')
 div_UV_prime = aus8_ZD_method.div_UV_prime;
 
-
 % lon index of domain
 ALLC_lon_u_ind = aus8_currents.ALLC_west_to_east_lon_u_ind;
 
@@ -105,7 +104,7 @@ for jj = 2 : 2 : length(SC_lon_u_repelem(1:end-1))
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     
     lat_south_ind_1 = ...
-        find(ismember(lat_v, SC_lat_v_south_repelem(jj)));    
+        find(ismember(lat_v, SC_lat_v_south_repelem(jj)));
     lat_south_ind_2 = ...
         find(ismember(lat_v, SC_lat_v_south_repelem(jj+1)));
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
@@ -124,13 +123,13 @@ for jj = 2 : 2 : length(SC_lon_u_repelem(1:end-1))
     
     
     lat_vec_now = ...
-        lat_north_12(north_12_ind):lat_south_12(south_12_ind)-1;    
+        lat_north_12(north_12_ind):lat_south_12(south_12_ind)-1;
     
     SC_U_trans_mcps_indiv_within(lat_vec_now, ...
         ALLC_lon_u_ind_NB(jj_count)) = ...
         SC_U_trans_mcps_indiv(lat_vec_now,...
         ALLC_lon_u_ind_NB(jj_count));
-
+    
 end
 
 % U SBC
@@ -156,7 +155,7 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
     
     if mod(jj,2) % if odd
         % then this is a v point, always one and sign doesn't change
-        % for V_SA northward is outward, hence southward changes 
+        % for V_SA northward is outward, hence southward changes
         % to positive
         
         SC_V_north_trans_lat_ind = find(isfinite(...
@@ -167,16 +166,16 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
             SC_V_north_trans_lat_ind, lon_u_repelem_ind);
         
         SC_V_north_trans = -SC_V_north_trans_now;
-       
+        
     else % even
         % then this is a u point, there can be zero or many and the sign
         % can change. The sign depens on the direction of the boundary
-        % going west to east, if the boundary is going north then U_SA 
+        % going west to east, if the boundary is going north then U_SA
         % eastward is inward, hence eastward stays positive.
         % if the boundary is going southward, then U_SA eastward is outward
         % hence it changes to negative
         
-        % but first, if the boundary is not going north or south, then 
+        % but first, if the boundary is not going north or south, then
         % there is no zonal flow
         
         
@@ -191,7 +190,8 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
                     lat_u < SC_lat_v_north_repelem(jj+1));
                 
                 SC_U_north_trans_now = ...
-                    SC_U_trans_mcps_indiv(lat_u_within_ind, lon_u_repelem_ind);
+                    SC_U_trans_mcps_indiv(...
+                    lat_u_within_ind, lon_u_repelem_ind);
                 SC_U_north_trans_all = SC_U_north_trans_now;
                 
                 
@@ -201,13 +201,14 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
                     lat_u < SC_lat_v_north_repelem(jj));
                 
                 SC_U_north_trans_now = ...
-                    SC_U_trans_mcps_indiv(lat_u_within_ind, lon_u_repelem_ind);
-                SC_U_north_trans_all = -SC_U_north_trans_now;                
+                    SC_U_trans_mcps_indiv(...
+                    lat_u_within_ind, lon_u_repelem_ind);
+                SC_U_north_trans_all = -SC_U_north_trans_now;
                 
             end
             
             % sum u trans up in case there are more than 1
-            SC_U_north_trans = sum(SC_U_north_trans_all);
+            SC_U_north_trans = nansum(SC_U_north_trans_all);
             
         end
     end
@@ -238,16 +239,16 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
             SC_V_south_trans_lat_ind, lon_u_repelem_ind);
         
         SC_V_south_trans = SC_V_south_trans_now;
-       
+        
     else % even
         % then this is a u point, there can be zero or many and the sign
         % can change. The sign depens on the direction of the boundary
-        % going west to east, if the boundary is going north then U_SA 
+        % going west to east, if the boundary is going north then U_SA
         % eastward is outward, hence eastward changes to negative.
         % if the boundary is going southward, then U_SA eastward is inward
         % hence it stays positive
         
-        % but first, if the boundary is not going north or south, then 
+        % but first, if the boundary is not going north or south, then
         % there is no zonal flow
         
         
@@ -262,7 +263,8 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
                     lat_u < SC_lat_v_south_repelem(jj+1));
                 
                 SC_U_south_trans_now = ...
-                    SC_U_trans_mcps_indiv(lat_u_within_ind, lon_u_repelem_ind);
+                    SC_U_trans_mcps_indiv(...
+                    lat_u_within_ind, lon_u_repelem_ind);
                 SC_U_south_trans_all = -SC_U_south_trans_now;
                 
                 
@@ -272,13 +274,14 @@ for jj = 1 : length(SC_lon_u_repelem(1:end-1))
                     lat_u < SC_lat_v_south_repelem(jj));
                 
                 SC_U_south_trans_now = ...
-                    SC_U_trans_mcps_indiv(lat_u_within_ind, lon_u_repelem_ind);
-                SC_U_south_trans_all = SC_U_south_trans_now;                
+                    SC_U_trans_mcps_indiv(...
+                    lat_u_within_ind, lon_u_repelem_ind);
+                SC_U_south_trans_all = SC_U_south_trans_now;
                 
             end
             
             % sum u trans up in case there are more than 1
-            SC_U_south_trans = sum(SC_U_south_trans_all);
+            SC_U_south_trans = nansum(SC_U_south_trans_all);
             
         end
     end
@@ -332,15 +335,15 @@ dvdy = 1./cos(lat_u_repmat * pi180).*dv./dy_v;
 
 SC_div_UV_prime = dudx + dvdy;
 
-for ii = 1 : length(lat_u)
-    for jj = 1 : length(lon_v)
-        if isfinite(SC_div_UV_prime(ii,jj))
-            if SC_div_UV_prime(ii,jj) == div_UV_prime(ii,jj)
-                SC_div_UV_prime(ii,jj) = 0;
-            end
-        end
-    end
-end
+% for ii = 1 : length(lat_u)
+%     for jj = 1 : length(lon_v)
+%         if isfinite(SC_div_UV_prime(ii,jj))
+%             if SC_div_UV_prime(ii,jj) == div_UV_prime(ii,jj)
+%                 SC_div_UV_prime(ii,jj) = 0;
+%             end
+%         end
+%     end
+% end
 
 
 %% W SBC
@@ -368,7 +371,7 @@ for jj = ALLC_lon_u_ind(1:end-1)
 end
 
 
-% 
+%
 SC_U_trans_prime = NaN(1, length(lon_u));
 SC_U_trans_prime(57) = SC_U_trans(57);
 for jj = ALLC_lon_u_ind(1:end-1)
@@ -401,6 +404,6 @@ grid
 % export_fig(fig1, ['Dropbox/SACS_work/figures/' ...
 % 'm18_calc_transport/trans'], ...
 %     '-m2', '-nocrop')
-% 
+%
 % close
 

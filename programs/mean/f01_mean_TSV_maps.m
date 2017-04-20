@@ -1,23 +1,7 @@
 %% fig 1: map at the surface of T in colours S in contours
-% and V in arrows
-clc
-path(pathdef)
-
-% set up main directory
-cd ~
-% cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('Dropbox/SACS_work'))
-addpath(genpath(['/Users/earl/Dropbox/' ...
-    'LeeuwinUndercurrent_HonoursProject/' ...
-    'matlab/OFAM/ofam_out']))
-
-clear
-
+clearvars('-except', 'outputpath')
 load aus8_TEOS10
 load aus8_geostrophy
-
 load ofam_mean
 
 
@@ -309,12 +293,14 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
-% print(gcf,'-r300','-dpng', ...
-%     ['Dropbox/SACS_work/figures/f1_mean_TSV_maps/p_' ...
-%     num2str(pres_now)])
 
-export_fig(fig1, ['Dropbox/SACS_work/figures/f1_mean_TSV_maps/p_' ...
-    num2str(pres_now)], ...
-    '-m4', '-nocrop')
+% Save
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
+end
+export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
 close
 

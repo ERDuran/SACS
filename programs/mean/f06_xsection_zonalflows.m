@@ -1,6 +1,5 @@
 %% fig 2: meridional cross sections of zonal velocity differences
 clearvars('-except', 'outputpath')
-
 load aus8_ZD_method
 load aus8_currents
 
@@ -286,12 +285,13 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 % 11) Save
-outputls = ls([pwd '/' outputpath]);
-if ~contains(outputls, mfilename)
-    mkdir(outputpath, mfilename)
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/U'], ...
-    '-m4', '-nocrop')
+export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
 
 
 %% 12) colorbar figure
@@ -323,7 +323,7 @@ set(cbar, ...
     'YTickLabel',BluesReds_cont(BluesReds_cont~=0)/magnif, ...
     'fontsize',font_size,'fontweight','bold');
 
-export_fig(fig2, [outputpath mfilename '/u_cbar'], ...
-    '-m4', '-nocrop')
+export_fig(fig2, [outputpath mfilename '/' scriptname(1:3) '_cbar'], ...
+    '-m4')
 close all
 

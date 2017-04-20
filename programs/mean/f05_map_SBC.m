@@ -1,6 +1,5 @@
 %% fig 1: map of SBC currents
 clearvars('-except', 'outputpath')
-
 load aus8_ZD_method
 load aus8_currents
 
@@ -164,11 +163,13 @@ if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 
-outputls = ls([pwd '/' outputpath]);
-if ~strfind(outputls, mfilename)
-    mkdir(outputpath, mfilename)
+% Save
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/U'], ...
-    '-m4', '-nocrop')
+export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
 close
 
