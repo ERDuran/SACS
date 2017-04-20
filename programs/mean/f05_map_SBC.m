@@ -157,6 +157,7 @@ quiver(...
 % 9) title, grid, background and fonts
 title('SBC current')
 grid
+set(gca,'xtick',115:2:147)
 set(gca,'layer','top','color',[0.7 0.7 0.7],...
     'fontsize',font_size,'fontweight','bold')
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end

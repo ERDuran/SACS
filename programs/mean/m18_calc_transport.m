@@ -50,9 +50,10 @@ SC_u_g_prime_all(SC_u_g_prime_ind) = u_g_prime(SC_u_g_prime_ind);
 SC_v_g_prime_all(SC_v_g_prime_ind) = v_g_prime(SC_v_g_prime_ind);
 
 % repelems
-SC_lon_u = aus8_currents.SC.lon_u;
-SC_lat_v_north = aus8_currents.SC.lat_v_north;
-SC_lat_v_south = aus8_currents.SC.lat_v_south;
+SC_lon_u = aus8_currents.SC.lon_u(1,:);
+SC_lon_v = SC_lon_u(1:end-1) + 1/16; 
+SC_lat_v_north = aus8_currents.SC.lat_v_north(1,:);
+SC_lat_v_south = aus8_currents.SC.lat_v_south(1,:);
 SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem(1,:);
 SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem(1,:);
 SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem(1,:);
@@ -81,16 +82,13 @@ SC_U_prime = SC_U_g_prime + U_ek;
 SC_U_trans_mcps_indiv = SC_U_prime .* dy_u;
 
 
-%% get u lines inside
-% [SC_U_prime_within_north, SC_U_prime_within_south] = ...
-%     deal(NaN(1,length(SC_lon_u(1,:))));
-
+%% U within
 SC_U_trans_mcps_indiv_within = NaN(size(SC_U_prime));
 
-SC_U_trans_mcps_indiv_within(37:44,57) = ...
-    SC_U_trans_mcps_indiv(37:44,57);
-SC_U_trans_mcps_indiv_within(113:117,313) = ...
-    SC_U_trans_mcps_indiv(113:117,313);
+% SC_U_trans_mcps_indiv_within(37:44,57) = ...
+%     SC_U_trans_mcps_indiv(37:44,57);
+% SC_U_trans_mcps_indiv_within(113:117,313) = ...
+%     SC_U_trans_mcps_indiv(113:117,313);
 
 ALLC_lon_u_ind_NB = ALLC_lon_u_ind(2:end-1);
 
@@ -146,6 +144,26 @@ SC_v_g_prime_surf_isnan_ind = isnan(SC_v_g_prime_all(:,:,1));
 SC_V_g_prime(SC_v_g_prime_surf_isnan_ind) = NaN;
 SC_V_prime = SC_V_g_prime + V_ek;
 SC_V_trans_mcps_indiv = SC_V_prime .* dx_v;
+
+
+%% get u lines inside
+SC_V_trans_mcps_indiv_within = NaN(size(SC_V_prime));
+
+SC_lon_v_ind = find(ismember(lon_v, SC_lon_v));
+
+jj_count = 0;
+for jj = SC_lon_v_ind
+    jj_count = jj_count + 1;
+    lat_v_within_ind = ...
+        find(ismember(lat_v, ...
+        SC_lat_v_north(jj_count)-1/8:-1/8:SC_lat_v_south(jj_count)+1/8)); 
+    SC_V_trans_mcps_indiv_within(lat_v_within_ind, jj) = ...
+        SC_V_trans_mcps_indiv(lat_v_within_ind,jj);
+end
+
+% U SBC
+SC_V_trans_mcps = nansum(SC_V_trans_mcps_indiv_within, 1);
+SC_V_trans = SC_V_trans_mcps .* 10^-6;
 
 
 %% V SC

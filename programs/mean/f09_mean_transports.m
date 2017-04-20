@@ -50,9 +50,11 @@ SC_u_g_prime_all(SC_u_g_prime_ind) = u_g_prime(SC_u_g_prime_ind);
 SC_v_g_prime_all(SC_v_g_prime_ind) = v_g_prime(SC_v_g_prime_ind);
 
 % repelems
+SC_lon_u = aus8_currents.SC.lon_u(1,:);
+SC_lon_v = SC_lon_u(1:end-1) + 1/16; 
 SC_lon_u = aus8_currents.SC.lon_u;
-SC_lat_v_north = aus8_currents.SC.lat_v_north;
-SC_lat_v_south = aus8_currents.SC.lat_v_south;
+SC_lat_v_north = aus8_currents.SC.lat_v_north(1,:);
+SC_lat_v_south = aus8_currents.SC.lat_v_south(1,:);
 SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem(1,:);
 SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem(1,:);
 SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem(1,:);
@@ -145,6 +147,26 @@ SC_v_g_prime_surf_isnan_ind = isnan(SC_v_g_prime_all(:,:,1));
 SC_V_g_prime(SC_v_g_prime_surf_isnan_ind) = NaN;
 SC_V_prime = SC_V_g_prime + V_ek;
 SC_V_trans_mcps_indiv = SC_V_prime .* dx_v;
+
+
+%% get u lines inside
+SC_V_trans_mcps_indiv_within = NaN(size(SC_V_prime));
+
+SC_lon_v_ind = find(ismember(lon_v, SC_lon_v));
+
+jj_count = 0;
+for jj = SC_lon_v_ind
+    jj_count = jj_count + 1;
+    lat_v_within_ind = ...
+        find(ismember(lat_v, ...
+        SC_lat_v_north(jj_count)-1/8:-1/8:SC_lat_v_south(jj_count)+1/8)); 
+    SC_V_trans_mcps_indiv_within(lat_v_within_ind, jj) = ...
+        SC_V_trans_mcps_indiv(lat_v_within_ind,jj);
+end
+
+% U SBC
+SC_V_trans_mcps = nansum(SC_V_trans_mcps_indiv_within, 1);
+SC_V_trans = SC_V_trans_mcps .* 10^-6;
 
 
 %% V SC
@@ -382,28 +404,47 @@ for jj = ALLC_lon_u_ind(1:end-1)
 end
 
 
-%%
-% close all
-fig1 = figure;
-set(gcf,'units','normalized','outerposition',[0 0 1 1])
+%% plot
+close all
+font_size = 6;
+fig1 = figure(1);
+set(gcf, 'units', 'normalized', 'outerposition', [0 0 0.8 0.6]);
+rowN = 1; colN = 1;
+col_ind = (repmat(1:colN,rowN,1))';
+row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
+gap_w = 0.03; % gap width between subplots
+gap_h = 0.06; % gap height between subplots
+marg_b = 0.05; % bottom margin
+marg_t = 0.05; % top margin
+marg_l = 0.05; % left margin
+marg_r = 0.02; % right margin
+x_sp = (1 - marg_l - marg_r - gap_w*(colN-1))/colN; % x subplot length
+y_sp = (1 - marg_b - marg_t - gap_h*(rowN-1))/rowN; % y subplot length
+h_axes_sp = tight_subplot(rowN, colN, ...
+    [gap_h gap_w], [marg_b marg_t], [marg_l marg_r]);
 
-plot(lon_u, SC_U_trans, 'linewidth', 2)
-
+plot(lon_u, SC_U_trans, 'b', 'linewidth', 1)
 hold all
-plot(lon_u, SC_U_trans_prime, 'linewidth', 2)
-plot(lon_v, SC_north_trans, '--', 'linewidth', 2)
-plot(lon_v, SC_south_trans, '--', 'linewidth', 2)
-plot(lon_v, SC_W_trans, ':', 'linewidth', 2)
-plot(lon_v, SC_W_trans_prime, ':', 'linewidth', 2)
+plot(lon_u, SC_U_trans_prime, 'b:', 'linewidth', 1)
+plot(lon_v, SC_V_trans, 'r', 'linewidth', 1)
+plot(lon_v, SC_north_trans, 'g', 'linewidth', 1)
+plot(lon_v, SC_south_trans, 'y', 'linewidth', 1)
+plot(lon_v, SC_W_trans, 'k', 'linewidth', 1)
+plot(lon_v, SC_W_trans_prime, 'k:', 'linewidth', 1)
 
-
-legend('U_{SBC}', 'U''_{SBC}', 'V_{SA}', 'V_{SBC}', 'W_{SBC}', 'W''_{SBC}')
+legend('U_{SBC}', 'U''_{SBC}', 'V_{within}', 'V_{SA}', ...
+    'V_{SBC}', 'W_{SBC}', 'W''_{SBC}', ...
+    'location', 'north')
 axis([115 147 -2 2])
 grid
+set(gca,'xtick',115:2:147)
 
-% export_fig(fig1, ['Dropbox/SACS_work/figures/' ...
-% 'm18_calc_transport/trans'], ...
-%     '-m2', '-nocrop')
-%
-% close
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
+end
+export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
+close
 

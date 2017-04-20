@@ -31,11 +31,11 @@ ALLC_east_lon_u = aus8_currents.ALLC_east_lon_u;
 ALLC_west_to_east_lon_u_ind = aus8_currents.ALLC_west_to_east_lon_u_ind;
 
 SC_bottom_pres = aus8_currents.SC.bottom.pres;
-SC_bottom_lat_u = aus8_currents.SC.bottom.lat_u;
-SC_bottom_lon_u = aus8_currents.SC.bottom.lon_u;
-SC_bottom_lat_v = aus8_currents.SC.bottom.lat_v;
-SC_bottom_lon_v = aus8_currents.SC.bottom.lon_v;
-SC_bottom_lat_v_south_line = aus8_currents.SC.bottom.lat_v_south_line;
+% SC_bottom_lat_u = aus8_currents.SC.bottom.lat_u;
+% SC_bottom_lon_u = aus8_currents.SC.bottom.lon_u;
+% SC_bottom_lat_v = aus8_currents.SC.bottom.lat_v;
+% SC_bottom_lon_v = aus8_currents.SC.bottom.lon_v;
+% SC_bottom_lat_v_south_line = aus8_currents.SC.bottom.lat_v_south_line;
 
 
 %% get all levels above bottom
