@@ -211,10 +211,10 @@ text(0.1,0.6,['Number of iterations = ' num2str(nn)])
 text(0.1,0.4,['Relative error = ' num2str(rel_error(end))])
 
 % Save
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
 export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')

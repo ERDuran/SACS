@@ -1,24 +1,33 @@
 %% calculate sc transport
-clearvars('-except', 'outputpath')
+clearvars('-except', '*_path')
+
 load aus8_ZD_method
 load aus8_currents
-
-
-%%
-% lat lon pres
 lat_u = aus8_ZD_method.lat_u;
 lon_u = aus8_ZD_method.lon_u;
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
 pres = aus8_ZD_method.pres_mid;
-
-% for dx dy calcs
-a = aus8_ZD_method.a.value;
-pi180 = aus8_ZD_method.a.pi180;
-f = aus8_ZD_method.f.cst_lat;
-
-% thickness for dz calcs
+a = aus8_ZD_method.a;
+pi180 = aus8_ZD_method.pi180;
 depth_h_raw = aus8_ZD_method.depth_thicknesses;
+u_g_prime = aus8_ZD_method.u_g_prime;
+v_g_prime = aus8_ZD_method.v_g_prime;
+SC_u_g_prime_ind = aus8_currents.SC.u_g_prime_ind;
+SC_v_g_prime_ind = aus8_currents.SC.v_g_prime_ind;
+SC_lon_u = aus8_currents.SC.lon_u(1,:);
+SC_lat_v_north = aus8_currents.SC.lat_v_north(1,:);
+SC_lat_v_south = aus8_currents.SC.lat_v_south(1,:);
+SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem(1,:);
+SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem(1,:);
+SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem(1,:);
+U_ek = aus8_ZD_method.U_ek;
+V_ek = aus8_ZD_method.V_ek;
+div_UV_prime = aus8_ZD_method.div_UV_prime;
+ALLC_lon_u_ind = aus8_currents.ALLC_west_to_east_lon_u_ind;
+
+
+%%
 depth_h = permute(depth_h_raw, [3 2 1]);
 depth_h_u = repmat(depth_h, [length(lat_u), length(lon_u)]);
 depth_h_v = repmat(depth_h, [length(lat_v), length(lon_v)]);
@@ -32,16 +41,9 @@ end
 dy_raw = a * (lat_v(1:end-1) - lat_v(2:end)) * pi180;
 dy_u = repmat(dy_raw, [1 length(lon_u)]);
 
-
 % original uv g prime
-u_g_prime = aus8_ZD_method.u_g_prime;
-v_g_prime = aus8_ZD_method.v_g_prime;
 u_g_prime(isnan(u_g_prime)) = 0;
 v_g_prime(isnan(v_g_prime)) = 0;
-
-% index of SC uv g prime
-SC_u_g_prime_ind = aus8_currents.SC.u_g_prime_ind;
-SC_v_g_prime_ind = aus8_currents.SC.v_g_prime_ind;
 
 % SC uv g prime
 SC_u_g_prime_all = NaN(size(u_g_prime));
@@ -50,26 +52,11 @@ SC_u_g_prime_all(SC_u_g_prime_ind) = u_g_prime(SC_u_g_prime_ind);
 SC_v_g_prime_all(SC_v_g_prime_ind) = v_g_prime(SC_v_g_prime_ind);
 
 % repelems
-SC_lon_u = aus8_currents.SC.lon_u(1,:);
 SC_lon_v = SC_lon_u(1:end-1) + 1/16; 
-SC_lon_u = aus8_currents.SC.lon_u;
-SC_lat_v_north = aus8_currents.SC.lat_v_north(1,:);
-SC_lat_v_south = aus8_currents.SC.lat_v_south(1,:);
-SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem(1,:);
-SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem(1,:);
-SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem(1,:);
 
 % UV ekman
-U_ek = aus8_ZD_method.U_ek;
-V_ek = aus8_ZD_method.V_ek;
 U_ek(isnan(U_ek)) = 0;
 V_ek(isnan(V_ek)) = 0;
-
-% div(U',V')
-div_UV_prime = aus8_ZD_method.div_UV_prime;
-
-% lon index of domain
-ALLC_lon_u_ind = aus8_currents.ALLC_west_to_east_lon_u_ind;
 
 
 %% U prime trans
@@ -439,12 +426,12 @@ axis([115 147 -2 2])
 grid
 set(gca,'xtick',115:2:147)
 
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 close
 

@@ -1,35 +1,30 @@
 %% fig 1: map of SBC currents
 clearvars('-except', '*_path')
+
 load aus8_ZD_method
 load aus8_currents
-
-
-%% load stuff
 lat = aus8_ZD_method.lat_phi;
 lon = aus8_ZD_method.lon_phi;
 pres = aus8_ZD_method.pres_mid;
 depth_thicknesses = aus8_ZD_method.depth_thicknesses;
-
 lat_u = aus8_ZD_method.lat_u;
 lon_u = aus8_ZD_method.lon_u;
 u_g_prime = aus8_ZD_method.u_g_prime;
-
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
 v_g_prime = aus8_ZD_method.v_g_prime;
-
 SBC_u_g_prime_ind = aus8_currents.SC.u_g_prime_ind;
 SBC_v_g_prime_ind = aus8_currents.SC.v_g_prime_ind;
-
 U_ek = aus8_ZD_method.U_ek;
 V_ek = aus8_ZD_method.V_ek;
-
 SC_lat_v_north = aus8_currents.SC.lat_v_north;
 SC_lat_v_south = aus8_currents.SC.lat_v_south;
 SC_lon_u_repelem = aus8_currents.SC.lon_u_repelem;
 SC_lat_v_north_repelem = aus8_currents.SC.lat_v_north_repelem;
 SC_lat_v_south_repelem = aus8_currents.SC.lat_v_south_repelem;
 
+
+%%
 u_dz = repmat(permute(depth_thicknesses, [3 2 1]), [size(U_ek), 1]);
 u_g_prime_times_dz = u_g_prime .* u_dz;
 SBC_U_g_prime = NaN(length(lat_u), length(lon_u));
@@ -165,12 +160,12 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 
 % Save
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 close
 

@@ -1,26 +1,23 @@
 %% fig 2: meridional cross sections of zonal velocity differences
-clearvars('-except', 'outputpath')
+clearvars('-except', '*_path')
+
 load aus8_geostrophy
 load aus8_TEOS10
 load ofam_mean
-
-
-%% load stuff
 lat_CARS = aus8_TEOS10.lat;
 lon_CARS = aus8_TEOS10.lon;
 pres = aus8_TEOS10.pres;
-
 lat_u_CARS = aus8_geostrophy.u.lat_u;
 lon_u_CARS = lon_CARS;
-u_CARS = aus8_geostrophy.u.u_0_HH;
-
+u_CARS = aus8_geostrophy.u.u_0_HH_2000;
 lat_OFAM = ofam_mean.lat;
 lon_OFAM = ofam_mean.lon;
-
 lat_u_OFAM = lat_OFAM;
 lon_u_OFAM = lon_OFAM;
 u_OFAM = ofam_mean.u_vel;
 
+
+%%
 u_interp2_OFAM = NaN(length(lat_u_CARS), length(lon_u_CARS), length(pres));
 for kk = 1 : length(pres)
     u_interp2_OFAM(:,:,kk) = interp2(lon_OFAM, lat_OFAM, ...
@@ -299,12 +296,12 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 % 11) Save
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 close
 

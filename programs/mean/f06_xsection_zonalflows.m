@@ -1,20 +1,18 @@
 %% fig 2: meridional cross sections of zonal velocity differences
-clearvars('-except', 'outputpath')
+clearvars('-except', '*_path')
+
 load aus8_ZD_method
 load aus8_currents
-
-
-%% load stuff
 pres = aus8_ZD_method.pres_mid;
-
 lat_u = aus8_ZD_method.lat_u;
 lon_u = aus8_ZD_method.lon_u;
 u_g_prime = aus8_ZD_method.u_g_prime;
-
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
 v_g_prime = aus8_ZD_method.v_g_prime;
 
+
+%%
 v_g_prime_interp2 = NaN(length(lat_v), length(lon_u), length(pres));
 for kk = 1 : length(pres)
     v_g_prime_interp2(:,:,kk) = interp2(...
@@ -285,12 +283,12 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 % 11) Save
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 
 
@@ -323,7 +321,7 @@ set(cbar, ...
     'YTickLabel',BluesReds_cont(BluesReds_cont~=0)/magnif, ...
     'fontsize',font_size,'fontweight','bold');
 
-export_fig(fig2, [outputpath mfilename '/' scriptname(1:3) '_cbar'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 close all
 

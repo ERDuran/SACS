@@ -1,47 +1,19 @@
 %% check that div(U_zd,V_zd) = 0
-% clc
-path(pathdef)
-
-% set up main directory
-cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('functions'))
-
-% Add path to the data to be loaded
-addpath cars_out
-addpath programs/mean
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
+clearvars('-except', '*_path')
 
 load aus8_ZD_method
-
-
-%%
 depth_thicknesses = aus8_ZD_method.depth_thicknesses;
-
 u_g_prime = aus8_ZD_method.u_g_prime;
-
 v_g_prime = aus8_ZD_method.v_g_prime;
-
-a = aus8_ZD_method.a.value;
-pi180 = aus8_ZD_method.a.pi180;
+a = aus8_ZD_method.a;
+pi180 = aus8_ZD_method.pi180;
 n_it = aus8_ZD_method.n_iteration;
-
 lat_u = aus8_ZD_method.lat_u;
 lon_u = aus8_ZD_method.lon_u;
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
-
 U_ek = aus8_ZD_method.U_ek;
 V_ek = aus8_ZD_method.V_ek;
-
 F_nan = aus8_ZD_method.F == 0;
 
 

@@ -1,36 +1,27 @@
 %% fig 1: map at the surface of T in colours S in contours
-clearvars('-except', 'outputpath')
+clearvars('-except', '*_path')
+
 load aus8_TEOS10
 load aus8_geostrophy
 load ofam_mean
-
-
-%% load stuff
 lat_CARS = aus8_TEOS10.lat;
 lon_CARS = aus8_TEOS10.lon;
-pres = aus8_TEOS10.pres;
 Theta_CARS = aus8_TEOS10.Theta.mean;
 asal_CARS = aus8_TEOS10.asal.mean;
-
 lat_u_CARS = aus8_geostrophy.u.lat_u;
 lon_u_CARS = lon_CARS;
-u_CARS = aus8_geostrophy.u.u_0_HH;
-
+u_CARS = aus8_geostrophy.u.u_0_HH_2000;
 lat_v_CARS = lat_CARS;
 lon_v_CARS = aus8_geostrophy.v.lon_v;
-v_CARS = aus8_geostrophy.v.v_0_HH;
-
-
+v_CARS = aus8_geostrophy.v.v_0_HH_2000;
 lat_OFAM = ofam_mean.lat;
 lon_OFAM = ofam_mean.lon;
 pres = ofam_mean.pressure;
 Theta_OFAM = ofam_mean.cons_temperature;
 asal_OFAM = ofam_mean.abs_salinity;
-
 lat_u_OFAM = lat_OFAM;
 lon_u_OFAM = lon_OFAM;
 u_OFAM = ofam_mean.u_vel;
-
 lat_v_OFAM = lat_OFAM;
 lon_v_OFAM = lon_OFAM;
 v_OFAM = ofam_mean.v_vel;
@@ -295,12 +286,12 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 
 % Save
-outputls = ls(outputpath);
+outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
-    mkdir(outputpath, scriptname)
+    mkdir(figures_path, scriptname)
 end
-export_fig(fig1, [outputpath mfilename '/' scriptname(1:3) '_'], ...
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
     '-m4')
 close
 
