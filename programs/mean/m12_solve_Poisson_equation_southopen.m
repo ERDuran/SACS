@@ -1,43 +1,21 @@
 %% Solve Poisson equation using iteration method
-% this routines calculates:
-% clc
-path(pathdef)
-
-% set up main directory
-cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('functions'))
-
-% Add path to the data to be loaded
-addpath cars_out
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
+clearvars('-except', '*_path')
 
 load aus8_ZD_method
-
-
-%%
-a = aus8_ZD_method.a.value;
-pi180 = aus8_ZD_method.a.pi180;
-
-%
+a = aus8_ZD_method.a;
+pi180 = aus8_ZD_method.pi180;
 lat_U = aus8_ZD_method.lat_u;
 lon_U = aus8_ZD_method.lon_u;
 U = aus8_ZD_method.U;
-U_nan = isnan(U);
-U(U_nan) = 0;
-
-%
 lat_V = aus8_ZD_method.lat_v;
 lon_V = aus8_ZD_method.lon_v;
 V = aus8_ZD_method.V;
+F = aus8_ZD_method.F;
+
+
+%%
+U_nan = isnan(U);
+U(U_nan) = 0;
 V_nan = isnan(V);
 V(V_nan) = 0;
 
@@ -46,7 +24,6 @@ lat_phi = [lat_U; lat_U(end)-1/8];
 lon_phi = lon_V;
 
 %
-F = aus8_ZD_method.F;
 F_nan = F == 0;
 
 % dx for U position
@@ -106,6 +83,7 @@ phi_np1(end+1,:) = 0;
 
 % number of iterations
 n = 100000;
+n_10000s = 0 : 10000 : n;
 
 rel_error = NaN(n,1);
 max_diff_K_Lap_phi__F = NaN(n,1);
@@ -161,6 +139,9 @@ for nn = 1 : n
     rel_error(nn) = ...
         max(max(abs(phi_np1 - phi_n))) / max(max(abs(phi_np1)));
         
+    if find(ismember(n_10000s,nn))
+        fprintf('iteration number = %7.0f \n', nn)
+    end
 end
 toc
 
@@ -229,28 +210,31 @@ text(0.1,0.6,['Number of iterations = ' num2str(nn)])
 
 text(0.1,0.4,['Relative error = ' num2str(rel_error(end))])
 
-%
-export_fig(['figures/Poisson_eq/n_iter_' num2str(nn)], ...
-    '-m3', '-nocrop');
+% Save
+outputls = ls(outputpath);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(outputpath, scriptname)
+end
+export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
+    '-m4')
+close
 
 
 %% save stuff
 aus8_ZD_method.lat_phi = lat_phi;
 aus8_ZD_method.lon_phi = lon_phi;
 aus8_ZD_method.phi = phi;
-
 aus8_ZD_method.U_d = U_d;
-
 aus8_ZD_method.V_d = V_d;
-
 aus8_ZD_method.Lap_phi = Lap_phi;
-
 aus8_ZD_method.n_iteration = nn;
 aus8_ZD_method.rel_error = rel_error;
 aus8_ZD_method.max_diff_K_Lap_phi__F = max_diff_K_Lap_phi__F;
 aus8_ZD_method.Dt = Dt;
 aus8_ZD_method.K = K;
 
-save('cars_out/aus8_ZD_method', 'aus8_ZD_method')
-disp('aus8_ZD_method saved in cars_out/aus8_ZD_method !')
+save([cars_out_path 'aus8_ZD_method'], 'aus8_ZD_method')
+disp(['aus8_ZD_method saved in ' ...
+    cars_out_path 'aus8_ZD_method'])
 

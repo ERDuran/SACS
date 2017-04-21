@@ -1,29 +1,7 @@
 %% Calculate dynamic height and geostrophic velocities in each AOI
-clc
-path(pathdef)
-
-% set up main directory
-cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('functions'))
-
-% Add path to programs
-addpath programs/mean
-
-% Add path to the data to be loaded
-addpath cars_out
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
+clearvars('-except', '*_path')
 
 load aus8_TEOS10
-
 lat = aus8_TEOS10.lat;
 lon = aus8_TEOS10.lon;
 pres = aus8_TEOS10.pres;
@@ -35,7 +13,7 @@ Theta = aus8_TEOS10.Theta.mean;
 disp('Calculating dynamic heights at the surface...')
 
 % pressure reference: the depth of no motion
-p_ref = [0 2000];
+p_ref = 0;
 
 %
 aus8_streamfunction.lat = lat;
@@ -81,16 +59,8 @@ for pp = 1 : length(p_ref)
 end
 
 
-%% plot dynamic height
-p_desired = 0;
-dynh_plot = aus8_streamfunction.dynh.p_ref_2000;
-increment = 0.2;
-p07_test_dynamic_height
-
-export_fig(['figures/p07_dynh_tests/test_' num2str(pres(p_ind))], '-m2', '-nocrop');
-
-
 %%
-save('cars_out/aus8_streamfunction', 'aus8_streamfunction')
-disp('aus8_streamfunction saved in cars_out/aus8_streamfunction !')
+save([cars_out_path 'aus8_streamfunction'], 'aus8_streamfunction')
+disp(['aus8_streamfunction saved in ' ...
+    cars_out_path 'aus8_streamfunction'])
 

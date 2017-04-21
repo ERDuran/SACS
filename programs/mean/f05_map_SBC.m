@@ -1,5 +1,5 @@
 %% fig 1: map of SBC currents
-clearvars('-except', 'outputpath')
+clearvars('-except', '*_path')
 load aus8_ZD_method
 load aus8_currents
 

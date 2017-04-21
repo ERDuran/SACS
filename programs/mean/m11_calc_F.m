@@ -1,40 +1,18 @@
 %% calculate horizontal divergence
-% clc
-path(pathdef)
-
-% set up main directory
-cd /home/z5100174/Desktop/MATLAB
-
-% Add path to the data to be loaded
-addpath(genpath('functions'))
-
-% Add path to the data to be loaded
-addpath cars_out
-
-% Add path to the gsw TEOS-10 library (including subfolders)
-addpath(genpath('teos10_library'))
-
-clear 
-% vn is a function that can store the name of a variable
-% hence vn(x) returns 'x' as a string.
-vn = @(x) inputname(1);
+clearvars('-except', '*_path')
 
 load aus8_ZD_method
-
-a = aus8_ZD_method.a.value;
-cst_lat = aus8_ZD_method.f.cst_lat;
-pi180 = aus8_ZD_method.a.pi180;
-
-
-%% calculate horizontal divergence 
+a = aus8_ZD_method.a;
+pi180 = aus8_ZD_method.pi180;
 U = aus8_ZD_method.U;
 lat_u = aus8_ZD_method.lat_u;
 lon_u = aus8_ZD_method.lon_u;
-
 V = aus8_ZD_method.V;
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
 
+
+%% calculate horizontal divergence 
 U(isnan(U)) = 0;
 V(isnan(V)) = 0;
 
@@ -62,12 +40,13 @@ end
 lat_u_repmat = repmat(lat_u,1,length(lon_v));
 F = du./dx + 1./cos(lat_u_repmat * pi180).*dv./dy;
 
-
-%%
 aus8_ZD_method.lat_F = lat_u;
 aus8_ZD_method.lon_F = lon_v;
 aus8_ZD_method.F = F;
 
-save('cars_out/aus8_ZD_method', 'aus8_ZD_method')
-disp('aus8_ZD_method saved in cars_out/aus8_ZD_method !')
+
+%%
+save([cars_out_path 'aus8_ZD_method'], 'aus8_ZD_method')
+disp(['aus8_ZD_method saved in ' ...
+    cars_out_path 'aus8_ZD_method'])
 
