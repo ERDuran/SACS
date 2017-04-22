@@ -82,15 +82,16 @@ phi_np1(isnan(F)) = NaN;
 phi_np1(end+1,:) = 0;
 
 % number of iterations
-n = 100000;
-n_10000s = 0 : 10000 : n;
-
-rel_error = NaN(n,1);
-max_diff_K_Lap_phi__F = NaN(n,1);
-number_NaN = NaN(n,1);
+n_5000s = 0 : 5000 : 5000000;
+n_iter = 0;
+tol = 0.00001;
+rel_error = 1;
+% max_diff_K_Lap_phi__F = NaN(n,1);
+% number_NaN = NaN(n,1);
 
 tic
-for nn = 1 : n
+while rel_error > tol
+    n_iter = n_iter + 1;
     phi_n = phi_np1;
     
     % Calculate grad(phi) = U_d + V_d
@@ -128,19 +129,20 @@ for nn = 1 : n
     K_Lap_phi_minus_F = K * Lap_phi - F;
     
     phi_np1 = phi_n(1:end-1,:) + Dt * (K_Lap_phi_minus_F);
-    phi_np1(end+1,:) = 0;
+    phi_np1(end+1,:) = 0; %#ok<SAGROW>
     
-    number_NaN(nn) = length(find(isnan(phi_np1)));
+%     number_NaN(nn) = length(find(isnan(phi_np1)));
     
     %
-    max_diff_K_Lap_phi__F(nn) = max(max(K_Lap_phi_minus_F));
+%     max_diff_K_Lap_phi__F(nn) = max(max(K_Lap_phi_minus_F));
     
     % calculate relative error
-    rel_error(nn) = ...
+    rel_error = ...
         max(max(abs(phi_np1 - phi_n))) / max(max(abs(phi_np1)));
         
-    if find(ismember(n_10000s,nn))
-        fprintf('iteration number = %7.0f \n', nn)
+    if find(ismember(n_5000s,n_iter))
+        fprintf('Iterations number = %.f Tolerance = %.9f \n', ...
+            n_iter, rel_error)
     end
 end
 toc
@@ -160,7 +162,7 @@ K_Lap_phi_minus_F(F_nan) = NaN;
 
 %%
 close
-figure
+fig1 = figure;
 set(gcf,'units','normalized','outerposition',[0 0.05 0.95 0.95])
 
 subplot(2,3,1)
@@ -204,11 +206,11 @@ colorbar, axis ij, title('V_d')
 caxis(CLIM)
 
 subplot(2,3,6)
-text(0.1,0.8,['Dt = ' num2str(Dt(end))])
+text(0.1,0.8,['Dt = ' num2str(Dt)])
 
-text(0.1,0.6,['Number of iterations = ' num2str(nn)])
+text(0.1,0.6,['Number of iterations = ' num2str(n_iter)])
 
-text(0.1,0.4,['Relative error = ' num2str(rel_error(end))])
+text(0.1,0.4,['Relative error = ' num2str(rel_error)])
 
 % Save
 outputls = ls(figures_path);
@@ -228,9 +230,8 @@ aus8_ZD_method.phi = phi;
 aus8_ZD_method.U_d = U_d;
 aus8_ZD_method.V_d = V_d;
 aus8_ZD_method.Lap_phi = Lap_phi;
-aus8_ZD_method.n_iteration = nn;
+aus8_ZD_method.n_iteration = n_iter;
 aus8_ZD_method.rel_error = rel_error;
-aus8_ZD_method.max_diff_K_Lap_phi__F = max_diff_K_Lap_phi__F;
 aus8_ZD_method.Dt = Dt;
 aus8_ZD_method.K = K;
 
