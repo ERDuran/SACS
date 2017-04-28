@@ -10,6 +10,8 @@ lon_u = aus8_ZD_method.lon_u;
 V = aus8_ZD_method.V;
 lat_v = aus8_ZD_method.lat_v;
 lon_v = aus8_ZD_method.lon_v;
+u_g_bottom_depth = aus8_ZD_method.u_g_bottom_depth;
+v_g_bottom_depth = aus8_ZD_method.v_g_bottom_depth;
 
 
 %% calculate horizontal divergence 
@@ -40,9 +42,26 @@ end
 lat_u_repmat = repmat(lat_u,1,length(lon_v));
 F = du./dx + 1./cos(lat_u_repmat * pi180).*dv./dy;
 
+% Also get F's bottom depth for later
+F_bottom_depth = NaN(size(F));
+for ii = 1 : length(lat_u)
+    for jj = 1 : length(lon_v)
+        F_bottoms = ...
+            [u_g_bottom_depth(ii,jj), u_g_bottom_depth(ii,jj+1), ...
+            v_g_bottom_depth(ii,jj), v_g_bottom_depth(ii+1,jj)];
+        max_depth_ind = find(F_bottoms == max(F_bottoms), 1, 'first');
+        if isempty(max_depth_ind)
+            continue
+        else
+            F_bottom_depth(ii,jj) = F_bottoms(max_depth_ind);
+        end
+    end
+end
+
 aus8_ZD_method.lat_F = lat_u;
 aus8_ZD_method.lon_F = lon_v;
 aus8_ZD_method.F = F;
+aus8_ZD_method.F_bottom_depth = F_bottom_depth;
 
 
 %%
