@@ -17,14 +17,17 @@ lon_F = aus8_ZD_method.lon_F;
 div_UV_prime = aus8_ZD_method.div_UV_prime;
 U_ek = aus8_ZD_method.U_ek;
 V_ek = aus8_ZD_method.V_ek;
-F_bottom_depth = round(aus8_ZD_method.F_bottom_depth);
+u_bottom_depth = aus8_ZD_method.u_g_prime_bottom_depth;
+v_bottom_depth = aus8_ZD_method.v_g_prime_bottom_depth;
+F_bottom_depth = aus8_ZD_method.F_bottom_depth;
+lat_f_plane_p_to_depth = aus8_ZD_method.lat_f_plane_p_to_depth;
 
 
 %% 1) Define mid pressure and west, east start/end
 %%% BOTTOM PRES
 % pressure of the bottom surface currents
 p_top = 0;
-p_mid = 300;
+p_mid = 250;
 p_bot = 2000;
 % pressure above the bottom
 p_top_below = p_top+5;
@@ -68,7 +71,52 @@ aus8_currents.ALLC_lon_v_ind = ALLC_lon_v_ind;
 %%% SAVE
 
 
-%% 2) Calculate UV_upper and UV_lower
+%% 2) Define SBC and DRC meridional criteria
+% SBC is north 100 isobath
+% SBC is south 2000 isobath
+% DRC is north 2000 isobath
+% DRC is south 1 degree south from the 2000 isobath
+% IMPORTANT NOTE: if number has four digits, write in the scientific
+% form eg. 1000 = 1e+03 or 1700 = 1.7e+03
+SBC_north_p = 200; % isobath
+SBC_north_z = gsw_z_from_p(-SBC_north_p, lat_f_plane_p_to_depth);
+SBC_south_p = 2e+03; % isobath
+SBC_south_z = gsw_z_from_p(-SBC_south_p, lat_f_plane_p_to_depth);
+DRC_north_p = SBC_south_p; % isobath
+DRC_north_z = SBC_south_z;
+DRC_south = -1; % degree south
+
+
+[lat_v_SBC_north, lat_v_SBC_south] = deal(NaN(1, length(ALLC_lon_v_ind)));
+jj_count = 0;
+for jj = ALLC_lon_v_ind
+    jj_count = jj_count + 1;
+    v_bottom_depth_now = v_bottom_depth(:,jj);
+    SBC_north_z_diff = v_bottom_depth_now - SBC_north_z;
+    first_ocean_ind = ...
+        find(isnan(SBC_north_z_diff), 1, 'last')+1;
+    SBC_north_z_diff_first_ocean = ...
+        SBC_north_z_diff(first_ocean_ind:length(lat_v));
+    SBC_north_z_diff_first_pos_ind = ...
+        find(SBC_north_z_diff_first_ocean >= 0, 1, 'first');
+    lat_v_SBC_north(jj_count) = lat_v(...
+        first_ocean_ind-1+SBC_north_z_diff_first_pos_ind-1);
+    
+    SBC_south_z_diff = abs(v_bottom_depth_now - SBC_south_z);
+    SBC_south_z_diff_first_ocean = ...
+        SBC_south_z_diff(first_ocean_ind:length(lat_v));
+    SBC_south_z_diff_first_ocean_min_ind = ...
+        find(SBC_south_z_diff_first_ocean == ...
+        min(SBC_south_z_diff_first_ocean), 1, 'first');
+    lat_v_SBC_south(jj_count) = lat_v(...
+        first_ocean_ind-1+SBC_south_z_diff_first_ocean_min_ind);
+end
+
+lat_v_DRC_north = lat_v_SBC_south;
+lat_v_DRC_south = lat_v_DRC_north + DRC_south;
+
+
+%% 3) Calculate UV_upper and UV_lower
 depth_h = permute(depth_h_raw, [3 2 1]);
 depth_h_u = repmat(depth_h, [length(lat_u), length(lon_u)]);
 depth_h_v = repmat(depth_h, [length(lat_v), length(lon_v)]);
@@ -95,7 +143,7 @@ aus8_currents.pmid_to_pbot.U_g_prime = U_g_prime_pmid_to_pbot;
 aus8_currents.pmid_to_pbot.V_g_prime = V_g_prime_pmid_to_pbot;
 
 
-%% 3) Get all UV within SBC "raw" region
+%% 4) Get all UV within SBC "raw" region
 F_bottom_depth_now = round(F_bottom_depth);
 F_bottom_depth_now(F_bottom_depth_now > 1994) = 2000;
 
@@ -214,9 +262,9 @@ aus8_currents.SBC_raw.V_prime = SBC_raw_V_prime;
 %%% SAVE
 
 
-%% 4) make repelem and interp2
+%% 5) make repelem and interp2
 % repelem
-ALLC_lon_u_repelem = [...
+lon_u_ALLC_repelem = [...
     ALLC_lon_u(:,1), ...
     repelem(ALLC_lon_u(:,2:end-1), 1, 2), ...
     ALLC_lon_u(:,end)];
@@ -235,10 +283,14 @@ for jj = 1 : length(lon_v)
         ALLC_lat_v_south(jj_count) = lat_v(ALLC_lat_v_south_now);
     end
 end
-ALLC_lat_v_north_repelem = ...
-    repelem(ALLC_lat_v_north, 1, 2);
-ALLC_lat_v_south_repelem = ...
-    repelem(ALLC_lat_v_south, 1, 2);
+lat_v_SBC_north_repelem = ...
+    repelem(lat_v_SBC_north, 1, 2);
+lat_v_SBC_south_repelem = ...
+    repelem(lat_v_SBC_south, 1, 2);
+lat_v_DRC_north_repelem = ...
+    repelem(lat_v_DRC_north, 1, 2);
+lat_v_DRC_south_repelem = ...
+    repelem(lat_v_DRC_south, 1, 2);
 
 % interp2
 U_prime_interp2 = interp2(...
@@ -247,15 +299,15 @@ V_prime_interp2 = interp2(...
     lon_v, lat_v, V_prime_ptop_to_pmid, lon_v, lat_u);
 speed_interp2 = sqrt(U_prime_interp2.^2 + V_prime_interp2.^2);
 
-aus8_currents.SBC_raw.ALLC_lon_u_repelem = ALLC_lon_u_repelem;
-aus8_currents.SBC_raw.ALLC_lat_v_north_repelem = ALLC_lat_v_north_repelem;
-aus8_currents.SBC_raw.ALLC_lat_v_south_repelem = ALLC_lat_v_south_repelem;
+aus8_currents.SBC_raw.ALLC_lon_u_repelem = lon_u_ALLC_repelem;
+aus8_currents.SBC_raw.ALLC_lat_v_north_repelem = lat_v_SBC_north_repelem;
+aus8_currents.SBC_raw.ALLC_lat_v_south_repelem = lat_v_SBC_south_repelem;
 % aus8_currents.SBC_raw.U_prime_interp2 = U_prime_interp2;
 % aus8_currents.SBC_raw.V_prime_interp2 = V_prime_interp2;
 % aus8_currents.SBC_raw.speed_interp2 = speed_interp2;
 
 
-%% 5) plot maps of U and V SBC
+%% 6) plot maps of U and V SBC
 % 1) figure set-up
 close all
 font_size = 8;
@@ -280,26 +332,31 @@ colormap(flipud(othercolor('Reds9')))
 sp = 1;
 axes(h_axes_sp(sp))
 U_prime_ptop_to_pmid_now = U_prime_ptop_to_pmid;
-U_prime_ptop_to_pmid_now(U_prime_ptop_to_pmid_now<0) = 0;
-V_prime_ptop_to_pmid_now = V_prime_ptop_to_pmid;
-V_prime_ptop_to_pmid_now(V_prime_ptop_to_pmid_now>0) = 0;
+% U_prime_ptop_to_pmid_now(U_prime_ptop_to_pmid_now<0) = 0;
+% V_prime_ptop_to_pmid_now = V_prime_ptop_to_pmid;
+% V_prime_ptop_to_pmid_now(V_prime_ptop_to_pmid_now>0) = 0;
 U_prime_interp2_now = U_prime_interp2;
-U_prime_interp2_now(U_prime_interp2_now<0) = 0;
-V_prime_interp2_now = V_prime_interp2;
-V_prime_interp2_now(V_prime_interp2_now>0) = 0;
-speed_interp2_now = sqrt(U_prime_interp2_now.^2 + V_prime_interp2_now.^2);
+% U_prime_interp2_now(U_prime_interp2_now<0) = 0;
+% V_prime_interp2_now = V_prime_interp2;
+% V_prime_interp2_now(V_prime_interp2_now>0) = 0;
+% speed_interp2_now = sqrt(U_prime_interp2_now.^2 + V_prime_interp2_now.^2);
 
 % 3) asal pcolor set-up
 % new colormap routine !
 levels = 11;
-Reds = othercolor('BuPu9', levels);
-Reds(1,:) = [1 1 1];
+cmap1 = flipud(othercolor('Blues9', levels));
+cmap1(end,:) = [1 1 1];
+cmap2 = othercolor('Reds9', levels);
+cmap2(1,:) = [1 1 1];
+cmaps = [cmap1; cmap2];
 magnif = 100;
-Reds_cont = ...
+cmap2_cont = ...
     [0 0.5 1 2 5 7.5 10 20 40 60 80 100]*magnif;
-Reds_cont_length = length(Reds_cont);
-cmap_custom = cmapcust(Reds,Reds_cont);
-colormap(cmap_custom);
+cmap1_cont = -fliplr(cmap2_cont);
+cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
+cmaps_cont_length = length(cmaps_cont);
+cmaps_custom = cmapcust(cmaps,cmaps_cont);
+colormap(cmaps_custom);
 
 % 4) plot asal pcolor
 % pcolor(...
@@ -313,33 +370,60 @@ colormap(cmap_custom);
 pcolor(...
     lon_v-1/16, ...
     lat_u+1/16, ...
-    speed_interp2_now*magnif)
+    U_prime_interp2_now*magnif)
 shading flat
 hold on
-caxis([Reds_cont(1) Reds_cont(end)]);
-lon_min = 114; lon_max = 148; lat_min = -45; lat_max = -32;
+caxis([cmaps_cont(1) cmaps_cont(end)]);
+lon_min = 114; lon_max = 148; lat_min = -46; lat_max = -32;
 axis([lon_min lon_max lat_min lat_max])
 freezeColors
 
-cmap = colormap(Reds);
-Reds_linspace = ...
-    linspace(Reds_cont(1), Reds_cont(end), Reds_cont_length);
+cmap = colormap(cmaps);
+cmaps_linspace = ...
+    linspace(cmaps_cont(1), cmaps_cont(end), cmaps_cont_length);
 cbar = colorbar;
-set(cbar, 'YTick',Reds_linspace, 'YTickLabel',Reds_cont/magnif);
+set(cbar, 'YTick',cmaps_linspace, 'YTickLabel',cmaps_cont/magnif);
 
 % ) contours
-depth_contours = single([100 2000]);
-h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
-    'g', 'linewidth', 0.5);
-% ch = clabel(h, 'manual', 'fontsize', font_size);
-% set(findobj(ch,'String','2e+03'),'String','2000')
-
-depth_contours = [50 200 500 1000 1500];
+depth_contours = [1000 1000];
 h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
     'k', 'linewidth', 0.5);
 % ch = clabel(h, 'manual', 'fontsize', font_size);
 % set(findobj(ch,'String','1e+03'),'String','1000')
 % set(findobj(ch,'String','1.5e+03'),'String','1500')
+
+h = plot(lon_u_ALLC_repelem, lat_v_SBC_north_repelem, ...
+    'g', 'linewidth', 1);
+h = plot(lon_u_ALLC_repelem, lat_v_SBC_south_repelem, ...
+    'g--', 'linewidth', 1);
+h = plot(lon_u_ALLC_repelem, lat_v_DRC_north_repelem, ...
+    'm:', 'linewidth', 1);
+h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
+    'm-', 'linewidth', 1);
+
+% ch = clabel(h, 'manual', 'fontsize', font_size);
+% set(findobj(ch,'String',num2str(DRC_south_p)),'String', ...
+%     ['x_{SBC} : ' num2str(SBC_south_p)])
+
+
+% depth_contours = [SBC_north_p SBC_north_p];
+% h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
+%     'g', 'linewidth', 0.5);
+% % ch = clabel(h, 'manual', 'fontsize', font_size);
+% % set(findobj(ch,'String',num2str(SBC_north_p),'String', ...
+% %     ['x_{SA}: ' num2str(SBC_north_p)])
+% 
+% depth_contours = [SBC_south_p SBC_south_p];
+% h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
+%     'g--', 'linewidth', 0.5);
+% % ch = clabel(h, 'manual', 'fontsize', font_size);
+% % set(findobj(ch,'String',num2str(SBC_south_p)),'String', ...
+% %     ['x_{SBC} : ' num2str(SBC_south_p)])
+% 
+% depth_contours = [DRC_north_p DRC_north_p];
+% h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
+%     'm--', 'linewidth', 0.5);
+
 
 % 6) 
 hold on
@@ -364,14 +448,14 @@ qscale = 2/magnif  ; % scaling factor for all vectors
 nn = 1;
 
 % 8) plot directional U and V
-h = quiver(...
-    lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
-    U_prime_interp2(1:nn:end, 1:nn:end), ...
-    V_prime_interp2(1:nn:end, 1:nn:end), ...
-    0, 'k');
-hU = get(h,'UData') ;
-hV = get(h,'VData') ;
-set(h,'UData',qscale*hU,'VData',qscale*hV)
+% h = quiver(...
+%     lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
+%     U_prime_interp2(1:nn:end, 1:nn:end), ...
+%     V_prime_interp2(1:nn:end, 1:nn:end), ...
+%     0, 'k');
+% hU = get(h,'UData') ;
+% hV = get(h,'VData') ;
+% set(h,'UData',qscale*hU,'VData',qscale*hV)
 % reference vector at the end
 
 % 9) title, grid, background and fonts
@@ -435,7 +519,7 @@ export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_' ...
 close
 
 
-%% save
+%% 7) save
 % save([cars_out_path 'aus8_ZD_method'], 'aus8_ZD_method')
 % disp(['aus8_ZD_method saved in ' ...
 %     cars_out_path 'aus8_ZD_method'])

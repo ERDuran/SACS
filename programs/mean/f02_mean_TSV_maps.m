@@ -292,6 +292,6 @@ if ~contains(outputls, scriptname)
     mkdir(figures_path, scriptname)
 end
 export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
-    '-m4')
+    '-pdf')
 close
 
