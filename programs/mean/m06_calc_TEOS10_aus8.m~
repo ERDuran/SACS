@@ -3,16 +3,28 @@ clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_z_hr_temp'])
 load([data_path 'SACS_data/aus8_z_hr_salt'])
-load([data_path 'SACS_data/ETOPO5'])
 
 lat = aus8_z_hr_temp.lat;
 lon = aus8_z_hr_temp.lon;
 depth = aus8_z_hr_temp.depth;
-pres = gsw_p_from_z(depth,-40);
 
-aus8_z_hr_Theta.lat = lat;
-aus8_z_hr_Theta.lon = lon;
-aus8_z_hr_Theta.depth = depth;
+
+%% Load in-situ temperature and salinity data
+clear 
+load aus8, disp('aus8 loaded !')
+
+lat = aus8.temp.var_on_pres.lat;
+lon = aus8.temp.var_on_pres.lon;
+pres = aus8.temp.var_on_pres.pres;
+
+aus8_TEOS10.lat = lat;
+aus8_TEOS10.lon = lon;
+aus8_TEOS10.pres = pres;
+
+temp = aus8.temp.var_on_pres.mean;
+sal = aus8.sal.var_on_pres.mean;
+
+load topog_mask
 
 
 %% Calculate conservative temperature, absolute salinity
