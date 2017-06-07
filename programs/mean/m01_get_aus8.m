@@ -79,6 +79,13 @@ aus8.salt.sa_cos = permute(salt.sa_cos(lon_ind,lat_ind,:),[2,1,3]);
 aus8.salt.sa_sin = permute(salt.sa_sin(lon_ind,lat_ind,:),[2,1,3]);
 
 
+% make sure temp and salt have the same dry points
+temp_nan = isnan(aus8.temp.mean);
+salt_nan = isnan(aus8.salt.mean);
+aus8.temp.mean(salt_nan) = NaN;
+aus8.salt.mean(temp_nan) = NaN;
+
+
 %%
 save([data_path 'SACS_data/aus8'], 'aus8')
 disp('aus8 DONE')

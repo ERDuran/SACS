@@ -1,44 +1,30 @@
 %% calculate vertical integral of velocities
 clearvars('-except', '*_path')
 
-load aus8_geostrophy
-lat_u = aus8_geostrophy.u.lat_u;
-lon_u = aus8_geostrophy.u.lon_u;
-u = aus8_geostrophy.u.u_0_HH_2000;
-lat_v = aus8_geostrophy.v.lat_v;
-lon_v = aus8_geostrophy.v.lon_v;
-v = aus8_geostrophy.v.v_0_HH_2000;
-a = aus8_geostrophy.a.value;
-pi180 = aus8_geostrophy.a.pi180;
-pres = aus8_geostrophy.pres;
-pres_mid = (5 : 10 : 1995)';
-pres_mid_length = length(pres_mid);
+load([data_path 'SACS_data/aus8_coor'])
+load([data_path 'SACS_data/aus8_u_g'])
+load([data_path 'SACS_data/aus8_v_g'])
+
+
+%%
+lat_u = aus8_coor.lat_u;
+lon_u = aus8_coor.lon_u;
+u_g = aus8_u_g.mean;
+lat_v = aus8_coor.lat_v;
+lon_v = aus8_coor.lon_v;
+v_g = aus8_v_g.mean;
+a = aus8_coor.a;
+pi180 = aus8_coor.pi180;
+depth = aus8_coor.depth;
+depth_thkn = depth(2:end) - depth(1:end-1);
+depth_mid = depth(1:end-1) + depth_thkn/2;
 
 
 %% U
-% depth on f-plane
-lat_f_plane_p_to_depth = 40;
-depth = gsw_z_from_p(-pres, lat_f_plane_p_to_depth);
-depth_mid = gsw_z_from_p(-pres_mid, lat_f_plane_p_to_depth);
-depth_thicknesses = depth(2:end) - depth(1:end-1);
-
-lat_u_length = length(lat_u);
-lon_u_length = length(lon_u);
-u_g_mid = NaN(lat_u_length, lon_u_length, pres_mid_length);
-% get u at vertical halfway points
-for ii = 1 : lat_u_length
-    for jj = 1 : lon_u_length
-        u_mid_now = interp1(pres,squeeze(u(ii,jj,:)),pres_mid);
-        dy = a * (lat_v(ii) - lat_v(ii+1)) * pi180;
-        
-        u_g_mid(ii,jj,:) = u_mid_now; 
-    end
-end
-
-U_g = NaN(lat_u_length, lon_u_length);
+U_g = NaN(length(lat_u), length(lon_u));
 % integrate U along z. U_z is in m^2/s
-for ii = 1 : lat_u_length
-    for jj = 1 : lon_u_length
+for ii = 1 : length(lat_u)
+    for jj = 1 : length(lon_u)
         u_mid_now = squeeze(u_g_mid(ii,jj,:));
         
         u_mid_now_times_depth_thicknesses = ...
@@ -59,11 +45,11 @@ v_g_mid = NaN(lat_v_length, lon_v_length, pres_mid_length);
 % get v at vertical halfway points
 for ii = 1 : lat_v_length
     for jj = 1 : lon_v_length
-        v_mid_now = interp1(pres,squeeze(v(ii,jj,:)),pres_mid);
+        v_mid_now = interp1(pres,squeeze(v_g(ii,jj,:)),pres_mid);
         dx = a * cos(lat_v(ii) * pi180) .* ...
             (lon_u(jj+1) - lon_u(jj)) * pi180;
         
-        v_g_mid(ii,jj,:) = interp1(pres,squeeze(v(ii,jj,:)),pres_mid);
+        v_g_mid(ii,jj,:) = interp1(pres,squeeze(v_g(ii,jj,:)),pres_mid);
     end
 end
 
