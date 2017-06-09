@@ -1,45 +1,43 @@
 %% Solve Poisson equation using iteration method
 clearvars('-except', '*_path')
 
-load aus8_ZD_method
-a = aus8_ZD_method.a;
-pi180 = aus8_ZD_method.pi180;
-lat_U = aus8_ZD_method.lat_u;
-lon_U = aus8_ZD_method.lon_u;
-U = aus8_ZD_method.U;
-lat_V = aus8_ZD_method.lat_v;
-lon_V = aus8_ZD_method.lon_v;
-V = aus8_ZD_method.V;
-F = aus8_ZD_method.F;
+load([data_path 'SACS_data/aus8_coor'])
+load([data_path 'SACS_data/aus8_U'])
+load([data_path 'SACS_data/aus8_V'])
+load([data_path 'SACS_data/aus8_F'])
 
 
 %%
-U_nan = isnan(U);
-U(U_nan) = 0;
-V_nan = isnan(V);
-V(V_nan) = 0;
+a = aus8_coor.a;
+pi180 = aus8_coor.pi180;
+lat_u = aus8_coor.lat_u;
+lon_u = aus8_coor.lon_u;
+lat_v = aus8_coor.lat_v;
+lon_v = aus8_coor.lon_v;
+U_mask = aus8_coor.U_mask;
+V_mask = aus8_coor.V_mask;
+F_mask = aus8_coor.F_mask;
 
+
+%%
 % apply south boundary condition
-lat_phi = [lat_U; lat_U(end)-1/8];
-lon_phi = lon_V;
-
-%
-F_nan = F == 0;
+lat_phi = [lat_u; lat_u(end)-1/8];
+lon_phi = lon_v;
 
 % dx for U position
-dx_U = NaN(length(lat_U), length(lon_U)-1);
-for ii = 1 : length(lat_U)
-    dx_now = a * cos(lat_U(ii) * pi180) .* ...
-        (lon_U(2:end) - lon_U(1:end-1)) * pi180;
+dx_U = NaN(length(lat_u), length(lon_u)-1);
+for ii = 1 : length(lat_u)
+    dx_now = a * cos(lat_u(ii) * pi180) .* ...
+        (lon_u(2:end) - lon_u(1:end-1)) * pi180;
     
     dx_U(ii,:) = dx_now;
 end
 
 
 % dy for V position
-dy_V = NaN(length(lat_V)-1, length(lon_V));
-for jj = 1 : length(lon_V)
-    dy_now = a * (lat_V(1:end-1) - lat_V(2:end)) * pi180;
+dy_V = NaN(length(lat_v)-1, length(lon_v));
+for jj = 1 : length(lon_v)
+    dy_now = a * (lat_v(1:end-1) - lat_v(2:end)) * pi180;
     
     dy_V(:,jj) = dy_now;
 end
@@ -63,8 +61,8 @@ for jj = 1 : length(lon_phi)
     dy_phi(:,jj) = dy_now;
 end
 
-lat_V_repmat = repmat(lat_V,1,length(lon_phi));
-lat_U_repmat = repmat(lat_U,1,length(lon_phi));
+lat_V_repmat = repmat(lat_v,1,length(lon_phi));
+lat_U_repmat = repmat(lat_u,1,length(lon_phi));
 
 
 %%
@@ -75,70 +73,53 @@ delta = max([dy_phi(:); dx_phi(:)]);
 Dt = 0.5 * delta^2 / K *10^-0.75;
 
 % Initial Conditions
-phi_np1 = ones(size(F));
-phi_np1(isnan(F)) = NaN;
+aus8_phi.mean = aus8_F.mean;
 
 % Boundary Condition
-phi_np1(end+1,:) = 0;
+aus8_phi.mean(end+1,:) = 0;
 
 % number of iterations
 n_5000s = 0 : 5000 : 5000000;
 n_iter = 0;
-tol = 0.00001;
+tol = 0.0001;
 rel_error = 1;
-% max_diff_K_Lap_phi__F = NaN(n,1);
-% number_NaN = NaN(n,1);
 
 tic
 while rel_error > tol
     n_iter = n_iter + 1;
-    phi_n = phi_np1;
+    phi_n = aus8_phi.mean;
     
     % Calculate grad(phi) = U_d + V_d
-    U_d = zeros(size(U));
-    V_d = zeros(size(V));
+    aus8_U_d.mean = zeros(size(aus8_U.mean));
+    aus8_V_d.mean = zeros(size(aus8_V.mean));
     
     phi_n_x = phi_n(1:end-1, 2:end) - phi_n(1:end-1, 1:end-1);
     phi_n_y = phi_n(1:end-1, :) - phi_n(2:end, :);
     
-    U_d(:,2:end-1) = (phi_n_x) ./ dx_phi;
-    V_d(2:end,:) = (phi_n_y) ./ dy_phi;
+    aus8_U_d.mean(:,2:end-1) = (phi_n_x) ./ dx_phi;
+    aus8_V_d.mean(2:end,:) = (phi_n_y) ./ dy_phi;
     
-    U_d(U_nan) = 0;
-    V_d(V_nan) = 0;
-    
-%     % manually add boundary condition on the domain edge (stencil
-%     % does not scan over the edge)
-%     U_d_dom(1,54) = 0; 
-%     V_d_dom(16,end) = 0;
-%     
-%     U_d_dom(1,1) = 0;
-%     U_d_dom(end,1) = 0;
-%     U_d_dom(end,end) = 0;
-%     
-%     V_d_dom(1,1) = 0;
+    aus8_U_d.mean(U_mask) = 0;
+    aus8_V_d.mean(V_mask) = 0;
     
     % Calculate Laplacian(phi) = div(U_d,V_d)
-    du = (U_d(:,2:end) - U_d(:,1:end-1));
+    dU = aus8_U_d.mean(:,2:end) - aus8_U_d.mean(:,1:end-1);
     
-    dv = V_d(1:end-1,:).*cos(lat_V_repmat(1:end-1,:) * pi180) - ...
-        V_d(2:end,:).*cos(lat_V_repmat(2:end,:) * pi180);
+    dV = aus8_V_d.mean(1:end-1,:).* ...
+        cos(lat_V_repmat(1:end-1,:) * pi180) - ...
+        aus8_V_d.mean(2:end,:).* ...
+        cos(lat_V_repmat(2:end,:) * pi180);
     
-    Lap_phi = du./dx_U + 1./cos(lat_U_repmat * pi180).*dv./dy_V;
+    aus8_Lap_phi.mean = dU./dx_U + 1./cos(lat_U_repmat * pi180).*dV./dy_V;
        
-    K_Lap_phi_minus_F = K * Lap_phi - F;
+    K_Lap_phi_minus_F = K * aus8_Lap_phi.mean - aus8_F.mean;
     
-    phi_np1 = phi_n(1:end-1,:) + Dt * (K_Lap_phi_minus_F);
-    phi_np1(end+1,:) = 0; %#ok<SAGROW>
-    
-%     number_NaN(nn) = length(find(isnan(phi_np1)));
-    
-    %
-%     max_diff_K_Lap_phi__F(nn) = max(max(K_Lap_phi_minus_F));
-    
+    aus8_phi.mean = phi_n(1:end-1,:) + Dt * (K_Lap_phi_minus_F);
+    aus8_phi.mean(end+1,:) = 0; 
+        
     % calculate relative error
     rel_error = ...
-        max(max(abs(phi_np1 - phi_n))) / max(max(abs(phi_np1)));
+        max(max(abs(aus8_phi.mean - phi_n))) / max(max(abs(aus8_phi.mean)));
         
     if find(ismember(n_5000s,n_iter))
         fprintf('Iterations number = %.f Tolerance = %.9f \n', ...
@@ -147,20 +128,19 @@ while rel_error > tol
 end
 toc
 
-%
-phi = phi_np1;
 
 %
-U_d(U_nan) = NaN;
-V_d(V_nan) = NaN;
+aus8_F_mean_plot = aus8_F.mean;
+aus8_F_mean_plot(F_mask) = NaN;
+aus8_Lap_phi_mean_plot = aus8_Lap_phi.mean;
+aus8_Lap_phi_mean_plot(F_mask) = NaN;
+K_Lap_phi_minus_F_plot = K_Lap_phi_minus_F;
+K_Lap_phi_minus_F_plot(F_mask) = NaN;
+aus8_U_d_mean_plot = aus8_U_d.mean;
+aus8_U_d_mean_plot(U_mask) = NaN;
+aus8_V_d_mean_plot = aus8_V_d.mean;
+aus8_V_d_mean_plot(V_mask) = NaN;
 
-%
-F(F_nan) = NaN;
-Lap_phi(F_nan) = NaN;
-K_Lap_phi_minus_F(F_nan) = NaN;
-
-
-%%
 close
 fig1 = figure;
 set(gcf,'units','normalized','outerposition',[0 0.05 0.95 0.95])
@@ -171,22 +151,21 @@ m = 5;
     flipud(othercolor('Blues7')),othercolor('Reds7')}, ...
     [-10^-m 0 10^-m], [10^(-m-1) 10^(-m-1)]);
 colormap(CMAP)
-pcolor(F), shading interp
+pcolor(aus8_F_mean_plot), shading interp
 colorbar, axis ij, title('F')
 caxis(CLIM)
 
 subplot(2,3,2)
 colormap(CMAP)
-pcolor(Lap_phi), shading interp
+pcolor(aus8_Lap_phi_mean_plot), shading interp
 colorbar, axis ij, title('Lap(phi)')
 caxis(CLIM)
 
 subplot(2,3,3)
-m = 6;
 [CMAP,LEV,WID,CLIM] = cmjoin({...
     flipud(othercolor('Blues7')),othercolor('Reds7')}, ...
     [-10^-m 0 10^-m], [10^(-m-1) 10^(-m-1)]);
-pcolor(K_Lap_phi_minus_F), shading interp
+pcolor(K_Lap_phi_minus_F_plot), shading interp
 colorbar, axis ij, title('K * Lap(phi) - F')
 caxis(CLIM)
 
@@ -196,12 +175,12 @@ m = -1;
     flipud(othercolor('Blues7')),othercolor('Reds7')}, ...
     [-10^-m 0 10^-m], [10^(-m-1) 10^(-m-1)]);
 colormap(CMAP)
-pcolor(U_d), shading interp
+pcolor(aus8_U_d_mean_plot), shading interp
 colorbar, axis ij, title('U_d')
 caxis(CLIM)
 
 subplot(2,3,5)
-pcolor(V_d), shading interp
+pcolor(aus8_V_d_mean_plot), shading interp
 colorbar, axis ij, title('V_d')
 caxis(CLIM)
 
@@ -213,23 +192,23 @@ text(0.1,0.6,['Number of iterations = ' num2str(n_iter)])
 text(0.1,0.4,['Relative error = ' num2str(rel_error)])
 
 % Save
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
-    '-m4')
-close
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
+%     '-m4')
+% close
 
 
 %% save stuff
 aus8_ZD_method.lat_phi = lat_phi;
 aus8_ZD_method.lon_phi = lon_phi;
 aus8_ZD_method.phi = phi;
-aus8_ZD_method.U_d = U_d;
-aus8_ZD_method.V_d = V_d;
-aus8_ZD_method.Lap_phi = Lap_phi;
+aus8_ZD_method.U_d = aus8_U_d;
+aus8_ZD_method.V_d = aus8_V_d;
+aus8_ZD_method.Lap_phi = aus8_Lap_phi;
 aus8_ZD_method.n_iteration = n_iter;
 aus8_ZD_method.rel_error = rel_error;
 aus8_ZD_method.Dt = Dt;

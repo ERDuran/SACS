@@ -9,15 +9,13 @@ lat = aus8_coor.lat;
 lon = aus8_coor.lon;
 depth = aus8_coor.depth;
 pres = aus8_coor.pres;
+Months = aus8_coor.Months;
 
 
 %% Calculate dynamic height
-aus8_dynh0.mean = NaN(size(aus8_thet.mean));
-month_names = {...
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', ...
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'};
+aus8_dynh_0.mean = NaN(size(aus8_thet.mean));
 for t = 1 : 12
-    aus8_dynh0.(month_names{t}) = ...
+    aus8_dynh_0.(Months{t}) = ...
         NaN(size(aus8_thet.mean));
 end
 
@@ -36,16 +34,16 @@ for m = 1 : length(lat)
             % otherwise, we're good
         else
             % calculate the streamfunction at the surface
-            aus8_dynh0.mean(m,n,:) = gsw_geo_strf_dyn_height(...
+            aus8_dynh_0.mean(m,n,:) = gsw_geo_strf_dyn_height(...
                 squeeze(aus8_asal.mean(m,n,:)), ...
                 squeeze(aus8_thet.mean(m,n,:)), ...
                 pres, 0);
             
             for t = 1 : 12
-                aus8_dynh0.(month_names{t})(m,n,:) = ...
+                aus8_dynh_0.(Months{t})(m,n,:) = ...
                     gsw_geo_strf_dyn_height(...
-                    squeeze(aus8_asal.(month_names{t})(m,n,:)), ...
-                    squeeze(aus8_thet.(month_names{t})(m,n,:)), ...
+                    squeeze(aus8_asal.(Months{t})(m,n,:)), ...
+                    squeeze(aus8_thet.(Months{t})(m,n,:)), ...
                     pres, 0);
             end
         end
@@ -59,15 +57,15 @@ end
 %% smooth out dynamic height
 for m = 2 : length(lat)-1
     for n = 2 : length(lon)-1
-        finite_dynh = find(isfinite(aus8_dynh0.mean(m,n,:)));
+        finite_dynh = find(isfinite(aus8_dynh_0.mean(m,n,:)));
         
         if ~isempty(finite_dynh)
             %
-            dynh_raw_N = squeeze(aus8_dynh0.mean(m-1,n,finite_dynh));
-            dynh_raw_S = squeeze(aus8_dynh0.mean(m+1,n,finite_dynh));
-            dynh_raw_W = squeeze(aus8_dynh0.mean(m,n-1,finite_dynh));
-            dynh_raw_E = squeeze(aus8_dynh0.mean(m,n+1,finite_dynh));
-            dynh_raw_C = squeeze(aus8_dynh0.mean(m,n,finite_dynh));
+            dynh_raw_N = squeeze(aus8_dynh_0.mean(m-1,n,finite_dynh));
+            dynh_raw_S = squeeze(aus8_dynh_0.mean(m+1,n,finite_dynh));
+            dynh_raw_W = squeeze(aus8_dynh_0.mean(m,n-1,finite_dynh));
+            dynh_raw_E = squeeze(aus8_dynh_0.mean(m,n+1,finite_dynh));
+            dynh_raw_C = squeeze(aus8_dynh_0.mean(m,n,finite_dynh));
             
             %
             % %%% 1 way: if any of the four points around are nan then
@@ -119,10 +117,10 @@ for m = 2 : length(lat)-1
                 %
                 mean_dynh_NaN = isnan(mean_dynh);
                 mean_dynh(mean_dynh_NaN) = dynh_raw_C(mean_dynh_NaN);
-                aus8_dynh0.mean(m,n,finite_dynh) = mean_dynh;
+                aus8_dynh_0.mean(m,n,finite_dynh) = mean_dynh;
             else
                 %
-                aus8_dynh0.mean(m,n,finite_dynh) = dynh_raw_C;
+                aus8_dynh_0.mean(m,n,finite_dynh) = dynh_raw_C;
             end
             %%%
             
@@ -155,15 +153,15 @@ for m = 2 : length(lat)-1
             % monthly data
             for t = 1 : 12
                 dynh_raw_N = squeeze(...
-                    aus8_dynh0.(month_names{t})(m-1,n,finite_dynh));
+                    aus8_dynh_0.(Months{t})(m-1,n,finite_dynh));
                 dynh_raw_S = squeeze(...
-                    aus8_dynh0.(month_names{t})(m+1,n,finite_dynh));
+                    aus8_dynh_0.(Months{t})(m+1,n,finite_dynh));
                 dynh_raw_W = squeeze(...
-                    aus8_dynh0.(month_names{t})(m,n-1,finite_dynh));
+                    aus8_dynh_0.(Months{t})(m,n-1,finite_dynh));
                 dynh_raw_E = squeeze(...
-                    aus8_dynh0.(month_names{t})(m,n+1,finite_dynh));
+                    aus8_dynh_0.(Months{t})(m,n+1,finite_dynh));
                 dynh_raw_C = squeeze(...
-                    aus8_dynh0.(month_names{t})(m,n,finite_dynh));
+                    aus8_dynh_0.(Months{t})(m,n,finite_dynh));
                 
                 if finite_dynh(end) == length(pres)
                     mean_dynh = mean([...
@@ -174,10 +172,10 @@ for m = 2 : length(lat)-1
                         dynh_raw_C],2);
                     mean_dynh_NaN = isnan(mean_dynh);
                     mean_dynh(mean_dynh_NaN) = dynh_raw_C(mean_dynh_NaN);
-                    aus8_dynh0.(month_names{t})(m,n,finite_dynh) = ...
+                    aus8_dynh_0.(Months{t})(m,n,finite_dynh) = ...
                         mean_dynh;
                 else
-                    aus8_dynh0.(month_names{t})(m,n,finite_dynh) = ...
+                    aus8_dynh_0.(Months{t})(m,n,finite_dynh) = ...
                         dynh_raw_C;
                 end
             end
@@ -187,7 +185,7 @@ end
 
 
 %%
-save([data_path 'SACS_data/aus8_dynh0'], 'aus8_dynh0')
+save([data_path 'SACS_data/aus8_dynh_0'], 'aus8_dynh_0')
 
-disp('aus8_dynh0 DONE')
+disp('aus8_dynh_0 DONE')
 
