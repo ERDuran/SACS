@@ -18,10 +18,10 @@ for p = 2 : 12
         time_step(p-1) + days_in_months(p-1)/2 + days_in_months(p)/2;
 end
 
-month_names = {...
+Months = {...
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', ...
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'};
-aus8_coor.month_names = month_names;
+aus8_coor.Months = Months;
 save([data_path 'SACS_data/aus8_coor'], 'aus8_coor')
 
 % time cycle setup
@@ -76,9 +76,9 @@ for ll = 1 : 12
         end
     end
     
-    aus8_monthly.temp.(month_names{ll}) = temp_monthly;
-    aus8_monthly.salt.(month_names{ll}) = salt_monthly;
-    disp([month_names{ll} ' OK!'])
+    aus8_monthly.temp.(Months{ll}) = temp_monthly;
+    aus8_monthly.salt.(Months{ll}) = salt_monthly;
+    disp([Months{ll} ' OK!'])
 end
 
 
@@ -90,7 +90,7 @@ margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
 
 z_ind = {0 0 0 0 -400 -400 -400 -400 -1000 -1000 -1000 -1000};
-month_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...
+Months_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...
     'Jan', 'Apr', 'Jul', 'Oct',};
 cmaps_levels = 12;
 
@@ -100,8 +100,8 @@ for sp = 1 : rowcols(1)*rowcols(2)
     axis_setup{sp} = ...
         [aus8_coor.lon(1) aus8_coor.lon(end) ...
         aus8_coor.lat(end) aus8_coor.lat(1)];
-    data{sp} = aus8_monthly.temp.(month_ind{sp})(:,:,depth==z_ind{sp});
-    titles{sp} = ['aus8 ' month_ind{sp} ...
+    data{sp} = aus8_monthly.temp.(Months_ind{sp})(:,:,depth==z_ind{sp});
+    titles{sp} = ['aus8 ' Months_ind{sp} ...
         ' $temp$ $z=' num2str(z_ind{sp}) '$ ($^{\circ}C$)'];
     cmaps{sp} = flipud(othercolor('RdYlBu8', cmaps_levels));
 end
@@ -147,7 +147,7 @@ margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
 
 z_ind = {0 0 0 0 -400 -400 -400 -400 -1000 -1000 -1000 -1000};
-month_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...
+Months_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...
     'Jan', 'Apr', 'Jul', 'Oct',};
 cmaps_levels = 12;
 
@@ -157,8 +157,8 @@ for sp = 1 : rowcols(1)*rowcols(2)
     axis_setup{sp} = ...
         [aus8_coor.lon(1) aus8_coor.lon(end) ...
         aus8_coor.lat(end) aus8_coor.lat(1)];
-    data{sp} = aus8_monthly.salt.(month_ind{sp})(:,:,depth==z_ind{sp});
-    titles{sp} = ['aus8 ' month_ind{sp} ...
+    data{sp} = aus8_monthly.salt.(Months_ind{sp})(:,:,depth==z_ind{sp});
+    titles{sp} = ['aus8 ' Months_ind{sp} ...
         ' $salt$ $z=' num2str(z_ind{sp}) '$ ($psu$)'];
     cmaps{sp} = flipud(othercolor('PuOr8', cmaps_levels));
 end

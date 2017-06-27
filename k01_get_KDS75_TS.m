@@ -25,12 +25,12 @@ clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_coor'])
 
-month_names = aus8_coor.month_names;
+Months = aus8_coor.Months;
 
 
 %% fix axis
 KDS75_temp.lat = flipud(kds422_data.yt_ocean);
-KDS75_temp.lon = kds422_data.xt_ocean + 360;
+KDS75_temp.lon = (kds422_data.xt_ocean + 360)';
 KDS75_temp.depth = -kds422_data.st_ocean;
 
 
@@ -69,8 +69,8 @@ KDS75_salt.Dec = flipud(permute(kds425_data.salt(:,:,:,3), [2, 1, 3]));
 mean_temp = KDS75_temp.Jan;
 mean_salt = KDS75_salt.Jan;
 for p = 2 : 12
-    mean_temp = mean_temp + KDS75_temp.(month_names{p});
-    mean_salt = mean_salt + KDS75_salt.(month_names{p});
+    mean_temp = mean_temp + KDS75_temp.(Months{p});
+    mean_salt = mean_salt + KDS75_salt.(Months{p});
 end
 KDS75_temp.mean = mean_temp/12;
 KDS75_salt.mean = mean_salt/12;
@@ -173,7 +173,7 @@ for sp = 1 : rowcols(1)*rowcols(2)
         [KDS75_temp.lon(1) KDS75_temp.lon(end) ...
         KDS75_temp.lat(end) KDS75_temp.lat(1)];
     data{sp} = KDS75_temp.(month_ind{sp})(:,:,z_ind{sp});
-    titles{sp} = ['aus8 ' month_ind{sp} ...
+    titles{sp} = ['KDS75 ' month_ind{sp} ...
         ' $temp$ $z=' ...
         num2str(KDS75_temp.depth(z_ind{sp})) '$ ($^{\circ}C$)'];
     cmaps{sp} = flipud(othercolor('RdYlBu8', cmaps_levels));
