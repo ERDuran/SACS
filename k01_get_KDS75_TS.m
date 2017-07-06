@@ -1,76 +1,43 @@
 %% get KDS75
 clearvars('-except', '*_path')
 
-% kds75
-[kds422_data, ~, kds_att] = ...
-    nc2mat([data_path ...
-    'KDS75/y109JFM/' ...
-    'ocean_month_422_ncks.nc'], ...
-    'ALL');
-[kds423_data, ~, ~] = ...
-    nc2mat([data_path ...
-    'KDS75/y109AMJ/' ...
-    'ocean_month_423_ncks.nc'], ...
-    'ALL');
-[kds424_data, ~, ~] = ...
-    nc2mat([data_path ...
-    'KDS75/y109JAS/' ...
-    'ocean_month_424_ncks.nc'], ...
-    'ALL');
-[kds425_data, ~, ~] = ...
-    nc2mat([data_path ...
-    'KDS75/y109OND/' ...
-    'ocean_month_425_ncks.nc'], ...
-    'ALL');
-
 load([data_path 'SACS_data/aus8_coor'])
 
 Months = aus8_coor.Months;
 
 
-%% fix axis
-KDS75_temp.lat = flipud(kds422_data.yt_ocean);
-KDS75_temp.lon = (kds422_data.xt_ocean + 360)';
-KDS75_temp.depth = -kds422_data.st_ocean;
+%%
+for t = 1 : 12
+    [data.(Months{t}), ~, kds_att] = ...
+        nc2mat([data_path ...
+        'KDS75/KDS75_ncra_y103to109_' Months{t} '.nc'], ...
+        'ALL');
+    
+    disp([Months{t} ' OK!'])
+end
+
+
+% fix axis
+KDS75_temp.lat = flipud(data.Jan.yt_ocean);
+KDS75_temp.lon = (data.Jan.xt_ocean + 360)';
+KDS75_temp.depth = -data.Jan.st_ocean;
 
 
 %%
 KDS75_temp.mean = 0;
-KDS75_temp.Jan = flipud(permute(kds422_data.temp(:,:,:,1), [2, 1, 3]));
-KDS75_temp.Feb = flipud(permute(kds422_data.temp(:,:,:,2), [2, 1, 3]));
-KDS75_temp.Mar = flipud(permute(kds422_data.temp(:,:,:,3), [2, 1, 3]));
-
 KDS75_salt.mean = 0;
-KDS75_salt.Jan = flipud(permute(kds422_data.salt(:,:,:,1), [2, 1, 3]));
-KDS75_salt.Feb = flipud(permute(kds422_data.salt(:,:,:,2), [2, 1, 3]));
-KDS75_salt.Mar = flipud(permute(kds422_data.salt(:,:,:,3), [2, 1, 3]));
 
-KDS75_temp.Apr = flipud(permute(kds423_data.temp(:,:,:,1), [2, 1, 3]));
-KDS75_temp.May = flipud(permute(kds423_data.temp(:,:,:,2), [2, 1, 3]));
-KDS75_temp.Jun = flipud(permute(kds423_data.temp(:,:,:,3), [2, 1, 3]));
-KDS75_salt.Apr = flipud(permute(kds423_data.salt(:,:,:,1), [2, 1, 3]));
-KDS75_salt.May = flipud(permute(kds423_data.salt(:,:,:,2), [2, 1, 3]));
-KDS75_salt.Jun = flipud(permute(kds423_data.salt(:,:,:,3), [2, 1, 3]));
-
-KDS75_temp.Jul = flipud(permute(kds424_data.temp(:,:,:,1), [2, 1, 3]));
-KDS75_temp.Aug = flipud(permute(kds424_data.temp(:,:,:,2), [2, 1, 3]));
-KDS75_temp.Sep = flipud(permute(kds424_data.temp(:,:,:,3), [2, 1, 3]));
-KDS75_salt.Jul = flipud(permute(kds424_data.salt(:,:,:,1), [2, 1, 3]));
-KDS75_salt.Aug = flipud(permute(kds424_data.salt(:,:,:,2), [2, 1, 3]));
-KDS75_salt.Sep = flipud(permute(kds424_data.salt(:,:,:,3), [2, 1, 3]));
-
-KDS75_temp.Oct = flipud(permute(kds425_data.temp(:,:,:,1), [2, 1, 3]));
-KDS75_temp.Nov = flipud(permute(kds425_data.temp(:,:,:,2), [2, 1, 3]));
-KDS75_temp.Dec = flipud(permute(kds425_data.temp(:,:,:,3), [2, 1, 3]));
-KDS75_salt.Oct = flipud(permute(kds425_data.salt(:,:,:,1), [2, 1, 3]));
-KDS75_salt.Nov = flipud(permute(kds425_data.salt(:,:,:,2), [2, 1, 3]));
-KDS75_salt.Dec = flipud(permute(kds425_data.salt(:,:,:,3), [2, 1, 3]));
-
+for t = 1 : 12
+    KDS75_temp.(Months{t}) = ...
+        flipud(permute(data.(Months{t}).temp, [2, 1, 3]));
+    KDS75_salt.(Months{t}) = ...
+        flipud(permute(data.(Months{t}).salt, [2, 1, 3]));
+end
 mean_temp = KDS75_temp.Jan;
 mean_salt = KDS75_salt.Jan;
-for p = 2 : 12
-    mean_temp = mean_temp + KDS75_temp.(Months{p});
-    mean_salt = mean_salt + KDS75_salt.(Months{p});
+for t = 2 : 12
+    mean_temp = mean_temp + KDS75_temp.(Months{t});
+    mean_salt = mean_salt + KDS75_salt.(Months{t});
 end
 KDS75_temp.mean = mean_temp/12;
 KDS75_salt.mean = mean_salt/12;
@@ -92,8 +59,8 @@ for sp = 1 : rowcols(1)*rowcols(2)
 end
     
 z = {0 0 -400 -400 -1000 -1000};
-for p = 1 : length(z)
-    z_ind{p} = find_nearest(KDS75_temp.depth,z{p});
+for t = 1 : length(z)
+    z_ind{t} = find_nearest(KDS75_temp.depth,z{t});
 end
 
 data = {...
@@ -158,8 +125,8 @@ margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
 
 z = {0 0 0 0 -400 -400 -400 -400 -1000 -1000 -1000 -1000};
-for p = 1 : length(z)
-    z_ind{p} = find_nearest(KDS75_temp.depth,z{p});
+for t = 1 : length(z)
+    z_ind{t} = find_nearest(KDS75_temp.depth,z{t});
 end
 
 month_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...
@@ -220,8 +187,8 @@ margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
 
 z = {0 0 0 0 -400 -400 -400 -400 -1000 -1000 -1000 -1000};
-for p = 1 : length(z)
-    z_ind{p} = find_nearest(KDS75_temp.depth,z{p});
+for t = 1 : length(z)
+    z_ind{t} = find_nearest(KDS75_temp.depth,z{t});
 end
 
 month_ind = {'Jan', 'Apr', 'Jul', 'Oct', 'Jan', 'Apr', 'Jul', 'Oct', ...

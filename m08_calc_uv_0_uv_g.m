@@ -152,8 +152,8 @@ end
 
 
 %% get the uv_g velocities at mid depth point
-depth_thkn = depth(2:end) - depth(1:end-1);
-depth_mid = depth(1:end-1) + depth_thkn/2;
+depth_thkn = -(depth(2:end) - depth(1:end-1));
+depth_mid = depth(1:end-1) - depth_thkn/2;
 aus8_coor.depth_thkn = depth_thkn;
 aus8_coor.depth_mid = depth_mid;
 save([data_path 'SACS_data/aus8_coor'], 'aus8_coor')
@@ -194,6 +194,191 @@ for m = 1 : length(lat_v)
     end
     fprintf('lat_v = %7.3f \n', lat_v(m))
 end
+
+
+%% figure set-up
+fig_n = 1;
+rowcols = [3 3];
+rowcols_size = [8 5]; % cm
+margs = [1 1 1 1]; % cm
+gaps = [1 1]; % cm
+
+z = {0 -400 -1000 0 -400 -1000 0 -400 -1000};
+for p = 1 : length(z)
+    z_ind{p} = find_nearest(aus8_coor.depth_mid,z{p});
+end
+cmaps_levels = 12;
+
+cmaps_chc = {'RdBu8', 'BuPu8'};
+cmaps_ind = [1 1 1 1 1 1 2 2 2];
+x_chc = {lon_u, lon_v, lon};
+x_ind = [1 1 1 2 2 2 3 3 3];
+y_chc = {lat_u, lat_v, lat};
+y_ind = [1 1 1 2 2 2 3 3 3];
+minmax_chc = {...
+    [-0.1 0.1], ...
+    [-0.1 0.1], ...
+    [0 0.2]};
+
+for sp = 1 : rowcols(1)*rowcols(2)
+    axis_setup{sp} = ...
+        [lon(1) lon(end) ...
+        lat(end) lat(1)];
+    cmaps{sp} = ...
+        othercolor(cmaps_chc{cmaps_ind(sp)}, cmaps_levels);
+    if cmaps_ind(sp) == 1
+        cmaps{sp} = flipud(cmaps{sp});
+    end
+    x{sp} = x_chc{x_ind(sp)};
+    y{sp} = y_chc{y_ind(sp)};
+    minmax{sp} = minmax_chc{x_ind(sp)};
+    nn{sp} = 12;
+    s{sp} = 2;
+end
+
+% data sorting
+for sp = 1 : rowcols(1)*rowcols(2)
+    if cmaps_ind(sp) == 1
+        if x_ind(sp) == 1
+            u{sp} = NaN(size(aus8_u_g.mean(:,:,1)));
+            v{sp} = NaN(size(aus8_u_g.mean(:,:,1)));
+            data{sp} = aus8_u_g.mean(:,:,z_ind{sp});
+            titles{sp} = ...
+                ['aus8 mean HH $u_{g}$ $z=' ...
+                num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+
+        elseif x_ind(sp) == 2
+            u{sp} = NaN(size(aus8_v_g.mean(:,:,1)));
+            v{sp} = NaN(size(aus8_v_g.mean(:,:,1)));
+            data{sp} = aus8_v_g.mean(:,:,z_ind{sp});
+            titles{sp} = ...
+                ['aus8 mean HH $v_{g}$ $z=' ...
+                num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+        end
+
+    elseif cmaps_ind(sp) == 2
+        u{sp} = interp2(lon_u,lat_u, ...
+                aus8_u_g.mean(:,:,z_ind{sp}),lon,lat);
+        v{sp} = interp2(lon_v,lat_v, ...
+                aus8_v_g.mean(:,:,z_ind{sp}),lon,lat);
+        data{sp} = sqrt(u{sp}.^2 + v{sp}.^2);
+        titles{sp} = ...
+            ['aus8 mean HH $\bf{v_{g}}$ $z=' ...
+            num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+    end
+
+end
+
+font_size = 9;
+fig_color = [0.7 0.7 0.7];
+
+fig = quiver_maker(...
+    fig_n, rowcols, rowcols_size, margs, gaps, ...
+    x, y, data, u, v, nn, s, axis_setup, minmax, cmaps, ...
+    titles, font_size, fig_color);
+outputls = ls(figures_path);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(figures_path, scriptname)
+end
+export_fig(fig, ...
+    [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-m3')
+close
+
+
+%% figure set-up
+fig_n = 2;
+rowcols = [3 1];
+rowcols_size = [25 9.5]; % cm
+margs = [1 1 1 1]; % cm
+gaps = [1 1]; % cm
+
+z = {0 -400 -1000 0 -400 -1000 0 -400 -1000};
+for p = 1 : length(z)
+    z_ind{p} = find_nearest(aus8_coor.depth_mid,z{p});
+end
+cmaps_levels = 12;
+
+cmaps_chc = {'RdBu8', 'BuPu8'};
+cmaps_ind = [2 2 2];
+x_chc = {lon_u, lon_v, lon};
+x_ind = [3 3 3];
+y_chc = {lat_u, lat_v, lat};
+y_ind = [3 3 3];
+minmax_chc = {...
+    [-0.1 0.1], ...
+    [-0.1 0.1], ...
+    [0 0.2]};
+
+for sp = 1 : rowcols(1)*rowcols(2)
+    axis_setup{sp} = ...
+        [113 148 ...
+        -47 -31.5];
+    cmaps{sp} = ...
+        othercolor(cmaps_chc{cmaps_ind(sp)}, cmaps_levels);
+    if cmaps_ind(sp) == 1
+        cmaps{sp} = flipud(cmaps{sp});
+    end
+    x{sp} = x_chc{x_ind(sp)};
+    y{sp} = y_chc{y_ind(sp)};
+    minmax{sp} = minmax_chc{x_ind(sp)};
+end
+
+% data sorting
+for sp = 1 : rowcols(1)*rowcols(2)
+    if cmaps_ind(sp) == 1
+        if x_ind(sp) == 1
+            u{sp} = NaN(size(aus8_u_g.mean(:,:,1)));
+            v{sp} = NaN(size(aus8_u_g.mean(:,:,1)));
+            data{sp} = aus8_u_g.mean(:,:,z_ind{sp});
+            titles{sp} = ...
+                ['aus8 mean HH $u_{g}$ $z=' ...
+                num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+
+        elseif x_ind(sp) == 2
+            u{sp} = NaN(size(aus8_v_g.mean(:,:,1)));
+            v{sp} = NaN(size(aus8_v_g.mean(:,:,1)));
+            data{sp} = aus8_v_g.mean(:,:,z_ind{sp});
+            titles{sp} = ...
+                ['aus8 mean HH $v_{g}$ $z=' ...
+                num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+        end
+
+    elseif cmaps_ind(sp) == 2
+        u{sp} = interp2(lon_u,lat_u, ...
+                aus8_u_g.mean(:,:,z_ind{sp}),lon,lat);
+        v{sp} = interp2(lon_v,lat_v, ...
+                aus8_v_g.mean(:,:,z_ind{sp}),lon,lat);
+        data{sp} = sqrt(u{sp}.^2 + v{sp}.^2);
+        titles{sp} = ...
+            ['aus8 mean HH $\bf{v_{g}}$ $z=' ...
+            num2str(aus8_coor.depth_mid(z_ind{sp})) '$ $(m/s)$'];
+    end
+
+end
+
+nn = {3 4 4};
+s = {12 7 6};
+
+font_size = 9;
+fig_color = [0.7 0.7 0.7];
+
+fig = quiver_maker(...
+    fig_n, rowcols, rowcols_size, margs, gaps, ...
+    x, y, data, u, v, nn, s, axis_setup, minmax, cmaps, ...
+    titles, font_size, fig_color);
+outputls = ls(figures_path);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(figures_path, scriptname)
+end
+export_fig(fig, ...
+    [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-m3')
+close
 
 
 %% save

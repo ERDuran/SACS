@@ -8,7 +8,7 @@ clearvars('-except', '*_path')
     '_grib2netcdf-atls12-a562cefde8a29a7288fa0b8b7f9413f7-qJ0lae.nc'], ...
     'ALL');
 
-load([data_path 'SACS_data/ETOPO5'])
+load([data_path 'SACS_data/SmSan02'])
 load([data_path 'SACS_data/aus8_coor'])
 
 
@@ -21,24 +21,24 @@ ERAInt.time_vec = datestr(datenum(1900,1,1) + ERAInt.time_num/24);
 %
 inss = permute(wind_data.inss, [2,1,3]);
 ERAInt.Tau_y.mean = mean(inss,3);
-ERAInt.Tau_y.mean(ETOPO5.topo_sm_interp==0) = NaN;
+ERAInt.Tau_y.mean(SmSan02.topo_sm_interp==0) = NaN;
 %
 iews = permute(wind_data.iews, [2,1,3]);
 ERAInt.Tau_x.mean = mean(iews,3);
-ERAInt.Tau_x.mean(ETOPO5.topo_sm_interp==0) = NaN;
+ERAInt.Tau_x.mean(SmSan02.topo_sm_interp==0) = NaN;
 
 %
-month_names = aus8_coor.month_names;
+Months = aus8_coor.Months;
 month_vector = 1 : 12 : length(ERAInt.time_num);
 
 for ll = 1 : 12
-    ERAInt.Tau_y.(month_names{ll}) = ...
+    ERAInt.Tau_y.(Months{ll}) = ...
         mean(inss(:,:,month_vector+ll-1),3);
-    ERAInt.Tau_y.(month_names{ll})(ETOPO5.topo_sm_interp==0) = NaN;
+    ERAInt.Tau_y.(Months{ll})(SmSan02.topo_sm_interp==0) = NaN;
         
-    ERAInt.Tau_x.(month_names{ll}) = ...
+    ERAInt.Tau_x.(Months{ll}) = ...
         mean(iews(:,:,month_vector+ll-1),3);
-    ERAInt.Tau_x.(month_names{ll})(ETOPO5.topo_sm_interp==0) = NaN;
+    ERAInt.Tau_x.(Months{ll})(SmSan02.topo_sm_interp==0) = NaN;
 end
 
 
@@ -63,12 +63,12 @@ for sp = 1 : rowcols(1)*rowcols(2)
     cmaps{sp} = flipud(othercolor('RdBu8', cmaps_levels));
     u{sp} = NaN(size(ERAInt.Tau_x.mean));
     v{sp} = NaN(size(ERAInt.Tau_x.mean));
+    nn{sp} = 12;
+    s{sp} = 2;
 end
 
 u{3} = ERAInt.Tau_x.mean;
 v{3} = ERAInt.Tau_y.mean;
-n = 12;
-s = 2;
 
 data{1} = ERAInt.Tau_x.mean;
 data{2} = ERAInt.Tau_y.mean;
@@ -90,7 +90,7 @@ fig_color = [0.7 0.7 0.7];
 
 fig = quiver_maker(...
     fig_n, rowcols, rowcols_size, margs, gaps, ...
-    x, y, data, u, v, n, s, axis_setup, minmax, cmaps, ...
+    x, y, data, u, v, nn, s, axis_setup, minmax, cmaps, ...
     titles, font_size, fig_color);
 outputls = ls(figures_path);
 scriptname = mfilename;
@@ -125,6 +125,8 @@ for sp = 1 : rowcols(1)*rowcols(2)
     cmaps{sp} = flipud(othercolor('RdBu8', cmaps_levels));
     u{sp} = NaN(size(ERAInt.Tau_x.mean));
     v{sp} = NaN(size(ERAInt.Tau_x.mean));
+    nn{sp} = 12;
+    s{sp} = 2;
 end
 
 u{9} = ERAInt.Tau_x.Jan;
@@ -135,32 +137,30 @@ u{11} = ERAInt.Tau_x.Jul;
 v{11} = ERAInt.Tau_y.Jul;
 u{12} = ERAInt.Tau_x.Oct;
 v{12} = ERAInt.Tau_y.Oct;
-n = 12;
-s = 2;
 
 
 data{1} = ERAInt.Tau_x.Jan;
-data{1}(ETOPO5.topo_sm_interp==0) = NaN;
+data{1}(SmSan02.topo_sm_interp==0) = NaN;
 data{5} = ERAInt.Tau_y.Jan;
-data{5}(ETOPO5.topo_sm_interp==0) = NaN;
+data{5}(SmSan02.topo_sm_interp==0) = NaN;
 data{9} = sqrt(data{1}.^2 + data{5}.^2);
 
 data{2} = ERAInt.Tau_x.Apr;
-data{2}(ETOPO5.topo_sm_interp==0) = NaN;
+data{2}(SmSan02.topo_sm_interp==0) = NaN;
 data{6} = ERAInt.Tau_y.Apr;
-data{6}(ETOPO5.topo_sm_interp==0) = NaN;
+data{6}(SmSan02.topo_sm_interp==0) = NaN;
 data{10} = sqrt(data{2}.^2 + data{6}.^2);
 
 data{3} = ERAInt.Tau_x.Jul;
-data{3}(ETOPO5.topo_sm_interp==0) = NaN;
+data{3}(SmSan02.topo_sm_interp==0) = NaN;
 data{7} = ERAInt.Tau_y.Jul;
-data{7}(ETOPO5.topo_sm_interp==0) = NaN;
+data{7}(SmSan02.topo_sm_interp==0) = NaN;
 data{11} = sqrt(data{3}.^2 + data{7}.^2);
 
 data{4} = ERAInt.Tau_x.Oct;
-data{4}(ETOPO5.topo_sm_interp==0) = NaN;
+data{4}(SmSan02.topo_sm_interp==0) = NaN;
 data{8} = ERAInt.Tau_y.Oct;
-data{8}(ETOPO5.topo_sm_interp==0) = NaN;
+data{8}(SmSan02.topo_sm_interp==0) = NaN;
 data{12} = sqrt(data{4}.^2 + data{8}.^2);
 
 titles{1} = ['ERA-Int Jan $\tau_{x}$ $(m^{2}/s)$ (03-12)'];
@@ -200,7 +200,7 @@ fig_color = [0.7 0.7 0.7];
 
 fig = quiver_maker(...
     fig_n, rowcols, rowcols_size, margs, gaps, ...
-    x, y, data, u, v, n, s, axis_setup, minmax, cmaps, ...
+    x, y, data, u, v, nn, s, axis_setup, minmax, cmaps, ...
     titles, font_size, fig_color);
 outputls = ls(figures_path);
 scriptname = mfilename;

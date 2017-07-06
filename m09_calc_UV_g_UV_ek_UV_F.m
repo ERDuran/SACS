@@ -38,9 +38,24 @@ for t = 1 : 12
 end
 
 % integrate U along z. U_z is in m^2/s
+u_bottom = NaN(length(lat_u), length(lon_u));
 for m = 1 : length(lat_u)
     for n = 1 : length(lon_u)
         u_g_now = squeeze(aus8_u_g.mean(m,n,:));
+        u_last_fini = find(isfinite(u_g_now), 1, 'last');
+        u_first_nan = find(isnan(u_g_now), 1, 'first')-1;
+        if isempty(u_last_fini)
+            u_bottom(m,n) = 0;
+        elseif isempty(u_first_nan)
+            u_bottom(m,n) = -2000;
+        else
+            if u_last_fini == u_first_nan
+                u_bottom(m,n) = depth(u_last_fini+1);
+            else
+                error('!')
+            end
+        end
+        
         u_g_times_depth_thkn = u_g_now .* depth_thkn;
         aus8_U_g.mean(m,n) = nansum(u_g_times_depth_thkn);
         for t = 1 : 12
@@ -54,13 +69,29 @@ aus8_U_g.mean(U_mask) = NaN;
 for t = 1 : 12
     aus8_U_g.(Months{t})(U_mask) = NaN;
 end
+aus8_coor.u_bottom = u_bottom;
 
 
 % V_g
 % integrate V along z. V_z is in m^2/s
+v_bottom = NaN(length(lat_v), length(lon_v));
 for m = 1 : length(lat_v)
     for n = 1 : length(lon_v)
         v_g_now = squeeze(aus8_v_g.mean(m,n,:));
+        v_last_fini = find(isfinite(v_g_now), 1, 'last');
+        v_first_nan = find(isnan(v_g_now), 1, 'first')-1;
+        if isempty(v_last_fini)
+            v_bottom(m,n) = 0;
+        elseif isempty(v_first_nan)
+            v_bottom(m,n) = -2000;
+        else
+            if v_last_fini == v_first_nan
+                v_bottom(m,n) = depth(v_last_fini+1);
+            else
+                error('!')
+            end
+        end
+        
         v_g_times_depth_thkn = v_g_now .* depth_thkn;
         aus8_V_g.mean(m,n) = nansum(v_g_times_depth_thkn);
         for t = 1 : 12
@@ -74,6 +105,7 @@ aus8_V_g.mean(V_mask) = NaN;
 for t = 1 : 12
     aus8_V_g.(Months{t})(V_mask) = NaN;
 end
+aus8_coor.v_bottom = v_bottom;
 
 
 %% U_ek V_ek
@@ -175,109 +207,80 @@ aus8_coor.F_mask = aus8_F.mean == 0;
 save([data_path 'SACS_data/aus8_coor'], 'aus8_coor')
 
 
-%%
-% 1) figure set-up
-close all
-font_size = 8;
-fig1 = figure(1);
-set(gcf, 'units', 'normalized', 'outerposition', [0 0 1 1]);
-rowN = 4; colN = 2;
-col_ind = (repmat(1:colN,rowN,1))';
-row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
-gap_w = 0.04; % gap width between subplots
-gap_h = 0.04; % gap height between subplots
-marg_b = 0.03; % bottom margin
-marg_t = 0.03; % top margin
-marg_l = 0.02; % left margin
-marg_r = 0.02; % right margin
-x_sp = (1 - marg_l - marg_r - gap_w*(colN-1))/colN; % x subplot length
-y_sp = (1 - marg_b - marg_t - gap_h*(rowN-1))/rowN; % y subplot length
-h_axes_sp = tight_subplot(rowN, colN, ...
-    [gap_h gap_w], [marg_b marg_t], [marg_l marg_r]);
-
-% 2) all data set-up
-sp = 1;
-axes(h_axes_sp(sp))
-% SBC_U_prime_now = SBC_U_prime;
-% SBC_U_prime_now(SBC_U_prime_now<0) = 0;
-
-% 3) asal pcolor set-up
-% new colormap routine !
-% levels = 11;
-% Reds = othercolor('Reds9', levels);
-% Reds(1,:) = [1 1 1];
-% magnif = 100;
-% Reds_cont = ...
-%     [0 0.05 0.1 0.5 1 5 10 20 50 100 200 300]*magnif;
-% Reds_cont_length = length(Reds_cont);
-% cmap_custom = cmapcust(Reds,Reds_cont);
-colormap(h_axes_sp(sp), othercolor('RdBu11', 20));
-
-% 4) plot asal pcolor
-pcolor(...
-    lon_u, ...
-    lat_u, ...
-    aus8_U_g.mean)
-shading interp
-% hold on
-caxis([-300 300]);
-% axis([114 148 -45 -33])
-% freezeColors
-
-% cmap = colormap(Reds);
-% Reds_linspace = ...
-%     linspace(Reds_cont(1), Reds_cont(end), Reds_cont_length);
-cbar = colorbar;
-% set(cbar, 'YTick',Reds_linspace, 'YTickLabel',Reds_cont/magnif);
-
-% 5) plot SBC boundaries
-% hold on
-% plot([SC_lon_u_repelem(1,1) SC_lon_u_repelem(1,1)], ...
-%     [SC_lat_v_north(1,1) SC_lat_v_south(1,1)], ...
-%     'g','linewidth',0.5,'linestyle','-')
-% plot(SC_lon_u_repelem(1,:), ...
-%     SC_lat_v_north_repelem(1,:), ...
-%     'g','linewidth',0.5,'linestyle','-')
-% plot(SC_lon_u_repelem(1,:), ...
-%     SC_lat_v_south_repelem(1,:), ...
-%     'g','linewidth',0.5,'linestyle','-')
-% plot([SC_lon_u_repelem(1,end) SC_lon_u_repelem(1,end)], ...
-%     [SC_lat_v_north(1,end) SC_lat_v_south(1,end)], ...
-%     'g','linewidth',0.5,'linestyle','-')
-
-% 7) UV quiver set-up
-% [lon_mg, lat_mg]=meshgrid(lon,lat);
-% quiv_S = 5;
-% nn = 1;
-
-% 8) plot directional U and V
-% quiver(...
-%     lon_mg(1:nn:end, 1:nn:end), lat_mg(1:nn:end, 1:nn:end), ...
-%     SBC_U_prime_interp2(1:nn:end, 1:nn:end), ...
-%     SBC_V_prime_interp2(1:nn:end, 1:nn:end), ...
-%     quiv_S, 'k');
-% reference arrow goes here
-
-% 9) title, grid, background and fonts
-% title('SBC current')
-% grid
-% set(gca,'xtick',115:2:147)
-% set(gca,'layer','top','color',[0.7 0.7 0.7],...
-%     'fontsize',font_size,'fontweight','bold')
-% if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
-% if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
-
-
-% % Save
+%% figure set-up
+% fig_n = 1;
+% rowcols = [3 2];
+% rowcols_size = [8 5]; % cm
+% margs = [1 1 1 1]; % cm
+% gaps = [1 1]; % cm
+% 
+% cmaps_levels = 12;
+% 
+% cmaps_chc = {'RdBu8', 'BuPu8'};
+% cmaps_ind = [1 1 1 1 1 1];
+% x_chc = {lon_u, lon_v};
+% x_ind = [1 2 1 2 1 2];
+% y_chc = {lat_u, lat_v};
+% minmax_chc = {...
+%     [-10 10], ...
+%     [-1 1], ...
+%     [0 100]};
+% minmax_ind = ...
+%     [1 1 2 2 3 3];
+% 
+% for sp = 1 : rowcols(1)*rowcols(2)
+%     axis_setup{sp} = ...
+%         [lon_u(1) lon_u(end) ...
+%         lat_v(end) lat_v(1)];
+%     cmaps{sp} = ...
+%         othercolor(cmaps_chc{cmaps_ind(sp)}, cmaps_levels);
+%     if cmaps_ind(sp) == 1
+%         cmaps{sp} = flipud(cmaps{sp});
+%     end
+%     x{sp} = x_chc{x_ind(sp)};
+%     y{sp} = y_chc{x_ind(sp)};
+%     minmax{sp} = minmax_chc{minmax_ind(sp)};
+% end
+% 
+% % data sorting
+% data{1} = aus8_U_g.mean;
+% data{2} = aus8_V_g.mean;
+% data{3} = aus8_U_ek.mean;
+% data{4} = aus8_V_ek.mean;
+% data{5} = aus8_U.mean;
+% data{6} = aus8_V.mean;
+% 
+% titles{1} = ...
+%     ['aus8 mean HH $U_{g}$ $(m^2/s)$'];
+% titles{2} = ...
+%     ['aus8 mean HH $V_{g}$ $(m^2/s)$'];
+% titles{3} = ...
+%     ['aus8 mean $U_{ek}$ $(m^2/s)$'];
+% titles{4} = ...
+%     ['aus8 mean $V_{ek}$ $(m^2/s)$'];
+% titles{5} = ...
+%     ['aus8 mean $U$ $(m^2/s)$'];
+% titles{6} = ...
+%     ['aus8 mean $V$ $(m^2/s)$'];
+% 
+% font_size = 9;
+% fig_color = [0.7 0.7 0.7];
+% 
+% fig = pcolor_maker(...
+%     fig_n, rowcols, rowcols_size, margs, gaps, ...
+%     x, y, data, axis_setup, minmax, cmaps, ...
+%     titles, font_size, fig_color);
+% 
 % outputls = ls(figures_path);
 % scriptname = mfilename;
 % if ~contains(outputls, scriptname)
 %     mkdir(figures_path, scriptname)
 % end
-% export_fig(fig1, [figures_path mfilename '/' scriptname(1:3) '_'], ...
-%     '-m4')
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
 % close
-
 
 
 %%
