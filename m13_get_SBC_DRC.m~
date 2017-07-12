@@ -292,7 +292,7 @@ V_Vtn_prime_up_SBC_now = ...
 V_Vtn_prime_up_SBC = -V_Vtn_prime_up_SBC_now;
 Vtn_prime_up_SBC(lon_first_idx) = V_Vtn_prime_up_SBC;
 
-% and last cases
+% and last cases 
 lon_last_idx = 312;
 lat_ind_V_Vtn_prime_up_SBC = ...
     lat_v == lat_v_SBC_north(end);
@@ -362,7 +362,7 @@ V_Vts_prime_up_SBC_now = ...
 V_Vts_prime_up_SBC = V_Vts_prime_up_SBC_now;
 Vts_prime_up_SBC(lon_first_idx) = V_Vts_prime_up_SBC;
 
-% and last cases
+% and last cases 
 lon_last_idx = 312;
 lat_ind_V_Vts_prime_up_SBC = ...
     lat_v == lat_v_SBC_south(end);
@@ -446,7 +446,7 @@ V_Vtn_g_prime_dw_DRC_now = ...
 V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
 Vtn_g_prime_dw_DRC(lon_first_idx) = V_Vtn_g_prime_dw_DRC;
 
-% and last cases
+% and last cases 
 lon_last_idx = 312;
 lat_ind_V_Vtn_g_prime_dw_DRC = ...
     lat_v == lat_v_SBC_north(end);
@@ -503,13 +503,11 @@ for jj = 2 : length(lon_u_ALLC)-2
         U_Vtn_g_prime_dw_DRC_prev + U_Vtn_g_prime_dw_DRC_next;
 end
 
-for n = 1 : length(lon_u)-1
+for n = 1 : length(lon_u)
     if Vtn_g_prime_dw_DRC(n) ~= 0
-        error('Vtn_g_prime_dw_DRC = 0 somewhere !')
-    end
+        error('Vtn_g_prime_dw_DRC)
+    disp('Vtn_g_prime_dw_DRC = 0 everywhere :)')
 end
-disp('Vtn_g_prime_dw_DRC = 0 everywhere :)')
-
 
 %% DRC Vts up
 Vts_prime_up_DRC = zeros(1, length(lon_v));
@@ -523,7 +521,7 @@ V_Vts_prime_up_DRC_now = ...
 V_Vts_prime_up_DRC = V_Vts_prime_up_DRC_now;
 Vts_prime_up_DRC(lon_first_idx) = V_Vts_prime_up_DRC;
 
-% and last cases
+% and last cases 
 lon_last_idx = 312;
 lat_ind_V_Vts_prime_up_DRC = ...
     lat_v == lat_v_DRC_south(end);
@@ -588,7 +586,7 @@ V_Vts_g_prime_dw_DRC_now = ...
 V_Vts_g_prime_dw_DRC = V_Vts_g_prime_dw_DRC_now;
 Vts_g_prime_dw_DRC(lon_first_idx) = V_Vts_g_prime_dw_DRC;
 
-% and last cases
+% and last cases 
 lon_last_idx = 312;
 lat_ind_V_Vts_g_prime_dw_DRC = ...
     lat_v == lat_v_DRC_south(end);
@@ -830,83 +828,14 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
-
-
-%%
-close all
-fig_n = 2;
-rowcols = [1 2];
-rowcols_size = [15 12.5]; % cm
-margs = [1 1 1 1]; % cm
-gaps = [1.5 1]; % cm
-cmaps_levels = 12;
-
-font_size = 12;
-fig_color = [1 1 1];
-
-fig = figure(fig_n);
-rowN = rowcols(1); colN = rowcols(2);
-[rm, cm] = meshgrid(rowN:-1:1, 1:colN);
-x_sp = rowcols_size(1); % x subplot length
-y_sp = rowcols_size(2); % y subplot length
-col_ind = (repmat(1:colN,rowN,1))';
-row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
-gap_w = gaps(1); % gap width between subplots
-gap_h = gaps(2); % gap height between subplots
-marg_b = margs(3); % bottom margin
-marg_t = margs(4); % top margin
-marg_l = margs(1); % left margin
-marg_r = margs(2); % right margin
-set(fig,'units','centimeters',...
-    'position',[0 0 ...
-    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
-    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]);
-
-sp = 1;
-axes('Units','centimeters', ...
-    'Position',[...
-    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-    x_sp, ...
-    y_sp])
-plot(lon_u, SBC_Ut-SBC_Ut_star, 'b-', 'linewidth', 1)
-title('SBC "leak": $U_{t}-U_{t}^{*}$ ($Sv$) VS longitude')
-grid
-set(gca,'layer','top','color',fig_color,...
-    'fontsize',font_size,'tickdir','out')
-
-sp = 2;
-axes('Units','centimeters', ...
-    'Position',[...
-    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-    x_sp, ...
-    y_sp])
-plot(lon_u, DRC_Ut-DRC_Ut_star, 'b-', 'linewidth', 1)
-title('DRC "leak": $U_{t}-U_{t}^{*}$ ($Sv$) VS longitude')
-grid
-set(gca,'layer','top','color',fig_color,...
-    'fontsize',font_size,'tickdir','out')
-
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
-
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
+% close
 

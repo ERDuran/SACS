@@ -9,7 +9,7 @@ load([data_path 'SACS_data/SmSan02'])
 lat = aus8_coor.lat;
 lon = aus8_coor.lon;
 depth = aus8_coor.depth;
-topog = SmSan02.topo_sm_interp;
+topog = SmSan02.topo_binavg;
 Months = aus8_coor.Months;
 
 

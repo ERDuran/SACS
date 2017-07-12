@@ -45,7 +45,7 @@ for p = 1 : length(pres)
             aus8_asal.(Months{t})(:,:,p),...
             aus8_temp.(Months{t})(:,:,p),pres(p));
     end
-    fprintf('p = %4.0f \n',depth(p))
+    fprintf('z = %4.0f \n',depth(p))
 end
 
 
