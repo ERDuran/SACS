@@ -138,8 +138,8 @@ minmax = {...
     [-10^-5 10^-5], ...
     [-10^-5 10^-5]};
 titles = {...
-    ['KDau mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
-    ['KDau mean $\nabla\cdot\bf{V''}$']};
+    ['KDS75 mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
+    ['KDS75 mean $\nabla\cdot\bf{V''}$']};
 font_size = 9;
 fig_color = [0.7 0.7 0.7];
 

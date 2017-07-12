@@ -118,7 +118,7 @@ end
 % Nudging
 % NORTH
 SBC_north_dlat1 = +3*1/8; % lat north
-SBC_north_dlat2 = +3*1/8; % lat north
+SBC_north_dlat2 = +4*1/8; % lat north
 lat_v_SBC_north = NaN(1,length(lon_v_ALLC));
 WBSEG_lon_u_east = 141.75;
 for n = 1 : length(115:1/8:147)-1
@@ -312,7 +312,7 @@ lat_v_DRC_south_repelem = ...
 close all
 fig_n = 1;
 rowcols = [2 2];
-rowcols_size = [17.5 9]; % cm
+rowcols_size = [17 9]; % cm
 margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
 cmaps_levels = 12;
@@ -431,24 +431,24 @@ text(138, -35, 'DRC $V_{t}sc$ up')
 
 
 % 6) 
-hold on
-[lat_u_NaN_ind, lon_u_NaN_ind] = ...
-    find(isnan(U_prime_ptop_to_pmid));
-lat_u_NaN = lat_u(lat_u_NaN_ind);
-lon_u_NaN = lon_u(lon_u_NaN_ind);
-scatter(lon_u_NaN, lat_u_NaN, 4, ...
-    'o', 'w');
-% 
-hold on
-[lat_v_NaN_ind, lon_v_NaN_ind] = ...
-    find(isnan(V_prime_ptop_to_pmid));
-lat_v_NaN = lat_v(lat_v_NaN_ind);
-lon_v_NaN = lon_v(lon_v_NaN_ind);
-scatter(lon_v_NaN, lat_v_NaN, 4, ...
-    'o', 'k');
+% hold on
+% [lat_u_NaN_ind, lon_u_NaN_ind] = ...
+%     find(isnan(U_prime_ptop_to_pmid));
+% lat_u_NaN = lat_u(lat_u_NaN_ind);
+% lon_u_NaN = lon_u(lon_u_NaN_ind);
+% scatter(lon_u_NaN, lat_u_NaN, 4, ...
+%     'o', 'w');
+% % 
+% hold on
+% [lat_v_NaN_ind, lon_v_NaN_ind] = ...
+%     find(isnan(V_prime_ptop_to_pmid));
+% lat_v_NaN = lat_v(lat_v_NaN_ind);
+% lon_v_NaN = lon_v(lon_v_NaN_ind);
+% scatter(lon_v_NaN, lat_v_NaN, 4, ...
+%     'o', 'k');
 
 % 9) title, grid, background and fonts
-title(['$U''$ ($m^{2/s}$) integrated from ' ...
+title(['aus8 $U''$ ($m^{2/s}$) integrated from ' ...
     '$z=0$ to $z=' num2str(z_mid) '$ $m$'])
 grid
 set(gca,'xtick',lon_min:2:lon_max)
@@ -511,7 +511,7 @@ h = plot(lon_u_ALLC_repelem, lat_v_DRC_north_repelem, ...
 h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
     'k', 'linewidth', 2);
 % 9) title, grid, background and fonts
-title(['$V''$ ($m^{2/s}$) integrated from ' ...
+title(['aus8 $V''$ ($m^{2/s}$) integrated from ' ...
     '$z=' num2str(z_top) '$ to $z=' num2str(z_mid) '$ $m$'])
 grid
 set(gca,'xtick',lon_min:2:lon_max)
@@ -580,7 +580,7 @@ arrow([138 -35], ...
     [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)])
 text(138, -35, 'DRC $V_{t}sc$ dw')
 % 9) title, grid, background and fonts
-title(['$U_g''$ ($m^{2/s}$) integrated from ' ...
+title(['aus8 $U_g''$ ($m^{2/s}$) integrated from ' ...
     '$z=' num2str(z_mid) '$ to $z=' num2str(z_bot) '$ $m$'])
 grid
 set(gca,'xtick',lon_min:2:lon_max)
@@ -643,7 +643,7 @@ h = plot(lon_u_ALLC_repelem, lat_v_DRC_north_repelem, ...
 h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
     'k', 'linewidth', 2);
 % 9) title, grid, background and fonts
-title(['$V_g''$ ($m^{2/s}$) integrated from ' ...
+title(['aus8 $V_g''$ ($m^{2/s}$) integrated from ' ...
     '$z=' num2str(z_mid) '$ to $z=' num2str(z_bot) '$ $m$'])
 grid
 set(gca,'xtick',lon_min:2:lon_max)
