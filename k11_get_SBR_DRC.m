@@ -109,7 +109,7 @@ Ut_prime_up_SBC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-2))
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
@@ -174,18 +174,18 @@ Ut_prime_up_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3 
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
         find(ismember(lat_v, lat_v_DRC_north_repelem(jj)));
     lat_north_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_north_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_north_repelem(jj-1)));
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     lat_south_ind_1 = ...
         find(ismember(lat_v, lat_v_DRC_south_repelem(jj)));
     lat_south_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1)));
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
     
     if lat_north_12(1) == lat_north_12(2)
@@ -239,18 +239,18 @@ Ut_g_prime_dw_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
         find(ismember(lat_v, lat_v_SBC_north_repelem(jj)));
     lat_north_ind_2 = ...
-        find(ismember(lat_v, lat_v_SBC_north_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_SBC_north_repelem(jj-1)));
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     lat_south_ind_1 = ...
         find(ismember(lat_v, lat_v_DRC_south_repelem(jj)));
     lat_south_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1)));
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
     
     if lat_north_12(1) == lat_north_12(2)
@@ -431,85 +431,151 @@ end
 
 
 %% DRC Vtn up
-DRC_Vtn = -SBC_Vts;
-
-
-%% DRC Vtn dw
-% % This should be zero...
-Vtn_g_prime_dw_DRC = zeros(1, length(lon_v));
+Vtn_prime_up_DRC = zeros(1, length(lon_v));
 
 % do the first
 lon_first_idx = 57;
-lat_ind_V_Vtn_g_prime_dw_DRC = ...
-    lat_v == lat_v_SBC_north(1);
-V_Vtn_g_prime_dw_DRC_now = ...
-    Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_first_idx);
-V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
-Vtn_g_prime_dw_DRC(lon_first_idx) = V_Vtn_g_prime_dw_DRC;
+lat_ind_V_Vtn_prime_up_DRC = ...
+    lat_v == lat_v_DRC_north(1);
+V_Vtn_prime_up_DRC_now = ...
+    Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_first_idx);
+V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
+Vtn_prime_up_DRC(lon_first_idx) = V_Vtn_prime_up_DRC;
 
 % and last cases
 lon_last_idx = 312;
-lat_ind_V_Vtn_g_prime_dw_DRC = ...
-    lat_v == lat_v_SBC_north(end);
-V_Vtn_g_prime_dw_DRC_now = ...
-    Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_last_idx);
-V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
-Vtn_g_prime_dw_DRC(lon_last_idx) = V_Vtn_g_prime_dw_DRC;
+lat_ind_V_Vtn_prime_up_DRC = ...
+    lat_v == lat_v_DRC_north(end);
+V_Vtn_prime_up_DRC_now = ...
+    Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_last_idx);
+V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
+Vtn_prime_up_DRC(lon_last_idx) = V_Vtn_prime_up_DRC;
 
 % in between cases
-for jj = 2 : length(lon_u_ALLC)-2
+for jj = length(lon_u_ALLC)-2 : -1 : 2
     lon_u_ind = find(lon_u == lon_u_ALLC(jj));
     
     %
-    lat_ind_V_Vtn_g_prime_dw_DRC = lat_v == lat_v_SBC_north(jj);
-    V_Vtn_g_prime_dw_DRC_now = ...
-        Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_u_ind);
-    V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
+    lat_ind_V_Vtn_prime_up_DRC = lat_v == lat_v_DRC_north(jj);
+    V_Vtn_prime_up_DRC_now = ...
+        Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_u_ind);
+    V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
     
     %
-    [U_Vtn_g_prime_dw_DRC_prev, U_Vtn_g_prime_dw_DRC_next] = deal(0);
+    [U_Vtn_prime_up_DRC_prev, U_Vtn_prime_up_DRC_next] = deal(0);
     
     % if the previous lat is to the south of the current one
-    if lat_v_SBC_north(jj-1) < lat_v_SBC_north(jj)
+    if lat_v_DRC_north(jj+1) < lat_v_DRC_north(jj)
         %
         lat_u_within_ind = find(...
-            lat_u < lat_v_SBC_north(jj) & ...
-            lat_u > lat_v_SBC_north(jj-1));
-        U_Vtn_g_prime_dw_DRC_all_now = ...
-            Ut_g_prime_dw(lat_u_within_ind, lon_u_ind);
-        U_Vtn_g_prime_dw_DRC_all = U_Vtn_g_prime_dw_DRC_all_now;
-        U_Vtn_g_prime_dw_DRC_prev = nansum(U_Vtn_g_prime_dw_DRC_all);
-        if isnan(U_Vtn_g_prime_dw_DRC_prev)
-            U_Vtn_g_prime_dw_DRC_prev = 0;
+            lat_u < lat_v_DRC_north(jj) & ...
+            lat_u > lat_v_DRC_north(jj+1));
+        U_Vtn_prime_up_DRC_all_now = ...
+            Ut_prime_up(lat_u_within_ind, lon_u_ind);
+        U_Vtn_prime_up_DRC_all = -U_Vtn_prime_up_DRC_all_now;
+        U_Vtn_prime_up_DRC_prev = nansum(U_Vtn_prime_up_DRC_all);
+        if isnan(U_Vtn_prime_up_DRC_prev)
+            U_Vtn_prime_up_DRC_prev = 0;
         end
     end
     
     % if the next lat is to the south of the current one
-    if lat_v_SBC_north(jj+1) < lat_v_SBC_north(jj)
+    if lat_v_SBC_north(jj-1) < lat_v_SBC_north(jj)
         %
         lat_u_within_ind = find(...
-            lat_u < lat_v_SBC_north(jj) & ...
-            lat_u > lat_v_SBC_north(jj+1));
-        U_Vtn_g_prime_dw_DRC_all_now = ...
-            Ut_g_prime_dw(lat_u_within_ind, lon_u_ind+1);
-        U_Vtn_g_prime_dw_DRC_all = -U_Vtn_g_prime_dw_DRC_all_now;
-        U_Vtn_g_prime_dw_DRC_next = nansum(U_Vtn_g_prime_dw_DRC_all);
+            lat_u < lat_v_DRC_north(jj) & ...
+            lat_u > lat_v_DRC_north(jj-1));
+        U_Vtn_prime_up_DRC_all_now = ...
+            Ut_prime_up(lat_u_within_ind, lon_u_ind+1);
+        U_Vtn_prime_up_DRC_all = U_Vtn_prime_up_DRC_all_now;
+        U_Vtn_prime_up_DRC_next = nansum(U_Vtn_prime_up_DRC_all);
     end
-    if isnan(U_Vtn_g_prime_dw_DRC_next)
-        U_Vtn_g_prime_dw_DRC_next = 0;
+    if isnan(U_Vtn_prime_up_DRC_next)
+        U_Vtn_prime_up_DRC_next = 0;
     end
     
     %
-    Vtn_g_prime_dw_DRC(lon_u_ind) = V_Vtn_g_prime_dw_DRC + ...
-        U_Vtn_g_prime_dw_DRC_prev + U_Vtn_g_prime_dw_DRC_next;
+    Vtn_prime_up_DRC(lon_u_ind) = V_Vtn_prime_up_DRC + ...
+        U_Vtn_prime_up_DRC_prev + U_Vtn_prime_up_DRC_next;
 end
 
-for n = 1 : length(lon_u)-1
-    if Vtn_g_prime_dw_DRC(n) ~= 0
-        error('Vtn_g_prime_dw_DRC = 0 somewhere :( !')
-    end
-end
-disp('Vtn_g_prime_dw_DRC = 0 everywhere :)')
+
+%% DRC Vtn dw
+% % This should be zero...
+% Vtn_g_prime_dw_DRC = zeros(1, length(lon_v));
+
+% % do the first
+% lon_first_idx = 57;
+% lat_ind_V_Vtn_g_prime_dw_DRC = ...
+%     lat_v == lat_v_SBC_north(1);
+% V_Vtn_g_prime_dw_DRC_now = ...
+%     Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_first_idx);
+% V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
+% Vtn_g_prime_dw_DRC(lon_first_idx) = V_Vtn_g_prime_dw_DRC;
+% 
+% % and last cases
+% lon_last_idx = 312;
+% lat_ind_V_Vtn_g_prime_dw_DRC = ...
+%     lat_v == lat_v_SBC_north(end);
+% V_Vtn_g_prime_dw_DRC_now = ...
+%     Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_last_idx);
+% V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
+% Vtn_g_prime_dw_DRC(lon_last_idx) = V_Vtn_g_prime_dw_DRC;
+% 
+% % in between cases
+% for jj = 2 : length(lon_u_ALLC)-2
+%     lon_u_ind = find(lon_u == lon_u_ALLC(jj));
+%     
+%     %
+%     lat_ind_V_Vtn_g_prime_dw_DRC = lat_v == lat_v_SBC_north(jj);
+%     V_Vtn_g_prime_dw_DRC_now = ...
+%         Vt_g_prime_dw(lat_ind_V_Vtn_g_prime_dw_DRC, lon_u_ind);
+%     V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
+%     
+%     %
+%     [U_Vtn_g_prime_dw_DRC_prev, U_Vtn_g_prime_dw_DRC_next] = deal(0);
+%     
+%     % if the previous lat is to the south of the current one
+%     if lat_v_SBC_north(jj-1) < lat_v_SBC_north(jj)
+%         %
+%         lat_u_within_ind = find(...
+%             lat_u < lat_v_SBC_north(jj) & ...
+%             lat_u > lat_v_SBC_north(jj-1));
+%         U_Vtn_g_prime_dw_DRC_all_now = ...
+%             Ut_g_prime_dw(lat_u_within_ind, lon_u_ind);
+%         U_Vtn_g_prime_dw_DRC_all = U_Vtn_g_prime_dw_DRC_all_now;
+%         U_Vtn_g_prime_dw_DRC_prev = nansum(U_Vtn_g_prime_dw_DRC_all);
+%         if isnan(U_Vtn_g_prime_dw_DRC_prev)
+%             U_Vtn_g_prime_dw_DRC_prev = 0;
+%         end
+%     end
+%     
+%     % if the next lat is to the south of the current one
+%     if lat_v_SBC_north(jj+1) < lat_v_SBC_north(jj)
+%         %
+%         lat_u_within_ind = find(...
+%             lat_u < lat_v_SBC_north(jj) & ...
+%             lat_u > lat_v_SBC_north(jj+1));
+%         U_Vtn_g_prime_dw_DRC_all_now = ...
+%             Ut_g_prime_dw(lat_u_within_ind, lon_u_ind+1);
+%         U_Vtn_g_prime_dw_DRC_all = -U_Vtn_g_prime_dw_DRC_all_now;
+%         U_Vtn_g_prime_dw_DRC_next = nansum(U_Vtn_g_prime_dw_DRC_all);
+%     end
+%     if isnan(U_Vtn_g_prime_dw_DRC_next)
+%         U_Vtn_g_prime_dw_DRC_next = 0;
+%     end
+%     
+%     %
+%     Vtn_g_prime_dw_DRC(lon_u_ind) = V_Vtn_g_prime_dw_DRC + ...
+%         U_Vtn_g_prime_dw_DRC_prev + U_Vtn_g_prime_dw_DRC_next;
+% end
+% 
+% for n = 1 : length(lon_u)-1
+%     if Vtn_g_prime_dw_DRC(n) ~= 0
+%         error('Vtn_g_prime_dw_DRC = 0 somewhere :( !')
+%     end
+% end
+% disp('Vtn_g_prime_dw_DRC = 0 everywhere :)')
 
 
 %% DRC Vts up
@@ -643,6 +709,7 @@ end
 
 
 %% DRC Vtc
+DRC_Vtn = Vtn_prime_up_DRC .* 10^-6;
 DRC_Vts_up = Vts_prime_up_DRC .* 10^-6;
 DRC_Vts_dw = Vts_g_prime_dw_DRC .* 10^-6;
 
@@ -723,7 +790,7 @@ SBC_Wtc(57) = SBC_Wt(57);
 for jj = 58 : 312
     SBC_Wtc(jj) = SBC_Wtc(jj-1) + SBC_Wt(jj);
 end
-DRC_Wtc(312) = DRC_Wt(57);
+DRC_Wtc(312) = DRC_Wt(312);
 for jj = 311 : -1 : 57
     DRC_Wtc(jj) = DRC_Wtc(jj+1) + DRC_Wt(jj);
 end
@@ -831,16 +898,16 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
+% close
 
 
 %%
@@ -899,14 +966,14 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
+% close
 
