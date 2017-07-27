@@ -15,8 +15,11 @@ topo_binavg(topo_binavg==0) = NaN;
 fig_n = 1;
 rowcols = [1 1];
 rowcols_size = [25 15]; % cm
-margs = [1.2 1.2 1.2 1.2]; % cm
+margs = [1.2 2.5 1.2 1.2]; % cm
 gaps = [1 1]; % cm
+plot_cbar_gap = 0.5;
+cbar_x = 0.3;
+cbar_y = rowcols_size(2);
 
 for sp = 1 : rowcols(1)*rowcols(2)
     axis_setup{sp} = ...
@@ -40,8 +43,7 @@ cmap2 = flipud(othercolor('Paired8', lvl_cmap2));
 cmaps = [cmap1; cmap2];
 cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
 cmaps_cont_length = length(cmaps_cont);
-cmaps_linspace = ...
-    linspace(cmaps_cont(1), cmaps_cont(end), cmaps_cont_length);
+cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_custom = {cmapcust(cmaps,cmaps_cont)};
 
 font_size = 13;
@@ -68,19 +70,18 @@ set(fig,'units','centimeters',...
     (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]);
 
 for sp = 1 : rowN*colN
-    axes('Units','centimeters', ...
+    ax = axes('Units','centimeters', ...
             'Position',[...
             (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
             x_sp, ...
-            y_sp])
+            y_sp]);
         
-    colormap(cmaps_custom{sp});
+    colormap(ax, cmaps_custom{sp});
     pcolor(x{sp}, y{sp}, data{sp})
     axis(axis_setup{sp})
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
-    freezeColors
     hold on
     
     % sections
@@ -124,7 +125,7 @@ for sp = 1 : rowN*colN
     
     aus8_figures.sect_names = {...
         'C. Leeuwin', 'C. Pasley', 'west GAB', 'east GAB', ...
-        'C. Carnot', 'Portland', 'Kind Is', 'South East C.'};
+        'C. Carnot', 'Portland', 'King Is.', 'South East C.'};
         
     lon_n = [1 9 14 18 22 27 30 33];
     
@@ -236,12 +237,7 @@ for sp = 1 : rowN*colN
     arrow([OF3(1), OF3(2)-2], [OF3(1), OF3(2)], ...
         big_ar_head-8, 'linewidth', 2, ...
         'Facecolor', [1 0.5 0], 'edgecolor', [1 0.5 0])
-    
-    
-    colormap(cmaps);
-    cbar = colorbar;
-    set(cbar, 'tickdir','out','ytick',cmaps_linspace(2:2:end), ...
-        'YTickLabel',cmaps_cont(2:2:end),'fontsize',font_size);
+
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -339,6 +335,18 @@ text(152,-43,sprintf('Tasman\nSea'), 'fontsize', font_size, ...
 % South Australian Basin
 text(125,-38.5,sprintf('South Australian Basin'), 'fontsize', font_size, ...
     'color', [0 0 0])
+
+ax = axes;
+set(gca,'Visible','off')
+colormap(ax, cmaps);
+cbar = colorbar;
+set(cbar,'ytick',cmaps_linspace(2:2:end), ...
+    'YTickLabel',cmaps_cont(2:2:end),'fontsize',font_size)
+set(cbar,'units','centimeters','position', [...
+    (marg_l+x_sp*(cm(sp))+gap_w*(cm(sp)-1)+plot_cbar_gap), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    cbar_x, ...
+    cbar_y]);
 
 outputls = ls(figures_path);
 scriptname = mfilename;

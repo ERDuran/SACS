@@ -64,9 +64,7 @@ aus8_currents.z_top = z_top;
 aus8_currents.z_mid = z_mid;
 aus8_currents.z_bot = z_bot;
 aus8_currents.lon_u_ALLC = lon_u_ALLC;
-aus8_currents.lon_u_ALLC_ind = lon_u_ALLC_ind;
 aus8_currents.lon_v_ALLC = lon_v_ALLC;
-aus8_currents.lon_v_ALLC_ind = lon_v_ALLC_ind;
 %%% SAVE
 
 
@@ -116,7 +114,7 @@ for jj = lon_v_ALLC_ind
 end
 
 % Nudging
-% NORTH
+% SBC NORTH
 SBC_north_dlat1 = +3*1/8; % lat north
 SBC_north_dlat2 = +4*1/8; % lat north
 lat_v_SBC_north = NaN(1,length(lon_v_ALLC));
@@ -129,26 +127,53 @@ for n = 1 : length(115:1/8:147)-1
     end
 end
 
-% SOUTH
+aus8_currents.nudging.north.SBC_north_dlat1 = SBC_north_dlat1;
+aus8_currents.nudging.north.SBC_north_dlat2 = SBC_north_dlat2;
+aus8_currents.nudging.north.WBSEG_lon_u_east = WBSEG_lon_u_east;
+
+% SBC SOUTH
 SBC_south_dlat1 = -3*1/8; % lat south
 SBC_south_dlat2 = -6*1/8; % lat south
 SBC_south_dlat3 = -3*1/8; % lat south
 lat_v_SBC_south = NaN(1,length(lon_v_ALLC));
+STEG_lon_u_east = 145.75;
 for n = 1 : length(115:1/8:147)-1
     if lon_u_ALLC(n) < WBSEG_lon_u_east
         lat_v_SBC_south(n) = lat_v_SBC_centr(n) + SBC_south_dlat1;
-    elseif lon_u_ALLC(n) >= WBSEG_lon_u_east && lon_u_ALLC(n) < 145.75
+    elseif lon_u_ALLC(n) >= WBSEG_lon_u_east && ...
+            lon_u_ALLC(n) < STEG_lon_u_east
         lat_v_SBC_south(n) = lat_v_SBC_centr(n) + SBC_south_dlat2;
     else
         lat_v_SBC_south(n) = lat_v_SBC_centr(n) + SBC_south_dlat3;
     end
 end
 
-% DRC_north_dlat = SBC_south_dlat
-DRC_south_dlat = -1.5; % degree south
+aus8_currents.nudging.south.SBC_south_dlat1 = SBC_south_dlat1;
+aus8_currents.nudging.south.SBC_south_dlat2 = SBC_south_dlat2;
+aus8_currents.nudging.south.SBC_south_dlat3 = SBC_south_dlat3;
+aus8_currents.nudging.south.WBSEG_lon_u_east = WBSEG_lon_u_east;
+aus8_currents.nudging.south.STEG_lon_u_east = STEG_lon_u_east;
 
+% DRC NORTH
 lat_v_DRC_north = lat_v_SBC_south;
-lat_v_DRC_south = lat_v_DRC_centr + DRC_south_dlat;
+
+% DRC SOUTH
+DRC_south_dlat1 = -12*1/8; % lat south
+DRC_south_dlat2 = -14*1/8; % lat south
+DRC_south_dlat3 = -12*1/8; % lat south
+lat_v_DRC_south = NaN(1,length(lon_v_ALLC));
+STEG_lon_u_east = 145.75;
+for n = 1 : length(115:1/8:147)-1
+    if lon_u_ALLC(n) < WBSEG_lon_u_east
+        lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat1;
+    elseif lon_u_ALLC(n) >= WBSEG_lon_u_east && ...
+            lon_u_ALLC(n) < STEG_lon_u_east
+        lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat2;
+    else
+        lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat3;
+    end
+end
+
 
 %%% WEST GAB AND LON UV IND
 % longitude of western boundary of the control volume
@@ -159,6 +184,9 @@ lon_u_west_ind = find(lon_u_ALLC == lon_u_west);
 lon_u_east = 124;
 % index of longitude of eastern boundary of the control volume
 lon_u_east_ind = find(lon_u_ALLC == lon_u_east);
+%
+aus8_currents.nudging.north.west_GAB.lon_u_west = lon_u_west;
+aus8_currents.nudging.north.west_GAB.lon_u_east = lon_u_east;
 % vector ind
 lon_u1 = lon_u_west : 1/8 : lon_u_east;
 lon_u1_ind = lon_u_west_ind : lon_u_east_ind;
@@ -190,13 +218,16 @@ lon_u_west = 139.75;
 % index of longitude of western boundary of the control volume
 lon_u_west_ind = find(lon_u_ALLC == lon_u_west);
 % longitude of eastern boundary of the control volume
-% WBSEG_lon_u_east = 142;
+lon_u_east = WBSEG_lon_u_east;
 % index of longitude of eastern boundary of the control volume
-lon_u_east_ind = find(lon_u_ALLC == WBSEG_lon_u_east);
+lon_u_east_ind = find(lon_u_ALLC == lon_u_east);
+%
+aus8_currents.nudging.north.eGs_wBS.lon_u_west = lon_u_west;
+aus8_currents.nudging.north.eGs_wBS.lon_u_east = lon_u_east;
 % vector ind
-lon_u1 = lon_u_west : 1/8 : WBSEG_lon_u_east;
+lon_u1 = lon_u_west : 1/8 : lon_u_east;
 lon_u1_ind = lon_u_west_ind : lon_u_east_ind;
-lon_v1 = lon_u_west+1/16 : 1/8 : WBSEG_lon_u_east-1/16;
+lon_v1 = lon_u_west+1/16 : 1/8 : lon_u_east-1/16;
 lon_v1_ind = lon_u_west_ind : lon_u_east_ind-1;
 for n = lon_u1_ind(1:end-1)
     v_bottom_depth_now = v_bottom(:,lon_v_ALLC_ind(n));
@@ -227,6 +258,9 @@ lon_u_west_ind = find(lon_u_ALLC == lon_u_west);
 lon_u_east = 147;
 % index of longitude of eastern boundary of the control volume
 lon_u_east_ind = find(lon_u_ALLC == lon_u_east);
+%
+aus8_currents.nudging.north.sBS_wT.lon_u_west = lon_u_west;
+aus8_currents.nudging.north.sBS_wT.lon_u_east = lon_u_east;
 % vector ind
 lon_u1 = lon_u_west : 1/8 : lon_u_east;
 lon_u1_ind = lon_u_west_ind : lon_u_east_ind;
@@ -254,8 +288,10 @@ end
 
 aus8_currents.lat_v_SBC_north = lat_v_SBC_north;
 aus8_currents.lat_v_SBC_south = lat_v_SBC_south;
+aus8_currents.lat_v_SBC_centr = lat_v_SBC_centr;
 aus8_currents.lat_v_DRC_north = lat_v_DRC_north;
 aus8_currents.lat_v_DRC_south = lat_v_DRC_south;
+aus8_currents.lat_v_DRC_centr = lat_v_DRC_centr;
 
 
 %% 3) Calculate UV_upper and UV_lower
@@ -661,7 +697,7 @@ if ~contains(outputls, scriptname)
 end
 export_fig(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
+    '_fig' num2str(fig_n) '_'  num2str(-z_mid)], ...
     '-m3')
 close
 
