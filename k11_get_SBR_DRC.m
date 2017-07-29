@@ -637,8 +637,7 @@ for jj = length(lon_u_ALLC)-2 : -1 : 2
     end
     
     %
-    Vts_prime_up_DRC(lon_u_ind) = ...
-        V_Vts_prime_up_DRC + ...
+    Vts_prime_up_DRC(lon_u_ind) = V_Vts_prime_up_DRC + ...
         U_Vts_prime_up_DRC_prev + U_Vts_prime_up_DRC_next;
 end
 
@@ -898,16 +897,16 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-% outputls = ls(figures_path);
-% scriptname = mfilename;
-% if ~contains(outputls, scriptname)
-%     mkdir(figures_path, scriptname)
-% end
-% export_fig(fig, ...
-%     [figures_path mfilename '/' scriptname(1:3) ...
-%     '_fig' num2str(fig_n) '_'], ...
-%     '-m3')
-% close
+outputls = ls(figures_path);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(figures_path, scriptname)
+end
+export_fig(fig, ...
+    [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-m3')
+close
 
 
 %%
@@ -966,14 +965,14 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-% outputls = ls(figures_path);
-% scriptname = mfilename;
-% if ~contains(outputls, scriptname)
-%     mkdir(figures_path, scriptname)
-% end
-% export_fig(fig, ...
-%     [figures_path mfilename '/' scriptname(1:3) ...
-%     '_fig' num2str(fig_n) '_'], ...
-%     '-m3')
-% close
+outputls = ls(figures_path);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(figures_path, scriptname)
+end
+export_fig(fig, ...
+    [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-m3')
+close
 

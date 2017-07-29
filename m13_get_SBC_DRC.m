@@ -722,7 +722,7 @@ SBC_Wtc(57) = SBC_Wt(57);
 for jj = 58 : 312
     SBC_Wtc(jj) = SBC_Wtc(jj-1) + SBC_Wt(jj);
 end
-DRC_Wtc(312) = DRC_Wt(57);
+DRC_Wtc(312) = DRC_Wt(312);
 for jj = 311 : -1 : 57
     DRC_Wtc(jj) = DRC_Wtc(jj+1) + DRC_Wt(jj);
 end
