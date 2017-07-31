@@ -520,6 +520,6 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
 
 %% 7) save
-save([data_path 'SACS_data/KDau_currents'], 'KDau_currents')
-disp('KDau_currents DONE')
+% save([data_path 'SACS_data/KDau_currents'], 'KDau_currents')
+% disp('KDau_currents DONE')
 

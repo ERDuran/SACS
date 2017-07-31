@@ -154,7 +154,7 @@ Ut_prime_up_DRC = zeros(size(Ut_prime_up));
 lat_north_ind_1 = ...
     find(ismember(lat_v, lat_v_DRC_north_repelem(1)));
 lat_south_ind_1 = ...
-    find(ismember(lat_v, lat_v_DRC_south_repelem(1)));
+    find(ismember(lat_v, lat_v_DRC_south_repelem(1))) -1;
 lat_vec_now = lat_north_ind_1:lat_south_ind_1-1;
 lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(1));
 Ut_prime_up_DRC(lat_vec_now, ...
@@ -165,8 +165,8 @@ Ut_prime_up_DRC(lat_vec_now, ...
 lat_north_ind_1 = ...
     find(ismember(lat_v, lat_v_DRC_north_repelem(end)));
 lat_south_ind_1 = ...
-    find(ismember(lat_v, lat_v_DRC_south_repelem(end)));
-lat_vec_now = lat_north_ind_1:lat_south_ind_1-1;
+    find(ismember(lat_v, lat_v_DRC_south_repelem(end))) -1;
+lat_vec_now = lat_north_ind_1:lat_south_ind_1;
 lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(end));
 Ut_prime_up_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind) = ...
@@ -183,9 +183,9 @@ for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3
         find(ismember(lat_v, lat_v_DRC_north_repelem(jj-1)));
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     lat_south_ind_1 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj))) -1;
     lat_south_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1))) -1;
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
     
     if lat_north_12(1) == lat_north_12(2)
@@ -200,7 +200,7 @@ for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3
     end
     
     lat_vec_now = ...
-        lat_north_12(north_12_ind):lat_south_12(south_12_ind)-1;
+        lat_north_12(north_12_ind):lat_south_12(south_12_ind);
     lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(jj));
     Ut_prime_up_DRC(lat_vec_now, ...
         lon_u_ALLC_repelem_ind) = ...
@@ -209,7 +209,7 @@ for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3
 end
 
 DRC_Ut_mcps_up = sum(Ut_prime_up_DRC, 1);
-DRC_Ut_up = DRC_Ut_mcps_up .* 10^-6;
+DRC_Ut_up = DRC_Ut_mcps_up * 10^-6;
 
 
 %% DRC Ut dw
@@ -734,8 +734,8 @@ DRC_Vtsc = DRC_Vtsc_up + DRC_Vtsc_dw;
 V_prime_up_SBC_for_W = NaN(size(V_prime_up));
 U_prime_up_SBC_for_W = NaN(size(U_prime_up));
 
-nc = 0;
-for n = 57 : 312
+nc = 255;
+for n = 312
     nc = nc + 1;
     lat_v_SBC_north_ind = find(lat_v==lat_v_SBC_north(nc));
     lat_v_SBC_south_ind = find(lat_v==lat_v_SBC_south(nc));
@@ -897,16 +897,16 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
+% close
 
 
 %%
@@ -965,14 +965,14 @@ grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
 
-outputls = ls(figures_path);
-scriptname = mfilename;
-if ~contains(outputls, scriptname)
-    mkdir(figures_path, scriptname)
-end
-export_fig(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-m3')
-close
+% outputls = ls(figures_path);
+% scriptname = mfilename;
+% if ~contains(outputls, scriptname)
+%     mkdir(figures_path, scriptname)
+% end
+% export_fig(fig, ...
+%     [figures_path mfilename '/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-m3')
+% close
 
