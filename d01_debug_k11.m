@@ -6,6 +6,10 @@ load([data_path 'SACS_data/KDau_currents'])
 load([data_path 'SACS_data/aus8_currents'])
 load([data_path 'SACS_data/KDau_U_prime'])
 load([data_path 'SACS_data/KDau_V_prime'])
+load([data_path 'SACS_data/KDau_u_g'])
+load([data_path 'SACS_data/KDau_v_g'])
+load([data_path 'SACS_data/KDau_u_g_prime'])
+load([data_path 'SACS_data/KDau_v_g_prime'])
 
 a = aus8_coor.a;
 pi180 = aus8_coor.pi180;
@@ -98,6 +102,22 @@ div_UV_prime3.mean = (dudx + dvdy) .* dy_v .* dx_u;
 div_UV_prime3.mean(div_UV_prime3.mean==0)=NaN;
 
 div_UV_prime4.mean = div_UV_prime2.mean + div_UV_prime3.mean;
+
+DIV1 = ...
+    (Ut_prime(:,2:end) - Ut_prime(:,1:end-1) + ...
+    Vt_prime(1:end-1,:) - Vt_prime(2:end,:)) * 10^-6;
+
+DIV2 = ...
+    Ut_prime_up(:,2:end) - Ut_prime_up(:,1:end-1) + ...
+    Vt_prime_up(1:end-1,:) - Vt_prime_up(2:end,:);
+
+DIV3 = ...
+    Ut_g_prime_dw(:,2:end) - Ut_g_prime_dw(:,1:end-1) + ...
+    Vt_g_prime_dw(1:end-1,:) - Vt_g_prime_dw(2:end,:);
+
+DIV4 = ...
+    DIV2 + ...
+    DIV3;
 
 
 %% START OF FC... ERROR NOT IN U
@@ -192,13 +212,63 @@ SBC_Wt_mcps = nansum(W_prime_up_mcps_SBC,1);
 SBC_Wt = SBC_Wt_mcps * 10^-6;
 
 
+%%
+nc = 0;
+nc = nc + 1;
+lat_v_SBC_ind = lat_v_SBC_north_1 : lat_v_DRC_north_1;
+
+lat_u_SBC_north_ind = find(lat_u<lat_v_SBC_north(end), 1, 'first');
+lat_u_SBC_south_ind = find(lat_u>lat_v_DRC_north(end), 1, 'last');
+lat_u_SBC_ind = lat_u_SBC_north_ind : lat_u_SBC_south_ind;
+
+Vt_prime_up_SBC_for_W = ...
+    Vt_prime_up(lat_v_SBC_ind,lon_u_DRC_2);
+Ut_prime_up_SBC_for_W = ...
+    Ut_prime_up(lat_u_SBC_ind,lon_u_DRC_2:lon_u_DRC_1);
+
+du = Ut_prime_up_SBC_for_W(:,2:end) - ...
+    Ut_prime_up_SBC_for_W(:,1:end-1);
+dv = Vt_prime_up_SBC_for_W(1:end-1,:) - ...
+    Vt_prime_up_SBC_for_W(2:end,:);
+
+w_prime_up_SBC = du + dv;
+% W_prime_up_mcps_SBC = w_prime_up_SBC .* ...
+%     dy_v(lat_u_SBC_ind,lon_u_DRC_2) .* dx_u(lat_u_SBC_ind,lon_u_DRC_2);
+SBC_Wt_mcps = nansum(w_prime_up_SBC,1);
+SBC_Wt2 = SBC_Wt_mcps * 10^-6;
+
+
 %% START OF FC... ERROR NOT IN W
 % FC
 
-FC_star = FC_U_1 -(SBC_Wt + FC_Vn + FC_Vs)
+FC_star = FC_U_1 -(-SBC_Wt + FC_Vn + FC_Vs)
 
 
+%%
+nc = 0;
+nc = nc + 1;
+lat_v_SBC_ind = lat_v_SBC_north_1 : lat_v_DRC_north_1;
+
+lat_u_SBC_north_ind = find(lat_u<lat_v_SBC_north(end), 1, 'first');
+lat_u_SBC_south_ind = find(lat_u>lat_v_DRC_north(end), 1, 'last');
+lat_u_SBC_ind = lat_u_SBC_north_ind : lat_u_SBC_south_ind;
+
+Vt_g_prime_dw_SBC_for_W = ...
+    Vt_g_prime_dw(lat_v_SBC_ind,lon_u_DRC_2);
+Ut_g_prime_dw_SBC_for_W = ...
+    Ut_g_prime_dw(lat_u_SBC_ind,lon_u_DRC_2:lon_u_DRC_1);
+
+du = Ut_g_prime_dw_SBC_for_W(:,2:end) - ...
+    Ut_g_prime_dw_SBC_for_W(:,1:end-1);
+dv = Vt_g_prime_dw_SBC_for_W(1:end-1,:) - ...
+    Vt_g_prime_dw_SBC_for_W(2:end,:);
+
+w_g_prime_dw_SBC = du + dv;
+% W_prime_up_mcps_SBC = w_prime_up_SBC .* ...
+%     dy_v(lat_u_SBC_ind,lon_u_DRC_2) .* dx_u(lat_u_SBC_ind,lon_u_DRC_2);
+SBC_Wt_mcps = nansum(w_g_prime_dw_SBC,1);
+SBC_Wt3 = SBC_Wt_mcps * 10^-6;
 
 
-
+FC_star = FC_U_1 -(SBC_Wt3 + FC_Vn + FC_Vs)
 
