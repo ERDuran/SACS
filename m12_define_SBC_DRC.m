@@ -160,9 +160,9 @@ lat_v_DRC_north = lat_v_SBC_south;
 % DRC SOUTH
 DRC_south_dlat1 = -12*1/8; % lat south
 DRC_south_dlat2 = -14*1/8; % lat south
-DRC_south_dlat3 = -12*1/8; % lat south
+DRC_south_dlat3 = -9*1/8; % lat south
 lat_v_DRC_south = NaN(1,length(lon_v_ALLC));
-STEG_lon_u_east = 145.75;
+STEG_lon_u_east = 145.375;
 for n = 1 : length(115:1/8:147)-1
     if lon_u_ALLC(n) < WBSEG_lon_u_east
         lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat1;
@@ -170,7 +170,7 @@ for n = 1 : length(115:1/8:147)-1
             lon_u_ALLC(n) < STEG_lon_u_east
         lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat2;
     else
-        lat_v_DRC_south(n) = lat_v_DRC_centr(n) + DRC_south_dlat3;
+        lat_v_DRC_south(n) = -45.625;
     end
 end
 

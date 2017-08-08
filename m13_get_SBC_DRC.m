@@ -3,6 +3,7 @@ clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/aus8_currents'])
+load([data_path 'SACS_data/aus8_currents'])
 load([data_path 'SACS_data/aus8_U_prime'])
 load([data_path 'SACS_data/aus8_V_prime'])
 
@@ -108,7 +109,7 @@ Ut_prime_up_SBC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-2))
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
@@ -153,8 +154,8 @@ Ut_prime_up_DRC = zeros(size(Ut_prime_up));
 lat_north_ind_1 = ...
     find(ismember(lat_v, lat_v_DRC_north_repelem(1)));
 lat_south_ind_1 = ...
-    find(ismember(lat_v, lat_v_DRC_south_repelem(1)));
-lat_vec_now = lat_north_ind_1:lat_south_ind_1-1;
+    find(ismember(lat_v, lat_v_DRC_south_repelem(1))) -1;
+lat_vec_now = lat_north_ind_1:lat_south_ind_1;
 lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(1));
 Ut_prime_up_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind) = ...
@@ -164,8 +165,8 @@ Ut_prime_up_DRC(lat_vec_now, ...
 lat_north_ind_1 = ...
     find(ismember(lat_v, lat_v_DRC_north_repelem(end)));
 lat_south_ind_1 = ...
-    find(ismember(lat_v, lat_v_DRC_south_repelem(end)));
-lat_vec_now = lat_north_ind_1:lat_south_ind_1-1;
+    find(ismember(lat_v, lat_v_DRC_south_repelem(end))) -1;
+lat_vec_now = lat_north_ind_1:lat_south_ind_1;
 lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(end));
 Ut_prime_up_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind) = ...
@@ -173,18 +174,18 @@ Ut_prime_up_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3 
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
         find(ismember(lat_v, lat_v_DRC_north_repelem(jj)));
     lat_north_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_north_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_north_repelem(jj-1)));
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     lat_south_ind_1 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj))) -1;
     lat_south_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1))) -1;
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
     
     if lat_north_12(1) == lat_north_12(2)
@@ -199,7 +200,7 @@ for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
     end
     
     lat_vec_now = ...
-        lat_north_12(north_12_ind):lat_south_12(south_12_ind)-1;
+        lat_north_12(north_12_ind):lat_south_12(south_12_ind);
     lon_u_ALLC_repelem_ind = find(lon_u == lon_u_ALLC_repelem(jj));
     Ut_prime_up_DRC(lat_vec_now, ...
         lon_u_ALLC_repelem_ind) = ...
@@ -208,7 +209,7 @@ for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
 end
 
 DRC_Ut_mcps_up = sum(Ut_prime_up_DRC, 1);
-DRC_Ut_up = DRC_Ut_mcps_up .* 10^-6;
+DRC_Ut_up = DRC_Ut_mcps_up * 10^-6;
 
 
 %% DRC Ut dw
@@ -238,18 +239,18 @@ Ut_g_prime_dw_DRC(lat_vec_now, ...
     lon_u_ALLC_repelem_ind);
 
 jj_count = 0;
-for jj = 2 : 2 : length(lon_u_ALLC_repelem(1:end-1))
+for jj = length(lon_u_ALLC_repelem(1:end-1)) : -2 : 3
     jj_count = jj_count + 1;
     
     lat_north_ind_1 = ...
         find(ismember(lat_v, lat_v_SBC_north_repelem(jj)));
     lat_north_ind_2 = ...
-        find(ismember(lat_v, lat_v_SBC_north_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_SBC_north_repelem(jj-1)));
     lat_north_12 = [lat_north_ind_1, lat_north_ind_2];
     lat_south_ind_1 = ...
         find(ismember(lat_v, lat_v_DRC_south_repelem(jj)));
     lat_south_ind_2 = ...
-        find(ismember(lat_v, lat_v_DRC_south_repelem(jj+1)));
+        find(ismember(lat_v, lat_v_DRC_south_repelem(jj-1)));
     lat_south_12 = [lat_south_ind_1, lat_south_ind_2];
     
     if lat_north_12(1) == lat_north_12(2)
@@ -430,11 +431,70 @@ end
 
 
 %% DRC Vtn up
-DRC_Vtn = -SBC_Vts;
+Vtn_prime_up_DRC = zeros(1, length(lon_v));
+
+% do the first
+lon_first_idx = 57;
+lat_ind_V_Vtn_prime_up_DRC = ...
+    lat_v == lat_v_DRC_north(1);
+V_Vtn_prime_up_DRC_now = ...
+    Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_first_idx);
+V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
+Vtn_prime_up_DRC(lon_first_idx) = V_Vtn_prime_up_DRC;
+
+% and last cases
+lon_last_idx = 312;
+lat_ind_V_Vtn_prime_up_DRC = ...
+    lat_v == lat_v_DRC_north(end);
+V_Vtn_prime_up_DRC_now = ...
+    Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_last_idx);
+V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
+Vtn_prime_up_DRC(lon_last_idx) = V_Vtn_prime_up_DRC;
+
+% in between cases
+for jj = length(lon_u_ALLC)-2 : -1 : 2
+    lon_u_ind = find(lon_u == lon_u_ALLC(jj));
+    
+    %
+    lat_ind_V_Vtn_prime_up_DRC = lat_v == lat_v_DRC_north(jj);
+    V_Vtn_prime_up_DRC_now = ...
+        Vt_prime_up(lat_ind_V_Vtn_prime_up_DRC, lon_u_ind);
+    V_Vtn_prime_up_DRC = -V_Vtn_prime_up_DRC_now;
+    
+    %
+    [U_Vtn_prime_up_DRC_prev, U_Vtn_prime_up_DRC_next] = deal(0);
+    
+    % if the previous lat is to the south of the current one
+    if lat_v_DRC_north(jj+1) < lat_v_DRC_north(jj)
+        %
+        lat_u_within_ind = find(...
+            lat_u < lat_v_DRC_north(jj) & ...
+            lat_u > lat_v_DRC_north(jj+1));
+        U_Vtn_prime_up_DRC_all_now = ...
+            Ut_prime_up(lat_u_within_ind, lon_u_ind+1);
+        U_Vtn_prime_up_DRC_all = -U_Vtn_prime_up_DRC_all_now;
+        U_Vtn_prime_up_DRC_prev = nansum(U_Vtn_prime_up_DRC_all);
+    end
+    
+    % if the next lat is to the south of the current one
+    if lat_v_DRC_north(jj-1) < lat_v_DRC_north(jj)
+        %
+        lat_u_within_ind = find(...
+            lat_u < lat_v_DRC_north(jj) & ...
+            lat_u > lat_v_DRC_north(jj-1));
+        U_Vtn_prime_up_DRC_all_now = ...
+            Ut_prime_up(lat_u_within_ind, lon_u_ind);
+        U_Vtn_prime_up_DRC_all = U_Vtn_prime_up_DRC_all_now;
+        U_Vtn_prime_up_DRC_next = nansum(U_Vtn_prime_up_DRC_all);
+    end
+    
+    %
+    Vtn_prime_up_DRC(lon_u_ind) = V_Vtn_prime_up_DRC + ...
+        U_Vtn_prime_up_DRC_prev + U_Vtn_prime_up_DRC_next;
+end
 
 
 %% DRC Vtn dw
-% % This should be zero...
 Vtn_g_prime_dw_DRC = zeros(1, length(lon_v));
 
 % do the first
@@ -456,7 +516,7 @@ V_Vtn_g_prime_dw_DRC = -V_Vtn_g_prime_dw_DRC_now;
 Vtn_g_prime_dw_DRC(lon_last_idx) = V_Vtn_g_prime_dw_DRC;
 
 % in between cases
-for jj = 2 : length(lon_u_ALLC)-2
+for jj = length(lon_u_ALLC)-2 : -1 : 2
     lon_u_ind = find(lon_u == lon_u_ALLC(jj));
     
     %
@@ -469,21 +529,6 @@ for jj = 2 : length(lon_u_ALLC)-2
     [U_Vtn_g_prime_dw_DRC_prev, U_Vtn_g_prime_dw_DRC_next] = deal(0);
     
     % if the previous lat is to the south of the current one
-    if lat_v_SBC_north(jj-1) < lat_v_SBC_north(jj)
-        %
-        lat_u_within_ind = find(...
-            lat_u < lat_v_SBC_north(jj) & ...
-            lat_u > lat_v_SBC_north(jj-1));
-        U_Vtn_g_prime_dw_DRC_all_now = ...
-            Ut_g_prime_dw(lat_u_within_ind, lon_u_ind);
-        U_Vtn_g_prime_dw_DRC_all = U_Vtn_g_prime_dw_DRC_all_now;
-        U_Vtn_g_prime_dw_DRC_prev = nansum(U_Vtn_g_prime_dw_DRC_all);
-        if isnan(U_Vtn_g_prime_dw_DRC_prev)
-            U_Vtn_g_prime_dw_DRC_prev = 0;
-        end
-    end
-    
-    % if the next lat is to the south of the current one
     if lat_v_SBC_north(jj+1) < lat_v_SBC_north(jj)
         %
         lat_u_within_ind = find(...
@@ -492,10 +537,19 @@ for jj = 2 : length(lon_u_ALLC)-2
         U_Vtn_g_prime_dw_DRC_all_now = ...
             Ut_g_prime_dw(lat_u_within_ind, lon_u_ind+1);
         U_Vtn_g_prime_dw_DRC_all = -U_Vtn_g_prime_dw_DRC_all_now;
-        U_Vtn_g_prime_dw_DRC_next = nansum(U_Vtn_g_prime_dw_DRC_all);
+        U_Vtn_g_prime_dw_DRC_prev = nansum(U_Vtn_g_prime_dw_DRC_all);
     end
-    if isnan(U_Vtn_g_prime_dw_DRC_next)
-        U_Vtn_g_prime_dw_DRC_next = 0;
+    
+    % if the next lat is to the south of the current one
+    if lat_v_SBC_north(jj-1) < lat_v_SBC_north(jj)
+        %
+        lat_u_within_ind = find(...
+            lat_u < lat_v_SBC_north(jj) & ...
+            lat_u > lat_v_SBC_north(jj-1));
+        U_Vtn_g_prime_dw_DRC_all_now = ...
+            Ut_g_prime_dw(lat_u_within_ind, lon_u_ind);
+        U_Vtn_g_prime_dw_DRC_all = U_Vtn_g_prime_dw_DRC_all_now;
+        U_Vtn_g_prime_dw_DRC_next = nansum(U_Vtn_g_prime_dw_DRC_all);
     end
     
     %
@@ -505,7 +559,7 @@ end
 
 for n = 1 : length(lon_u)-1
     if Vtn_g_prime_dw_DRC(n) ~= 0
-        error('Vtn_g_prime_dw_DRC = 0 somewhere !')
+        error('Vtn_g_prime_dw_DRC = 0 somewhere :( !')
     end
 end
 disp('Vtn_g_prime_dw_DRC = 0 everywhere :)')
@@ -570,8 +624,7 @@ for jj = length(lon_u_ALLC)-2 : -1 : 2
     end
     
     %
-    Vts_prime_up_DRC(lon_u_ind) = ...
-        V_Vts_prime_up_DRC + ...
+    Vts_prime_up_DRC(lon_u_ind) = V_Vts_prime_up_DRC + ...
         U_Vts_prime_up_DRC_prev + U_Vts_prime_up_DRC_next;
 end
 
@@ -642,6 +695,7 @@ end
 
 
 %% DRC Vtc
+DRC_Vtn = Vtn_prime_up_DRC .* 10^-6;
 DRC_Vts_up = Vts_prime_up_DRC .* 10^-6;
 DRC_Vts_dw = Vts_g_prime_dw_DRC .* 10^-6;
 
@@ -693,39 +747,113 @@ dv = V_prime_up_SBC_for_W(1:end-1,:).* ...
     cos(lat_v_repmat(2:end,:) * pi180);
 dvdy = 1./cos(lat_u_repmat * pi180).*dv./dy_v;
 div_UV_prime_up_SBC = dudx + dvdy;
+w_prime_up_SBC_real = div_UV_prime_up_SBC;
+w_prime_up_SBC_leak = div_UV_prime_up_SBC;
 
-% for ii = 1 : length(lat_u)
-%     for jj = 1 : length(lon_v)
-%         if isfinite(div_UV_prime_up_SBC(ii,jj))
-%             if div_UV_prime_up_SBC(ii,jj) == div_UV_prime.mean(ii,jj)
-%                 div_UV_prime_up_SBC(ii,jj) = 0;
-%             end
-%         end
-%     end
-% end
-% disp('div_UV_prime_up_SBC was corrected')
+for ii = 1 : length(lat_u)
+    for jj = 1 : length(lon_v)
+        if isfinite(div_UV_prime_up_SBC(ii,jj))
+            if div_UV_prime_up_SBC(ii,jj) == div_UV_prime.mean(ii,jj)
+                w_prime_up_SBC_real(ii,jj) = 0;
+                
+            else
+                w_prime_up_SBC_leak(ii,jj) = 0;
+            end
+        end
+    end
+end
 
-w_prime_up_SBC = div_UV_prime_up_SBC;
-W_prime_up_mcps_SBC = w_prime_up_SBC .* dy_v .* dx_u;
-SBC_Wt_mcps = nansum(W_prime_up_mcps_SBC,1);
-SBC_Wt = SBC_Wt_mcps * 10^-6;
+W_prime_up_mcps_SBC_real = w_prime_up_SBC_real .* dy_v .* dx_u;
+SBC_Wt_mcps_real = nansum(W_prime_up_mcps_SBC_real,1);
+SBC_Wt_real = SBC_Wt_mcps_real * 10^-6;
+
+W_prime_up_mcps_SBC_leak = w_prime_up_SBC_leak .* dy_v .* dx_u;
+SBC_Wt_mcps_leak = nansum(W_prime_up_mcps_SBC_leak,1);
+SBC_Wt_leak = SBC_Wt_mcps_leak * 10^-6;
+
+SBC_Wt = SBC_Wt_real + SBC_Wt_leak;
 
 
 %% DRC Wt
-DRC_Wt = -SBC_Wt;
+% Get Ut_prime_up_SBC Vt_prime_up_SBC for W
+V_g_prime_dw_DRC_for_W = NaN(size(V_prime_up));
+U_g_prime_dw_DRC_for_W = NaN(size(U_prime_up));
+
+nc = 257;
+for n = 313 : -1 : 58
+    nc = nc - 1;
+    lat_v_DRC_north_ind = find(lat_v==lat_v_SBC_north(nc));
+    lat_v_DRC_south_ind = find(lat_v==lat_v_DRC_south(nc));
+    lat_v_DRC_ind = lat_v_DRC_north_ind : lat_v_DRC_south_ind;
+    
+    lat_u_DRC_north_ind = find(lat_u<lat_v_SBC_north(nc), 1, 'first');
+    lat_u_DRC_south_ind = find(lat_u>lat_v_DRC_south(nc), 1, 'last');
+    lat_u_DRC_ind = lat_u_DRC_north_ind : lat_u_DRC_south_ind;
+    
+    V_g_prime_dw_DRC_for_W(lat_v_DRC_ind,n-1) = ...
+        V_g_prime_dw(lat_v_DRC_ind,n-1);
+    U_g_prime_dw_DRC_for_W(lat_u_DRC_ind,n-1:n) = ...
+        U_g_prime_dw(lat_u_DRC_ind,n-1:n);
+end
+
+du = U_g_prime_dw_DRC_for_W(:,2:end) - ...
+    U_g_prime_dw_DRC_for_W(:,1:end-1);
+dudx = du ./ dx_u;
+dv = V_g_prime_dw_DRC_for_W(1:end-1,:).* ...
+    cos(lat_v_repmat(1:end-1,:) * pi180) - ...
+    V_g_prime_dw_DRC_for_W(2:end,:).* ...
+    cos(lat_v_repmat(2:end,:) * pi180);
+dvdy = 1./cos(lat_u_repmat * pi180).*dv./dy_v;
+div_UV_g_prime_dw_DRC = dudx + dvdy;
+
+w_g_prime_dw_DRC_real = -w_prime_up_SBC_real;
+
+%%% calculate UV prime in the whole upper layer
+du = U_prime_up(:,2:end) - ...
+    U_prime_up(:,1:end-1);
+dudx = du ./ dx_u;
+dv = V_prime_up(1:end-1,:).* ...
+    cos(lat_v_repmat(1:end-1,:) * pi180) - ...
+    V_prime_up(2:end,:).* ...
+    cos(lat_v_repmat(2:end,:) * pi180);
+dvdy = 1./cos(lat_u_repmat * pi180).*dv./dy_v;
+div_UV_prime_up_all = dudx + dvdy;
+%%%
+
+div_UV_for_this = div_UV_g_prime_dw_DRC + div_UV_prime_up_all;
+div_UV_for_this(w_g_prime_dw_DRC_real==0) = NaN;
+w_prime_dw_DRC_leak = div_UV_for_this;
+
+W_g_prime_dw_mcps_DRC_real = w_g_prime_dw_DRC_real .* dy_v .* dx_u;
+DRC_Wt_mcps_real = nansum(W_g_prime_dw_mcps_DRC_real,1);
+DRC_Wt_real = DRC_Wt_mcps_real * 10^-6;
+
+W_g_prime_dw_mcps_DRC_leak = w_prime_dw_DRC_leak .* dy_v .* dx_u;
+DRC_Wt_mcps_leak = nansum(W_g_prime_dw_mcps_DRC_leak,1);
+DRC_Wt_leak = DRC_Wt_mcps_leak * 10^-6;
+
+DRC_Wt = DRC_Wt_real + DRC_Wt_leak;
 
 
 %% Wtc
-[SBC_Wtc, DRC_Wtc] = deal(zeros(1, length(lon_v)));
+[SBC_Wtc_real, SBC_Wtc_leak, DRC_Wtc_real, DRC_Wtc_leak] = ...
+    deal(zeros(1, length(lon_v)));
 
-SBC_Wtc(57) = SBC_Wt(57);
+SBC_Wtc_real(57) = SBC_Wt_real(57);
+SBC_Wtc_leak(57) = SBC_Wt_leak(57);
 for jj = 58 : 312
-    SBC_Wtc(jj) = SBC_Wtc(jj-1) + SBC_Wt(jj);
+    SBC_Wtc_real(jj) = SBC_Wtc_real(jj-1) + SBC_Wt_real(jj);
+    SBC_Wtc_leak(jj) = SBC_Wtc_leak(jj-1) + SBC_Wt_leak(jj);
 end
-DRC_Wtc(312) = DRC_Wt(312);
+SBC_Wtc = SBC_Wtc_real + SBC_Wtc_leak;
+
+DRC_Wtc_real(312) = DRC_Wt_real(312);
+DRC_Wtc_leak(312) = DRC_Wt_leak(312);
 for jj = 311 : -1 : 57
-    DRC_Wtc(jj) = DRC_Wtc(jj+1) + DRC_Wt(jj);
+    DRC_Wtc_real(jj) = DRC_Wtc_real(jj+1) + DRC_Wt_real(jj);
+    DRC_Wtc_leak(jj) = DRC_Wtc_leak(jj+1) + DRC_Wt_leak(jj);
 end
+DRC_Wtc = DRC_Wtc_real + DRC_Wtc_leak;
 
 
 %% SBC Ut star
@@ -767,7 +895,7 @@ col_ind = (repmat(1:colN,rowN,1))';
 row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
 gap_w = gaps(1); % gap width between subplots
 gap_h = gaps(2); % gap height between subplots
-marg_b = margs(3); % bottom margin
+marg_b = margs(3); % bottom_aus8 margin
 marg_t = margs(4); % top margin
 marg_l = margs(1); % left margin
 marg_r = margs(2); % right margin
@@ -783,18 +911,20 @@ axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp])
-plot(lon_u, SBC_Ut, 'b-', 'linewidth', 1)
+plot(lon_u, SBC_Ut, 'k-', 'linewidth', 1)
 hold all
-plot(lon_u, SBC_Ut_star, 'b--', 'linewidth', 1)
+plot(lon_u, SBC_Ut_star, 'k--', 'linewidth', 1)
 plot(lon_v, SBC_Vtnc, 'g-', 'linewidth', 1)
 plot(lon_v, SBC_Vtsc, 'r-', 'linewidth', 1)
-plot(lon_v, SBC_Wtc, 'm-', 'linewidth', 1)
+plot(lon_v, SBC_Wtc_real, 'b-', 'linewidth', 1)
+plot(lon_v, SBC_Wtc_leak, 'b:', 'linewidth', 1)
 legend(...
     'SBC $U_{t}$', ...
     'SBC $U_{t}^{*}$', ...
     'SBC $V_{t}nc$', ...
     'SBC $V_{t}sc$', ...
-    'SBC $W_{t}c$')
+    'SBC $W_{t}c$ real', ...
+    'SBC $W_{t}c$ leak')
 axis([115 147 -3 3])
 title('aus8 SBC transports ($Sv$) VS longitude')
 grid
@@ -808,14 +938,15 @@ axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp])
-plot(lon_u, DRC_Ut, 'b-', 'linewidth', 1)
+plot(lon_u, DRC_Ut, 'k-', 'linewidth', 1)
 hold all
-plot(lon_u, DRC_Ut_star, 'b--', 'linewidth', 1)
+plot(lon_u, DRC_Ut_star, 'k--', 'linewidth', 1)
 plot(lon_v, DRC_Vtnc, 'r-', 'linewidth', 1)
-plot(lon_v, DRC_Vtsc, 'k-', 'linewidth', 1)
-plot(lon_v, DRC_Vtsc_up, 'k:', 'linewidth', 1)
-plot(lon_v, DRC_Vtsc_dw, 'k--', 'linewidth', 1)
-plot(lon_v, DRC_Wtc, 'm-', 'linewidth', 1)
+plot(lon_v, DRC_Vtsc, 'm-', 'linewidth', 1)
+plot(lon_v, DRC_Vtsc_up, 'm:', 'linewidth', 1)
+plot(lon_v, DRC_Vtsc_dw, 'm--', 'linewidth', 1)
+plot(lon_v, DRC_Wtc_real, 'b-', 'linewidth', 1)
+plot(lon_v, DRC_Wtc_leak, 'b:', 'linewidth', 1)
 legend(...
     'DRC $U_{t}$', ...
     'DRC $U_{t}^{*}$', ...
@@ -823,7 +954,8 @@ legend(...
     'DRC $V_{t}sc$', ...
     'DRC $V_{t}sc$ up', ...
     'DRC $V_{t}sc$ dw', ...
-    'DRC $W_{t}c$')
+    'DRC $W_{t}c$ real', ...
+    'DRC $W_{t}c$ leak')
 axis([115 147 -17 17])
 title('aus8 DRC transports ($Sv$) VS longitude')
 grid
@@ -839,16 +971,15 @@ export_fig(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-m3')
-close
 
 
 %%
 close all
 fig_n = 2;
-rowcols = [1 2];
-rowcols_size = [15 12.5]; % cm
-margs = [1 1 1 1]; % cm
-gaps = [1.5 1]; % cm
+rowcols = [2 2];
+rowcols_size = [16 6]; % cm
+margs = [1.5 1 1 1]; % cm
+gaps = [1.5 2]; % cm
 cmaps_levels = 12;
 
 font_size = 12;
@@ -863,7 +994,7 @@ col_ind = (repmat(1:colN,rowN,1))';
 row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
 gap_w = gaps(1); % gap width between subplots
 gap_h = gaps(2); % gap height between subplots
-marg_b = margs(3); % bottom margin
+marg_b = margs(3); % bottom_aus8 margin
 marg_t = margs(4); % top margin
 marg_l = margs(1); % left margin
 marg_r = margs(2); % right margin
@@ -879,8 +1010,8 @@ axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp])
-plot(lon_u, SBC_Ut-SBC_Ut_star, 'b-', 'linewidth', 1)
-title('aus8 SBC "leak": $U_{t}-U_{t}^{*}$ ($Sv$) VS longitude')
+plot(lon_u, SBC_Ut-SBC_Ut_star, 'k-', 'linewidth', 1)
+title('aus8 SBC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude')
 grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
@@ -892,8 +1023,34 @@ axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp])
-plot(lon_u, DRC_Ut-DRC_Ut_star, 'b-', 'linewidth', 1)
-title('aus8 DRC "leak": $U_{t}-U_{t}^{*}$ ($Sv$) VS longitude')
+plot(lon_u, DRC_Ut-DRC_Ut_star, 'k-', 'linewidth', 1)
+title('aus8 DRC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude')
+grid
+set(gca,'layer','top','color',fig_color,...
+    'fontsize',font_size,'tickdir','out')
+
+sp = 3;
+axes('Units','centimeters', ...
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
+plot(lon_v, SBC_Wtc_leak, 'b:', 'linewidth', 1)
+title('aus8 SBC $W_{t}c$ leak ($Sv$) VS longitude')
+grid
+set(gca,'layer','top','color',fig_color,...
+    'fontsize',font_size,'tickdir','out')
+
+sp = 4;
+axes('Units','centimeters', ...
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
+plot(lon_v, DRC_Wtc_leak, 'b:', 'linewidth', 1)
+title('aus8 DRC $W_{t}c$ leak ($Sv$) VS longitude')
 grid
 set(gca,'layer','top','color',fig_color,...
     'fontsize',font_size,'tickdir','out')
@@ -908,5 +1065,4 @@ export_fig(fig, ...
     '_fig' num2str(fig_n) '_'], ...
     '-m3')
 close
-
 

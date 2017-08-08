@@ -438,17 +438,17 @@ set(gca,'layer','top','color',[0.7 0.7 0.7],...
 if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 
-%
-% outputls = ls(figures_path);
-% scriptname = mfilename;
-% if ~contains(outputls, scriptname)
-%     mkdir(figures_path, scriptname)
-% end
-% export_fig(fig, ...
-%     [figures_path mfilename '/' scriptname(1:3) ...
-%     '_fig' num2str(fig_n) '_'], ...
-%     '-m3')
-% close
+
+outputls = ls(figures_path);
+scriptname = mfilename;
+if ~contains(outputls, scriptname)
+    mkdir(figures_path, scriptname)
+end
+export_fig(fig, ...
+    [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-m3')
+close
 
 
 %% STUFF

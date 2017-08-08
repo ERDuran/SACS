@@ -24,8 +24,9 @@ lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 u_bottom = -aus8_coor.u_bottom;
 v_bottom = -aus8_coor.v_bottom;
-Months = aus8_coor.Months;
-Months{13} = 'mean';
+% Months = aus8_coor.Months;
+% Months{13} = 'mean';
+Months = {'mean'};
 
 
 %% 
@@ -117,7 +118,7 @@ rowcols = [2 1];
 rowcols_size = [16 10]; % cm
 margs = [1 1 1 1]; % cm
 gaps = [1 1]; % cm
-cmaps_levels = 12;
+cmaps_levels = 10;
 
 for sp = 1 : rowcols(1)*rowcols(2)
     axis_setup{sp} = ...
@@ -128,9 +129,19 @@ for sp = 1 : rowcols(1)*rowcols(2)
     cmaps{sp} = flipud(othercolor('RdBu8', cmaps_levels));
 end
 
-data = {...
-    aus8_F.mean-aus8_Lap_phi.mean, ...
-    aus8_F_prime.mean};
+%
+dx_u = NaN(length(lat_u), length(lon_v));
+for ii = 1 : length(lat_u)
+    dx_u(ii,:) = a * cos(lat_u(ii) * pi180) * ...
+        (lon_u(2:end) - lon_u(1:end-1)) * pi180;
+end
+dy_raw = a * (lat_v(1:end-1) - lat_v(2:end)) * pi180;
+dy_v = repmat(dy_raw, [1 length(lon_v)]);
+
+data1 = (aus8_F.mean-aus8_Lap_phi.mean) .* dx_u .* dy_v .* 10^-6;
+data2 = (aus8_F_prime.mean) .* dx_u .* dy_v .* 10^-6;
+
+data = {data1, data2};
 data{1}(data{1}==0) = NaN;
 data{2}(data{2}==0) = NaN;
 
@@ -138,9 +149,9 @@ minmax = {...
     [-10^-5 10^-5], ...
     [-10^-5 10^-5]};
 titles = {...
-    ['aus8 mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
-    ['aus8 mean $\nabla\cdot\bf{V''}$']};
-font_size = 9;
+    ['Leak (Sv): aus8 mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
+    ['Leak (Sv): aus8 mean $\nabla\cdot\bf{V''}$']};
+font_size = 13;
 fig_color = [0.7 0.7 0.7];
 
 fig = pcolor_maker(...

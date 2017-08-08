@@ -129,9 +129,20 @@ for sp = 1 : rowcols(1)*rowcols(2)
     cmaps{sp} = flipud(othercolor('RdBu8', cmaps_levels));
 end
 
-data = {...
-    KDau_F.mean-KDau_Lap_phi.mean, ...
-    KDau_F_prime.mean};
+%
+dx_u = NaN(length(lat_u), length(lon_v));
+for ii = 1 : length(lat_u)
+    dx_u(ii,:) = a * cos(lat_u(ii) * pi180) * ...
+        (lon_u(2:end) - lon_u(1:end-1)) * pi180;
+end
+dy_raw = a * (lat_v(1:end-1) - lat_v(2:end)) * pi180;
+dy_v = repmat(dy_raw, [1 length(lon_v)]);
+
+data1 = (KDau_F.mean-KDau_Lap_phi.mean) .* dx_u .* dy_v .* 10^-6;
+data2 = (KDau_F_prime.mean) .* dx_u .* dy_v .* 10^-6;
+
+data = {data1, data2};
+
 data{1}(data{1}==0) = NaN;
 data{2}(data{2}==0) = NaN;
 
@@ -139,8 +150,8 @@ minmax = {...
     [-10^-5 10^-5], ...
     [-10^-5 10^-5]};
 titles = {...
-    ['KDS75 mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
-    ['KDS75 mean $\nabla\cdot\bf{V''}$']};
+    ['Leak (Sv): KDS75 mean $\nabla\cdot\bf{V}-\nabla^{2}\phi$']
+    ['Leak (Sv): KDS75 mean $\nabla\cdot\bf{V''}$']};
 font_size = 9;
 fig_color = [0.7 0.7 0.7];
 

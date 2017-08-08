@@ -164,22 +164,22 @@ for sp = 1 : rowN*colN
     if sp == 1
         arrow([139 -33], ...
             [lon_u_ALLC_repelem(320) lat_v_SBC_north_repelem(320)], 8)
-        text(139, -33, '$\mathcal{V}_{CC}$', 'fontsize',font_size)
+        text(139, -33, '$y_{CC}$', 'fontsize',font_size)
         arrow([139 -34], ...
             [lon_u_ALLC_repelem(320) lat_v_SBC_south_repelem(320)], 8)
-        text(139, -34, '$\mathcal{V}_{SBC}$', 'fontsize',font_size)
+        text(139, -34, '$y_{int}$', 'fontsize',font_size)
         arrow([139 -35], ...
             [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 8)
-        text(139, -35, 'upper $\mathcal{V}_{OF}$', 'fontsize',font_size)
+        text(139, -35, 'upper $y_{OF}$', 'fontsize',font_size)
     end
     
     if sp == 3
         arrow([135 -33.8], ...
             [131.6 -33.8], 8)
-        text(135, -33.8, '$\mathcal{W}$', 'fontsize',font_size)
+        text(135, -33.8, '$z_{int}$ area', 'fontsize',font_size)
         arrow([139 -35], ...
             [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 8)
-        text(139, -35, 'lower $\mathcal{V}_{OF}$', 'fontsize',font_size)
+        text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
     title(['(' lett(sp) ') $' title_chc{sp} ...
