@@ -1066,3 +1066,24 @@ export_fig(fig, ...
     '-m3')
 close
 
+
+%% save all that stuff !
+aus8_currents.SBC_Ut = SBC_Ut;
+aus8_currents.SBC_Ut_star = SBC_Ut_star;
+aus8_currents.SBC_Vtnc = SBC_Vtnc;
+aus8_currents.SBC_Vtsc = SBC_Vtsc;
+aus8_currents.SBC_Wtc_real = SBC_Wtc_real;
+aus8_currents.SBC_Wtc_leak = SBC_Wtc_leak;
+aus8_currents.DRC_Ut = DRC_Ut;
+aus8_currents.DRC_Ut_star = DRC_Ut_star;
+aus8_currents.DRC_Vtnc = DRC_Vtnc;
+aus8_currents.DRC_Vtsc = DRC_Vtsc;
+aus8_currents.DRC_Vtsc_up = DRC_Vtsc_up;
+aus8_currents.DRC_Vtsc_dw = DRC_Vtsc_dw;
+aus8_currents.DRC_Wtc_real = DRC_Wtc_real;
+aus8_currents.DRC_Wtc_leak = DRC_Wtc_leak;
+
+save([data_path 'SACS_data/aus8_currents'], 'aus8_currents')
+disp(['aus8_currents DONE'])
+
+

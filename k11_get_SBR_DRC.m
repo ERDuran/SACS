@@ -1067,3 +1067,23 @@ export_fig(fig, ...
     '-m3')
 close
 
+
+%% save all that stuff !
+KDau_currents.SBC_Ut = SBC_Ut;
+KDau_currents.SBC_Ut_star = SBC_Ut_star;
+KDau_currents.SBC_Vtnc = SBC_Vtnc;
+KDau_currents.SBC_Vtsc = SBC_Vtsc;
+KDau_currents.SBC_Wtc_real = SBC_Wtc_real;
+KDau_currents.SBC_Wtc_leak = SBC_Wtc_leak;
+KDau_currents.DRC_Ut = DRC_Ut;
+KDau_currents.DRC_Ut_star = DRC_Ut_star;
+KDau_currents.DRC_Vtnc = DRC_Vtnc;
+KDau_currents.DRC_Vtsc = DRC_Vtsc;
+KDau_currents.DRC_Vtsc_up = DRC_Vtsc_up;
+KDau_currents.DRC_Vtsc_dw = DRC_Vtsc_dw;
+KDau_currents.DRC_Wtc_real = DRC_Wtc_real;
+KDau_currents.DRC_Wtc_leak = DRC_Wtc_leak;
+
+save([data_path 'SACS_data/KDau_currents'], 'KDau_currents')
+disp(['KDau_currents DONE'])
+

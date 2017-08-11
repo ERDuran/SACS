@@ -40,13 +40,14 @@ z_bot = aus8_currents.z_bot;
 
 
 %% 5) plot maps of U and V SBC
+screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [2 2];
-rowcols_size = [14 8]; % cm
-margs = [1 2.5 1.2 1.2]; % cm
-gaps = [0.75 1.25]; % cm
-plot_cbar_gap = 0.5;
-cbar_x = 0.3;
+rowcols_size = [7 4]/screen_ratio; % cm
+margs = [0.6 1.2 0.6 0.6]/screen_ratio; % cm
+gaps = [0.4 0.8]/screen_ratio; % cm
+plot_cbar_gap = 0.3/screen_ratio;
+cbar_x = 0.2/screen_ratio;
 cbar_y = rowcols_size(2);
 
 magnif = 10;
@@ -88,7 +89,7 @@ for sp = 1 : rowcols(1)*rowcols(2)
 end
 
 lett = 'a':'z';
-font_size = 13;
+font_size = 8*screen_ratio;
 fig_color = [0.7 0.7 0.7];
 
 close all
@@ -105,7 +106,11 @@ marg_b = margs(3); % bottom margin
 marg_t = margs(4); % top margin
 marg_l = margs(1); % left margin
 marg_r = margs(2); % right margin
-set(fig,'units','centimeters',...
+set(fig,'units','centimeters','paperunits','centimeters', ...
+    'inverthardcopy','off','color',[1 1 1],...
+    'paperposition',[0 0 ...
+    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
+    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]*screen_ratio,...
     'position',[0 0 ...
     (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
     (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]);
@@ -137,7 +142,7 @@ for sp = 1 : rowN*colN
             aus8_currents.nudging.north.eGs_wBS.lon_u_west;
         h = plot(lon_u_ALLC_repelem(lon_ind), ...
             lat_v_SBC_north_repelem(lon_ind), ...
-            'g', 'linewidth', 2);
+            'g', 'linewidth', 1);
         %
         lon_ind = lon_u_ALLC_repelem >= ...
             aus8_currents.nudging.north.eGs_wBS.lon_u_east & ...
@@ -145,46 +150,48 @@ for sp = 1 : rowN*colN
             aus8_currents.nudging.north.sBS_wT.lon_u_west;
         h = plot(lon_u_ALLC_repelem(lon_ind), ...
             lat_v_SBC_north_repelem(lon_ind), ...
-            'g', 'linewidth', 2);
+            'g', 'linewidth', 1);
     end
     %
     h = plot(lon_u_ALLC_repelem, lat_v_SBC_south_repelem, ...
-        'r', 'linewidth', 2);
+        'r', 'linewidth', 1);
     % h = plot(lon_u_ALLC_repelem, lat_v_DRC_centr_repelem, ...
     %     'k-', 'linewidth', 0.5);
     if sp <= 2
         h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
-            '--m', 'linewidth', 2);
+            '--m', 'linewidth', 1);
     else
         h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
-            ':m', 'linewidth', 2);
+            ':m', 'linewidth', 1);
     end
     
     
     if sp == 1
         arrow([139 -33], ...
-            [lon_u_ALLC_repelem(320) lat_v_SBC_north_repelem(320)], 8)
+            [lon_u_ALLC_repelem(320) lat_v_SBC_north_repelem(320)], 4)
         text(139, -33, '$y_{CC}$', 'fontsize',font_size)
         arrow([139 -34], ...
-            [lon_u_ALLC_repelem(320) lat_v_SBC_south_repelem(320)], 8)
+            [lon_u_ALLC_repelem(320) lat_v_SBC_south_repelem(320)], 4)
         text(139, -34, '$y_{int}$', 'fontsize',font_size)
         arrow([139 -35], ...
-            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 8)
+            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 4)
         text(139, -35, 'upper $y_{OF}$', 'fontsize',font_size)
     end
     
     if sp == 3
         arrow([135 -33.8], ...
-            [131.6 -33.8], 8)
+            [131.6 -33.8], 4)
         text(135, -33.8, '$z_{int}$ area', 'fontsize',font_size)
         arrow([139 -35], ...
-            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 8)
+            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 4)
         text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
-    title(['(' lett(sp) ') $' title_chc{sp} ...
+    h_tit = title(['(' lett(sp) ') $' title_chc{sp} ...
         '$ ($m^{2}/s$) integrated from ' ...
-    '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'])
+    '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
+    'horizontalalignment','left', 'fontsize',font_size);
+    h_tit.Position(1) = axis_setup{sp}(1);
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out', ...
@@ -213,10 +220,10 @@ scriptname = mfilename;
 if ~contains(outputls, scriptname)
     mkdir(figures_path, scriptname)
 end
-export_fig(fig, ...
+print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
-    '-transparent', '-m2.5')
+    '-dpng', '-r300')
 close
 
 
