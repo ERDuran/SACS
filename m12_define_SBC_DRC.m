@@ -69,8 +69,8 @@ aus8_currents.lon_v_ALLC = lon_v_ALLC;
 
 
 %% 2) Define SBC and DRC LATITUDE criteria
-% SBC is 
-% DRC is 
+% SBC is
+% DRC is
 % IMPORTANT NOTE: if number has four digits, write in the scientific
 % form eg. 1000 = 1e+03 or 1700 = 1.7e+03
 SBC_centr_zisb = -700; % isobath
@@ -86,15 +86,15 @@ for jj = lon_v_ALLC_ind
         find(isnan(v_bottom_depth_now), 1, 'last')+1;
     
     SBC_centr_z_diff = abs(v_bottom_depth_now - SBC_centr_zisb);
-%     first_ocean_ind = ...
-%         find(isnan(SBC_north_z_diff), 1, 'last')+1;
-%     SBC_north_z_diff_first_ocean = ...
-%         SBC_north_z_diff(first_ocean_ind:length(lat_v));
-%     SBC_north_z_diff_first_pos_ind = ...
-%         find(SBC_north_z_diff_first_ocean >= 0, 1, 'first');
-%     lat_v_SBC_north(jj_count) = lat_v(...
-%         first_ocean_ind-1+SBC_north_z_diff_first_pos_ind-1);
-        
+    %     first_ocean_ind = ...
+    %         find(isnan(SBC_north_z_diff), 1, 'last')+1;
+    %     SBC_north_z_diff_first_ocean = ...
+    %         SBC_north_z_diff(first_ocean_ind:length(lat_v));
+    %     SBC_north_z_diff_first_pos_ind = ...
+    %         find(SBC_north_z_diff_first_ocean >= 0, 1, 'first');
+    %     lat_v_SBC_north(jj_count) = lat_v(...
+    %         first_ocean_ind-1+SBC_north_z_diff_first_pos_ind-1);
+    
     SBC_centr_z_diff_first_ocean = ...
         SBC_centr_z_diff(first_ocean_ind:length(lat_v));
     SBC_centr_z_diff_first_pos_ind = ...
@@ -207,7 +207,7 @@ for n = lon_u1_ind(1:end-1)
     u_first_ocean_ind2 = ...
         find(isfinite(u_bottom_depth_now2), 1, 'first')-1;
     first_ocean = ...
-        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];    
+        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];
     lat_v_SBC_north(n) = lat_v(min(first_ocean));
 end
 %%% WEST & EAST LON U
@@ -233,18 +233,18 @@ for n = lon_u1_ind(1:end-1)
     v_bottom_depth_now = v_bottom(:,lon_v_ALLC_ind(n));
     u_bottom_depth_now1 = u_bottom(:,lon_u_ALLC_ind(n));
     u_bottom_depth_now2 = u_bottom(:,lon_u_ALLC_ind(n+1));
-%     if lon_u(ALLC_lon_u_ind(n)) < 116
-%         v_bottom_depth_now(1:32) = NaN;
-%         u_bottom_depth_now1(1:32) = NaN;
-%         u_bottom_depth_now2(1:32) = NaN;
-%     end
+    %     if lon_u(ALLC_lon_u_ind(n)) < 116
+    %         v_bottom_depth_now(1:32) = NaN;
+    %         u_bottom_depth_now1(1:32) = NaN;
+    %         u_bottom_depth_now2(1:32) = NaN;
+    %     end
     v_first_ocean_ind = find(isnan(v_bottom_depth_now), 1, 'last');
     u_first_ocean_ind1 = ...
         find(isnan(u_bottom_depth_now1), 1, 'last');
     u_first_ocean_ind2 = ...
         find(isnan(u_bottom_depth_now2), 1, 'last');
     first_ocean = ...
-        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];    
+        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];
     lat_v_SBC_north(n) = lat_v(min(first_ocean));
 end
 %%% WEST & EAST LON U
@@ -270,18 +270,18 @@ for n = lon_u1_ind(1:end-1)
     v_bottom_depth_now = v_bottom(:,lon_v_ALLC_ind(n));
     u_bottom_depth_now1 = u_bottom(:,lon_u_ALLC_ind(n));
     u_bottom_depth_now2 = u_bottom(:,lon_u_ALLC_ind(n+1));
-%     if lon_u(ALLC_lon_u_ind(n)) < 116
-%         v_bottom_depth_now(1:32) = NaN;
-%         u_bottom_depth_now1(1:32) = NaN;
-%         u_bottom_depth_now2(1:32) = NaN;
-%     end
+    %     if lon_u(ALLC_lon_u_ind(n)) < 116
+    %         v_bottom_depth_now(1:32) = NaN;
+    %         u_bottom_depth_now1(1:32) = NaN;
+    %         u_bottom_depth_now2(1:32) = NaN;
+    %     end
     v_first_ocean_ind = find(isnan(v_bottom_depth_now), 1, 'last');
     u_first_ocean_ind1 = ...
         find(isnan(u_bottom_depth_now1), 1, 'last');
     u_first_ocean_ind2 = ...
         find(isnan(u_bottom_depth_now2), 1, 'last');
     first_ocean = ...
-        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];    
+        [v_first_ocean_ind, u_first_ocean_ind1, u_first_ocean_ind2];
     lat_v_SBC_north(n) = lat_v(min(first_ocean));
 end
 %%% WEST & EAST LON U
@@ -299,29 +299,40 @@ depth_thkn_perm = permute(depth_thkn, [3 2 1]);
 depth_thkn_u = repmat(depth_thkn_perm, [length(lat_u), length(lon_u)]);
 depth_thkn_v = repmat(depth_thkn_perm, [length(lat_v), length(lon_v)]);
 
-u_g_prime_times_depth_thkn_u = aus8_u_g_prime.mean .* depth_thkn_u;
-U_g_prime_ptop_to_pmid = ...
-    nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_above_all_ind), 3);
-U_prime_ptop_to_pmid = U_g_prime_ptop_to_pmid + aus8_U_ek.mean;
-
-v_g_prime_times_depth_thkn_v = aus8_v_g_prime.mean .* depth_thkn_v;
-V_g_prime_ptop_to_pmid = ...
-    nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_above_all_ind), 3);
-V_prime_ptop_to_pmid = V_g_prime_ptop_to_pmid + aus8_V_ek.mean;
-
-U_g_prime_pmid_to_pbot = ...
-    nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_below_all_ind), 3);
-
-V_g_prime_pmid_to_pbot = ...
-    nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_below_all_ind), 3);
-
-U_g_prime_pmid_to_pbot(U_g_prime_pmid_to_pbot==0) = NaN;
-V_g_prime_pmid_to_pbot(V_g_prime_pmid_to_pbot==0) = NaN;
-
-aus8_currents.ptop_to_pmid.U_prime.mean = U_prime_ptop_to_pmid;
-aus8_currents.ptop_to_pmid.V_prime.mean = V_prime_ptop_to_pmid;
-aus8_currents.pmid_to_pbot.U_g_prime.mean = U_g_prime_pmid_to_pbot;
-aus8_currents.pmid_to_pbot.V_g_prime.mean = V_g_prime_pmid_to_pbot;
+for t = 1 : length(Months)
+    u_g_prime_times_depth_thkn_u = ...
+        aus8_u_g_prime.(Months{t}) .* depth_thkn_u;
+    U_g_prime_ztop_to_zmid = ...
+        nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_above_all_ind), 3);
+    U_prime_ztop_to_zmid = U_g_prime_ztop_to_zmid + ...
+        aus8_U_ek.(Months{t});
+    
+    v_g_prime_times_depth_thkn_v = ...
+        aus8_v_g_prime.(Months{t}) .* depth_thkn_v;
+    V_g_prime_ztop_to_zmid = ...
+        nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_above_all_ind), 3);
+    V_prime_ztop_to_zmid = V_g_prime_ztop_to_zmid + ...
+        aus8_V_ek.(Months{t});
+    
+    U_g_prime_zmid_to_zbot = ...
+        nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_below_all_ind), 3);
+    
+    V_g_prime_zmid_to_zbot = ...
+        nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_below_all_ind), 3);
+    
+    U_g_prime_zmid_to_zbot(U_g_prime_zmid_to_zbot==0) = NaN;
+    V_g_prime_zmid_to_zbot(V_g_prime_zmid_to_zbot==0) = NaN;
+    
+    aus8_currents.ztop_to_zmid.U_prime.(Months{t}) = ...
+        U_prime_ztop_to_zmid;
+    aus8_currents.ztop_to_zmid.V_prime.(Months{t}) = ...
+        V_prime_ztop_to_zmid;
+    aus8_currents.zmid_to_zbot.U_g_prime.(Months{t}) = ...
+        U_g_prime_zmid_to_zbot;
+    aus8_currents.zmid_to_zbot.V_g_prime.(Months{t}) = ...
+        V_g_prime_zmid_to_zbot;
+    disp([Months{t} ' OK!'])
+end
 
 
 %% 4) make repelem and interp2
@@ -378,11 +389,11 @@ set(fig,'units','centimeters',...
 % 2) all data set-up
 sp = 1;
 axes('Units','centimeters', ...
-            'Position',[...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-            x_sp, ...
-            y_sp])
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
 
 % 3) asal pcolor set-up
 % new colormap routine !
@@ -405,7 +416,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_u, ...
     lat_u, ...
-    U_prime_ptop_to_pmid*magnif)
+    U_prime_ztop_to_zmid*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -453,31 +464,31 @@ text(138, -35, 'DRC $V_{t}sc$ up')
 % % ch = clabel(h, 'manual', 'fontsize', font_size);
 % % set(findobj(ch,'String',num2str(SBC_north_p),'String', ...
 % %     ['x_{SA}: ' num2str(SBC_north_p)])
-% 
+%
 % depth_contours = [SBC_south_p SBC_south_p];
 % h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
 %     'g--', 'linewidth', 0.5);
 % % ch = clabel(h, 'manual', 'fontsize', font_size);
 % % set(findobj(ch,'String',num2str(SBC_south_p)),'String', ...
 % %     ['x_{SBC} : ' num2str(SBC_south_p)])
-% 
+%
 % depth_contours = [DRC_north_p DRC_north_p];
 % h = contour(lon_v, lat_u, F_bottom_depth_now, depth_contours, ...
 %     'm--', 'linewidth', 0.5);
 
 
-% 6) 
+% 6)
 % hold on
 % [lat_u_NaN_ind, lon_u_NaN_ind] = ...
-%     find(isnan(U_prime_ptop_to_pmid));
+%     find(isnan(U_prime_ztop_to_zmid));
 % lat_u_NaN = lat_u(lat_u_NaN_ind);
 % lon_u_NaN = lon_u(lon_u_NaN_ind);
 % scatter(lon_u_NaN, lat_u_NaN, 4, ...
 %     'o', 'w');
-% % 
+% %
 % hold on
 % [lat_v_NaN_ind, lon_v_NaN_ind] = ...
-%     find(isnan(V_prime_ptop_to_pmid));
+%     find(isnan(V_prime_ztop_to_zmid));
 % lat_v_NaN = lat_v(lat_v_NaN_ind);
 % lon_v_NaN = lon_v(lon_v_NaN_ind);
 % scatter(lon_v_NaN, lat_v_NaN, 4, ...
@@ -498,11 +509,11 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 % 2) all data set-up
 sp = 2;
 axes('Units','centimeters', ...
-            'Position',[...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-            x_sp, ...
-            y_sp])
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
 % 3) asal pcolor set-up
 % new colormap routine !
 levels = 11;
@@ -523,7 +534,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_v, ...
     lat_v, ...
-    V_prime_ptop_to_pmid*magnif)
+    V_prime_ztop_to_zmid*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -561,11 +572,11 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 % 2) all data set-up
 sp = 3;
 axes('Units','centimeters', ...
-            'Position',[...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-            x_sp, ...
-            y_sp])
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
 % 3) asal pcolor set-up
 % new colormap routine !
 levels = 11;
@@ -586,7 +597,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_u, ...
     lat_u, ...
-    U_g_prime_pmid_to_pbot*magnif)
+    U_g_prime_zmid_to_zbot*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -630,11 +641,11 @@ if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 % 2) all data set-up
 sp = 4;
 axes('Units','centimeters', ...
-            'Position',[...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-            x_sp, ...
-            y_sp])
+    'Position',[...
+    (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+    (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+    x_sp, ...
+    y_sp])
 % 3) asal pcolor set-up
 % new colormap routine !
 levels = 11;
@@ -655,7 +666,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_v, ...
     lat_v, ...
-    V_g_prime_pmid_to_pbot*magnif)
+    V_g_prime_zmid_to_zbot*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -708,13 +719,13 @@ close
 % depth_contours = -700;
 % contour(lon_v, lat_v, v_bottom, [depth_contours depth_contours], ...
 %     'k', 'linewidth', 1);
-% 
+%
 % cn = c;
 % cs = c;
 % cn(2,2:end) = c(2,2:end)+0.4;
 % cs(2,2:end) = c(2,2:end)-0.4;
 % % cs(1,2:end) = c(1,2:end)-0.4;
-% 
+%
 % plot(c(1,2:end), c(2,2:end), 'g', 'linewidth', 1)
 % plot(cn(1,2:end), cn(2,2:end), 'g', 'linewidth', 3)
 % plot(cs(1,2:end), cs(2,2:end), 'g', 'linewidth', 3)
@@ -755,7 +766,7 @@ close
 % ref_U = zeros(size(ref_x_mg));
 % ref_U(4*n_lat,4*n_lon) = ref_vec;
 % ref_V = zeros(size(ref_x_mg));
-% 
+%
 % h = quiver(...
 %     ref_x, ref_y, ...
 %     ref_U, ...

@@ -66,6 +66,11 @@ plot(lon_u, aus8_currents.SBC_Ut, 'k-', 'linewidth', line_width)
 hold on
 plot(lon_u, KDau_currents.SBC_Ut, 'k--', 'linewidth', line_width)
 
+% xy = polyfit(lon_u,aus8_currents.SBC_Ut,1);
+% plot(lon_u, lon_u*xy(1)+xy(2), ':r');
+% xy = polyfit(lon_u,KDau_currents.SBC_Ut,1);
+% plot(lon_u, lon_u*xy(1)+xy(2), '--r');
+
 axis([115 147 -2.2 3.6])
 h_tit = title(['(' lett(sp) ') SBC local zonal transport ($Sv$)'], ...
     'fontsize',font_size, 'horizontalalignment','left');
@@ -216,6 +221,7 @@ print(fig, ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 close all
+
 
 %%
 play(bird_f_path,[1 (get(bird_f_path, 'SampleRate')*3)]);

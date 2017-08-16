@@ -21,9 +21,9 @@ Months = aus8_coor.Months;
 
 
 %%
-% apply open ocean boundary everywhere
-lat_phi = [lat_u(1)+1/8; lat_u; lat_u(end)-1/8];
-lon_phi = [lon_v(1)-1/8, lon_v, lon_v(end)+1/8];
+% apply south boundary condition
+lat_phi = [lat_u; lat_u(end)-1/8];
+lon_phi = lon_v;
 
 % dx for U position
 dx_U = NaN(length(lat_u), length(lon_u)-1);
@@ -45,25 +45,25 @@ end
 
 % include open boundary phi
 % dx for phi position
-dx_phi = NaN(length(lat_phi)-2, length(lon_phi)-1);
-for ii = 2 : length(lat_phi)-1
+dx_phi = NaN(length(lat_phi)-1, length(lon_phi)-1);
+for ii = 1 : length(lat_phi)-1
     dx_now = a * cos(lat_phi(ii) * pi180) .* ...
         (lon_phi(2:end) - lon_phi(1:end-1)) * pi180;
     
-    dx_phi(ii-1,:) = dx_now;
+    dx_phi(ii,:) = dx_now;
 end
 
 
 % dy for phi position
-dy_phi = NaN(length(lat_phi)-1, length(lon_phi)-2);
-for jj = 2 : length(lon_phi)-1
+dy_phi = NaN(length(lat_phi)-1, length(lon_phi));
+for jj = 1 : length(lon_phi)
     dy_now = a * (lat_phi(1:end-1) - lat_phi(2:end)) * pi180;
     
-    dy_phi(:,jj-1) = dy_now;
+    dy_phi(:,jj) = dy_now;
 end
 
-lat_V_repmat = repmat(lat_v,1,length(lon_phi)-2);
-lat_U_repmat = repmat(lat_u,1,length(lon_phi)-2);
+lat_V_repmat = repmat(lat_v,1,length(lon_phi));
+lat_U_repmat = repmat(lat_u,1,length(lon_phi));
 
 
 %%
@@ -73,8 +73,11 @@ K = 1;
 delta = max([dy_phi(:); dx_phi(:)]);
 Dt = 0.5 * delta^2 / K *10^-0.75;
 
-% zero grid (boundary condition)
-aus8_phi.mean = zeros(length(lat_phi), length(lon_phi));
+% Initial Conditions
+aus8_phi.mean = aus8_F.mean;
+
+% Boundary Condition
+aus8_phi.mean(end+1,:) = 0;
 
 for t = 1 : 12
     aus8_phi.(Months{t}) = aus8_F.(Months{t});
@@ -83,12 +86,12 @@ end
 
 % number of iterations
 n_5000s = 0 : 5000 : 5000000;
-tol = 1 * 10^-6;
+tol = 3 * 10^-6;
 n_iter = 0;
 
 Months{13} = 'mean';
 
-for t = 13%1 : length(Months)
+for t = 1 : length(Months)
     rel_error = 1;
     tic
     while rel_error > tol
@@ -99,11 +102,11 @@ for t = 13%1 : length(Months)
         aus8_U_d.(Months{t}) = zeros(size(aus8_U.(Months{t})));
         aus8_V_d.(Months{t}) = zeros(size(aus8_V.(Months{t})));
         
-        phi_n_x = phi_n(2:end-1, 2:end) - phi_n(2:end-1, 1:end-1);
-        phi_n_y = phi_n(1:end-1, 2:end-1) - phi_n(2:end, 2:end-1);
+        phi_n_x = phi_n(1:end-1, 2:end) - phi_n(1:end-1, 1:end-1);
+        phi_n_y = phi_n(1:end-1, :) - phi_n(2:end, :);
         
-        aus8_U_d.(Months{t}) = (phi_n_x) ./ dx_phi;
-        aus8_V_d.(Months{t}) = (phi_n_y) ./ dy_phi;
+        aus8_U_d.(Months{t})(:,2:end-1) = (phi_n_x) ./ dx_phi;
+        aus8_V_d.(Months{t})(2:end,:) = (phi_n_y) ./ dy_phi;
         
         aus8_U_d.(Months{t})(U_mask) = 0;
         aus8_V_d.(Months{t})(V_mask) = 0;
@@ -123,11 +126,14 @@ for t = 13%1 : length(Months)
         K_Lap_phi_minus_F = ...
             K * aus8_Lap_phi.(Months{t}) - aus8_F.(Months{t});
         
-        aus8_phi.(Months{t}) = zeros(length(lat_phi), length(lon_phi));
-        aus8_phi.(Months{t})(2:end-1,2:end-1) = ...
-            phi_n(2:end-1,2:end-1) + Dt * (K_Lap_phi_minus_F);
+        aus8_phi.(Months{t}) = ...
+            phi_n(1:end-1,:) + Dt * (K_Lap_phi_minus_F);
+        aus8_phi.(Months{t})(end+1,:) = 0;
         
-        rel_error = max(max(abs(K_Lap_phi_minus_F)));
+        % calculate relative error
+        rel_error = ...
+            max(max(abs(aus8_phi.(Months{t}) - phi_n))) / ...
+            max(max(abs(aus8_phi.(Months{t}))));
         
         if find(ismember(n_5000s,n_iter))
             fprintf('Iterations number = %.f Tolerance = %.9f \n', ...

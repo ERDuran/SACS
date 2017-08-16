@@ -24,9 +24,8 @@ lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 u_bottom = -aus8_coor.u_bottom;
 v_bottom = -aus8_coor.v_bottom;
-% Months = aus8_coor.Months;
-% Months{13} = 'mean';
-Months = {'mean'};
+Months = aus8_coor.Months;
+Months{13} = 'mean';
 
 
 %% 

@@ -86,12 +86,12 @@ end
 
 % number of iterations
 n_5000s = 0 : 5000 : 5000000;
-tol = 2 * 10^-6;
+tol = 1 * 10^-6;
 n_iter = 0;
 
 Months{13} = 'mean';
 
-for t = 13%1 : length(Months)
+for t = 1 : length(Months)
     rel_error = 1;
     tic
     while rel_error > tol
@@ -136,8 +136,8 @@ for t = 13%1 : length(Months)
             mean(mean(abs(KDau_phi.(Months{t}))));
         
         if find(ismember(n_5000s,n_iter))
-            fprintf('Iterations number = %.f Tolerance = %.9f \n', ...
-                n_iter, rel_error)
+            fprintf('%s, Iterations = %.f, Tolerance = %.9f \n', ...
+                Months{t}, n_iter, rel_error)
         end
     end
     toc
