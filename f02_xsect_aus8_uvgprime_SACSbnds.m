@@ -23,20 +23,22 @@ lon_u_SBC_north_OK = ...
 screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [2 4];
-rowcols_size = [3 4]/screen_ratio; % cm
-margs = [1 1.2 0.6 0.6]/screen_ratio; % cm
-gaps = [0.6 1]/screen_ratio; % cm
+rowcols_size = [3.4 4]/screen_ratio; % cm
+margs = [0.8 1.2 0.6 0.6]/screen_ratio; % cm
+gaps = [0.2 1]/screen_ratio; % cm
 plot_cbar_gap = 0.3/screen_ratio;
 cbar_x = 0.2/screen_ratio;
 cbar_y = rowcols_size(2);
 
 magnif = 100;
-cmap1_cont = (-12 : 2 : 0);
-cmap2_cont = (0 : 4 : 20);
+cmap1_cont = -[14 12 10 8 6 4 2 0.5 0];
+cmap2_cont = [0 0.5 2 4 6 8 10 12 14];
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
 cmap1 = flipud(othercolor('Blues6', lvl_cmap1));
 cmap2 = othercolor('Reds6', lvl_cmap2);
+cmap1(end,:) = [1 1 1];
+cmap2(1,:) = [1 1 1];
 cmaps = [cmap1; cmap2];
 cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
 cmaps_cont_length = length(cmaps_cont);
@@ -64,7 +66,8 @@ end
 
 lett = 'a':'z';
 font_size = 8*screen_ratio;
-fig_color = [0.7 0.7 0.7];
+nan_color = [0.7 0.7 0.7];
+fig_color = [1 1 1];
 
 close all
 fig = figure(fig_n);
@@ -80,22 +83,27 @@ marg_b = margs(3); % bottom margin
 marg_t = margs(4); % top margin
 marg_l = margs(1); % left margin
 marg_r = margs(2); % right margin
+fig_x = marg_l+colN*x_sp+gap_w*(colN-1)+marg_r;
+fig_y = marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t;
+
+desired_length = 0.05/screen_ratio; %cm
+if y_sp > x_sp, long_side = y_sp; else, long_side = x_sp; end
+norm_length = desired_length/long_side;
+fig_tick_length = [norm_length; 0.01];
+if cbar_y > cbar_x, long_side = cbar_y; else, long_side = cbar_x; end
+norm_length = desired_length/long_side;
+cbar_tick_length = [norm_length; 0.01];
+
 set(fig,'units','centimeters','paperunits','centimeters', ...
-    'inverthardcopy','off','color',[1 1 1],...
-    'paperposition',[0 0 ...
-    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
-    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]*screen_ratio,...
-    'position',[0 0 ...
-    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
-    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]);
+    'inverthardcopy','off','color',fig_color,...
+    'paperposition',[0 0 fig_x fig_y]*screen_ratio,...
+    'position',[0 0 fig_x fig_y]);
 
 for sp = 1 : rowN*colN
+    subplot_x = marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1);
+    subplot_y = marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1);
     ax = axes('Units','centimeters', ...
-        'Position',[...
-        (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-        (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-        x_sp, ...
-        y_sp]);
+        'Position',[subplot_x,subplot_y,x_sp,y_sp]);
     
     colormap(ax, cmaps_custom{sp});
     pcolor(x{sp}, y{sp}, data{sp})
@@ -106,15 +114,11 @@ for sp = 1 : rowN*colN
     
     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
         -20 : 2 : -2,'--k');
-%     clabel(cn, hn,'manual','fontsize',font_size)
+    clabel(cn, hn,'fontsize',font_size)
     
     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
-        0 : 2 : 20,'-k');
-%     clabel(cn, hn,'manual','fontsize',font_size)
-    
-    line_width = 0.1;
-    contour(x{sp},y{sp},data{sp}, ...
-        cmaps_cont,'-k','linewidth', line_width);
+        2 : 2 : 20,'-k');
+    clabel(cn, hn,'fontsize',font_size)
     
     line_width = 1;
     if find(ismember(lon_u_SBC_north_OK,aus8_figures.cross.lon(1,sp)))
@@ -254,24 +258,26 @@ for sp = 1 : rowN*colN
     h_tit.Position(1) = axis_setup{sp}(1);
 
     grid
-    set(gca,'layer','top','color',fig_color,...
+    set(ax,'layer','top','color',nan_color,...
         'fontsize',font_size,'tickdir','out', ...
-        'ytick', -2000:200:0)
+        'ytick', -2000:200:0,'ticklength',fig_tick_length, ...
+        'xtick',axis_setup{sp}(1):axis_setup{sp}(2)-1)
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
     
     if sp == rowN*colN
-        ax = axes;
-        set(gca,'Visible','off')
+        ax = axes('visible', 'off');
         colormap(ax, cmaps);
         cbar = colorbar;
         set(cbar,'ytick',cmaps_linspace, ...
             'YAxisLocation','right','YTickLabel',cmaps_y_label,...
-            'fontsize',font_size)
+            'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
             (marg_l+x_sp*(cm(sp))+gap_w*(cm(sp)-1)+plot_cbar_gap), ...
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
             cbar_x, ...
             cbar_y]);
+        pointycbar(cbar)
+        
     end
 end
 

@@ -62,9 +62,9 @@ ax = axes('Units','centimeters', ...
     x_sp, ...
     y_sp]);
 
-plot(lon_u, aus8_currents.SBC_Ut, 'k-', 'linewidth', line_width)
+plot(lon_u, aus8_currents.SBC_Ut.mean, 'k-', 'linewidth', line_width)
 hold on
-plot(lon_u, KDau_currents.SBC_Ut, 'k--', 'linewidth', line_width)
+plot(lon_u, KDau_currents.SBC_Ut.mean, 'k--', 'linewidth', line_width)
 
 % xy = polyfit(lon_u,aus8_currents.SBC_Ut,1);
 % plot(lon_u, lon_u*xy(1)+xy(2), ':r');
@@ -101,13 +101,13 @@ ax = axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp]);
-plot(lon_v, aus8_currents.SBC_Vtnc, 'g-', 'linewidth', line_width)
+plot(lon_v, aus8_currents.SBC_Vtnc.mean, 'g-', 'linewidth', line_width)
 hold on
-plot(lon_v, KDau_currents.SBC_Vtnc, 'g--', 'linewidth', line_width)
-plot(lon_v, aus8_currents.SBC_Vtsc, 'r-', 'linewidth', line_width)
-plot(lon_v, KDau_currents.SBC_Vtsc, 'r--', 'linewidth', line_width)
-plot(lon_v, aus8_currents.SBC_Wtc_real, 'b-', 'linewidth', line_width)
-plot(lon_v, KDau_currents.SBC_Wtc_real, 'b--', 'linewidth', line_width)
+plot(lon_v, KDau_currents.SBC_Vtnc.mean, 'g--', 'linewidth', line_width)
+plot(lon_v, aus8_currents.SBC_Vtsc.mean, 'r-', 'linewidth', line_width)
+plot(lon_v, KDau_currents.SBC_Vtsc.mean, 'r--', 'linewidth', line_width)
+plot(lon_v, aus8_currents.SBC_Wtc_real.mean, 'b-', 'linewidth', line_width)
+plot(lon_v, KDau_currents.SBC_Wtc_real.mean, 'b--', 'linewidth', line_width)
 
 axis([115 147 -2.2 3.6])
 h_tit = title(['(' lett(sp) ...
@@ -143,9 +143,9 @@ ax = axes('Units','centimeters', ...
     x_sp, ...
     y_sp]);
 
-plot(lon_u, aus8_currents.DRC_Ut, 'k-', 'linewidth', line_width)
+plot(lon_u, aus8_currents.DRC_Ut.mean, 'k-', 'linewidth', line_width)
 hold on
-plot(lon_u, KDau_currents.DRC_Ut, 'k--', 'linewidth', line_width)
+plot(lon_u, KDau_currents.DRC_Ut.mean, 'k--', 'linewidth', line_width)
 
 axis([115 147 -16.2 2.6])
 h_tit = title(['(' lett(sp) ...
@@ -177,13 +177,13 @@ ax = axes('Units','centimeters', ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     x_sp, ...
     y_sp]);
-plot(lon_v, aus8_currents.DRC_Vtnc, 'r-', 'linewidth', line_width)
+plot(lon_v, aus8_currents.DRC_Vtnc.mean, 'r-', 'linewidth', line_width)
 hold on
-plot(lon_v, KDau_currents.DRC_Vtnc, 'r--', 'linewidth', line_width)
-plot(lon_v, aus8_currents.DRC_Vtsc, 'm-', 'linewidth', line_width)
-plot(lon_v, KDau_currents.DRC_Vtsc, 'm--', 'linewidth', line_width)
-plot(lon_v, aus8_currents.DRC_Wtc_real, 'b-', 'linewidth', line_width)
-plot(lon_v, KDau_currents.DRC_Wtc_real, 'b--', 'linewidth', line_width)
+plot(lon_v, KDau_currents.DRC_Vtnc.mean, 'r--', 'linewidth', line_width)
+plot(lon_v, aus8_currents.DRC_Vtsc.mean, 'm-', 'linewidth', line_width)
+plot(lon_v, KDau_currents.DRC_Vtsc.mean, 'm--', 'linewidth', line_width)
+plot(lon_v, aus8_currents.DRC_Wtc_real.mean, 'b-', 'linewidth', line_width)
+plot(lon_v, KDau_currents.DRC_Wtc_real.mean, 'b--', 'linewidth', line_width)
 
 axis([115 147 -16.2 2.6])
 h_tit = title(['(' lett(sp) ...

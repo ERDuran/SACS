@@ -15,8 +15,8 @@ topo_binavg(topo_binavg==0) = NaN;
 screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [1 1];
-rowcols_size = [14 7]/screen_ratio; % cm
-margs = [0.8 1.2 0.6 0.2]/screen_ratio; % cm
+rowcols_size = [14 6]/screen_ratio; % cm
+margs = [0.6 1.2 0.6 0.2]/screen_ratio; % cm
 gaps = [1 1]/screen_ratio; % cm
 plot_cbar_gap = 0.3/screen_ratio;
 cbar_x = 0.2/screen_ratio;
@@ -48,8 +48,8 @@ cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_custom = {cmapcust(cmaps,cmaps_cont)};
 
 font_size = 8*screen_ratio;
-fig_color = [0 0 0];
-
+nan_color = [0 0 0];
+fig_color = [1 1 1];
 
 close all
 fig = figure(fig_n);
@@ -65,22 +65,27 @@ marg_b = margs(3); % bottom margin
 marg_t = margs(4); % top margin
 marg_l = margs(1); % left margin
 marg_r = margs(2); % right margin
+fig_x = marg_l+colN*x_sp+gap_w*(colN-1)+marg_r;
+fig_y = marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t;
+
+desired_length = 0.05/screen_ratio; %cm
+if y_sp > x_sp, long_side = y_sp; else, long_side = x_sp; end
+norm_length = desired_length/long_side;
+fig_tick_length = [norm_length; 0.01];
+if cbar_y > cbar_x, long_side = cbar_y; else, long_side = cbar_x; end
+norm_length = desired_length/long_side;
+cbar_tick_length = [norm_length; 0.01];
+
 set(fig,'units','centimeters','paperunits','centimeters', ...
-    'inverthardcopy','off','color',[1 1 1],...
-    'position',[0 0 ...
-    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
-    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)], ...
-    'paperposition',[0 0 ...
-    (marg_l+colN*x_sp+gap_w*(colN-1)+marg_r) ...
-    (marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t)]*screen_ratio);
+    'inverthardcopy','off','color',fig_color,...
+    'position',[0 0 fig_x fig_y], ...
+    'paperposition',[0 0 fig_x fig_y]*screen_ratio);
 
 for sp = 1 : rowN*colN
+    subplot_x = marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1);
+    subplot_y = marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1);
     ax = axes('Units','centimeters', ...
-        'Position',[...
-        (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-        (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
-        x_sp, ...
-        y_sp]);
+        'Position',[subplot_x,subplot_y,x_sp,y_sp]);
         
     colormap(ax, cmaps_custom{sp});
     pcolor(x{sp}, y{sp}, data{sp})
@@ -145,7 +150,7 @@ for sp = 1 : rowN*colN
     FC_south = 1.2;
     % FC
     FC_color = [1 0 0];
-    contour(x{sp}(64:268), y{sp}-FC_south, data{sp}(:,64:268), ...
+    contour(x{sp}(62:268), y{sp}-FC_south, data{sp}(:,62:268), ...
         [-700 -700], ...
         'color',FC_color, 'linewidth', 1.2)
     contour(x{sp}(272:313)-0.6, y{sp}-FC_south+0.1, ...
@@ -155,7 +160,7 @@ for sp = 1 : rowN*colN
     contour(x{sp}(308:313), y{sp}-FC_south+0.05, data{sp}(:,308:313), ...
         [-700 -700], ...
         'color',FC_color, 'linewidth', 1.2)
-    arrow([115.1,-35.3-FC_south], [115,-35.3-FC_south], ...
+    arrow([115.1,-35.2-FC_south], [115,-35.2-FC_south], ...
         big_ar_head, ...
         'Facecolor', FC_color, 'edgecolor', FC_color)
     text(133,-35.7-FC_south, 'FC', 'fontsize', font_size, ...
@@ -186,7 +191,7 @@ for sp = 1 : rowN*colN
     
     % ZC
     ZC_south = 0.5;
-    contour(x{sp}(278:308), y{sp}-ZC_south, data{sp}(:,278:308), ...
+    contour(x{sp}(278:310), y{sp}-ZC_south, data{sp}(:,278:310), ...
         [-700 -700], ...
         'color',SBC_color, 'linewidth', 1)
     arrow([146.9,-44.21-ZC_south], [147,-44.24-ZC_south], ...
@@ -245,10 +250,10 @@ for sp = 1 : rowN*colN
         'Facecolor', [1 0.5 0], 'edgecolor', [1 0.5 0])
 
     grid
-    set(ax,'layer','top','color',fig_color,...
-        'fontsize',font_size,'tickdir','out')
+    set(ax,'layer','top','color',nan_color,...
+        'fontsize',font_size,'tickdir','out','ticklength',fig_tick_length)
     if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), 
-    else set(gca,'xtick',109:2:153,'ytick',-50:2:-30), end
+    else, set(gca,'xtick',109:2:153,'ytick',-50:2:-30), end
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 end
 
@@ -343,18 +348,18 @@ text(125,-38.5,sprintf('South Australian Basin'), ...
     'fontsize', font_size, ...
     'color', [0 0 0])
 
-ax = axes;
-set(gca,'Visible','off')
+ax = axes('visible', 'off');
 colormap(ax, cmaps);
 cbar = colorbar;
 set(cbar,'ytick',cmaps_linspace(2:2:end), ...
-    'YTickLabel',cmaps_cont(2:2:end),'fontsize',font_size)
+    'YTickLabel',cmaps_cont(2:2:end),'fontsize',font_size,...
+    'ticklength',cbar_tick_length)
 set(cbar,'units','centimeters','position', [...
     (marg_l+x_sp*(cm(sp))+gap_w*(cm(sp)-1)+plot_cbar_gap), ...
     (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
     cbar_x, ...
-    cbar_y]);
-
+    cbar_y]);        
+        
 outputls = ls(figures_path);
 scriptname = mfilename;
 if ~contains(outputls, scriptname)
