@@ -54,29 +54,40 @@ depth_thkn_perm = permute(depth_thkn, [3 2 1]);
 depth_thkn_u = repmat(depth_thkn_perm, [length(lat_u), length(lon_u)]);
 depth_thkn_v = repmat(depth_thkn_perm, [length(lat_v), length(lon_v)]);
 
-u_g_prime_times_depth_thkn_u = KDau_u_g_prime.mean .* depth_thkn_u;
-U_g_prime_ptop_to_pmid = ...
-    nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_above_all_ind), 3);
-U_prime_ptop_to_pmid = U_g_prime_ptop_to_pmid + KDau_U_ek.mean;
-
-v_g_prime_times_depth_thkn_v = KDau_v_g_prime.mean .* depth_thkn_v;
-V_g_prime_ptop_to_pmid = ...
-    nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_above_all_ind), 3);
-V_prime_ptop_to_pmid = V_g_prime_ptop_to_pmid + KDau_V_ek.mean;
-
-U_g_prime_pmid_to_pbot = ...
-    nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_below_all_ind), 3);
-
-V_g_prime_pmid_to_pbot = ...
-    nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_below_all_ind), 3);
-
-U_g_prime_pmid_to_pbot(U_g_prime_pmid_to_pbot==0) = NaN;
-V_g_prime_pmid_to_pbot(V_g_prime_pmid_to_pbot==0) = NaN;
-
-KDau_currents.ptop_to_pmid.U_prime.mean = U_prime_ptop_to_pmid;
-KDau_currents.ptop_to_pmid.V_prime.mean = V_prime_ptop_to_pmid;
-KDau_currents.pmid_to_pbot.U_g_prime.mean = U_g_prime_pmid_to_pbot;
-KDau_currents.pmid_to_pbot.V_g_prime.mean = V_g_prime_pmid_to_pbot;
+for t = 1 : length(Months)
+    u_g_prime_times_depth_thkn_u = ...
+        KDau_u_g_prime.(Months{t}) .* depth_thkn_u;
+    U_g_prime_ztop_to_zmid = ...
+        nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_above_all_ind), 3);
+    U_prime_ztop_to_zmid = U_g_prime_ztop_to_zmid + ...
+        KDau_U_ek.(Months{t});
+    
+    v_g_prime_times_depth_thkn_v = ...
+        KDau_v_g_prime.(Months{t}) .* depth_thkn_v;
+    V_g_prime_ztop_to_zmid = ...
+        nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_above_all_ind), 3);
+    V_prime_ztop_to_zmid = V_g_prime_ztop_to_zmid + ...
+        KDau_V_ek.(Months{t});
+    
+    U_g_prime_zmid_to_zbot = ...
+        nansum(u_g_prime_times_depth_thkn_u(:,:,z_mid_below_all_ind), 3);
+    
+    V_g_prime_zmid_to_zbot = ...
+        nansum(v_g_prime_times_depth_thkn_v(:,:,z_mid_below_all_ind), 3);
+    
+    U_g_prime_zmid_to_zbot(U_g_prime_zmid_to_zbot==0) = NaN;
+    V_g_prime_zmid_to_zbot(V_g_prime_zmid_to_zbot==0) = NaN;
+    
+    KDau_currents.ztop_to_zmid.U_prime.(Months{t}) = ...
+        U_prime_ztop_to_zmid;
+    KDau_currents.ztop_to_zmid.V_prime.(Months{t}) = ...
+        V_prime_ztop_to_zmid;
+    KDau_currents.zmid_to_zbot.U_g_prime.(Months{t}) = ...
+        U_g_prime_zmid_to_zbot;
+    KDau_currents.zmid_to_zbot.V_g_prime.(Months{t}) = ...
+        V_g_prime_zmid_to_zbot;
+    disp([Months{t} ' OK!'])
+end
 
 
 %% 5) make repelem and interp2
@@ -156,7 +167,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_u, ...
     lat_u, ...
-    U_prime_ptop_to_pmid*magnif)
+    U_prime_ztop_to_zmid*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -218,7 +229,7 @@ text(138, -35, 'DRC $V_{t}sc$ up')
 % 6) 
 % hold on
 % [lat_u_NaN_ind, lon_u_NaN_ind] = ...
-%     find(isnan(U_prime_ptop_to_pmid));
+%     find(isnan(U_prime_ztop_to_zmid));
 % lat_u_NaN = lat_u(lat_u_NaN_ind);
 % lon_u_NaN = lon_u(lon_u_NaN_ind);
 % scatter(lon_u_NaN, lat_u_NaN, 4, ...
@@ -226,7 +237,7 @@ text(138, -35, 'DRC $V_{t}sc$ up')
 % % 
 % hold on
 % [lat_v_NaN_ind, lon_v_NaN_ind] = ...
-%     find(isnan(V_prime_ptop_to_pmid));
+%     find(isnan(V_prime_ztop_to_zmid));
 % lat_v_NaN = lat_v(lat_v_NaN_ind);
 % lon_v_NaN = lon_v(lon_v_NaN_ind);
 % scatter(lon_v_NaN, lat_v_NaN, 4, ...
@@ -272,7 +283,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_v, ...
     lat_v, ...
-    V_prime_ptop_to_pmid*magnif)
+    V_prime_ztop_to_zmid*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -335,7 +346,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_u, ...
     lat_u, ...
-    U_g_prime_pmid_to_pbot*magnif)
+    U_g_prime_zmid_to_zbot*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);
@@ -404,7 +415,7 @@ colormap(cmaps_custom);
 pcolor(...
     lon_v, ...
     lat_v, ...
-    V_g_prime_pmid_to_pbot*magnif)
+    V_g_prime_zmid_to_zbot*magnif)
 shading interp
 hold on
 caxis([cmaps_cont(1) cmaps_cont(end)]);

@@ -3,6 +3,7 @@ clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
 load([data_path 'SACS_data/aus8_coor'])
+load([data_path 'SACS_data/KDau_currents'])
 load([data_path 'SACS_data/aus8_currents'])
 
 
@@ -12,13 +13,13 @@ lon_u = aus8_coor.lon_u;
 lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 
-U_prime_ztop_to_zmid = aus8_currents.ztop_to_zmid.U_prime.mean;
-V_prime_ztop_to_zmid = aus8_currents.ztop_to_zmid.V_prime.mean;
+U_prime_ztop_to_zmid = KDau_currents.ztop_to_zmid.U_prime.mean;
+V_prime_ztop_to_zmid = KDau_currents.ztop_to_zmid.V_prime.mean;
 V_prime_ztop_to_zmid_interp2 = interp2(...
     lon_v, lat_v, V_prime_ztop_to_zmid, lon_u, lat_u);
 
-U_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.U_g_prime.mean;
-V_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.V_g_prime.mean;
+U_g_prime_zmid_to_zbot = KDau_currents.zmid_to_zbot.U_g_prime.mean;
+V_g_prime_zmid_to_zbot = KDau_currents.zmid_to_zbot.V_g_prime.mean;
 V_g_prime_zmid_to_zbot_interp2 = interp2(...
     lon_v, lat_v, V_g_prime_zmid_to_zbot, lon_u, lat_u);
 
@@ -222,7 +223,7 @@ for sp = 1 : rowN*colN
         text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
-    h_tit = title(['(' lett(sp) ') Mean CARS $' title_chc{sp} ...
+    h_tit = title(['(' lett(sp) ') Mean KDS75 $' title_chc{sp} ...
         '$ ($m^{2}/s$) integrated from ' ...
     '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);

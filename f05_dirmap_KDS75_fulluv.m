@@ -3,6 +3,7 @@ clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
 load([data_path 'SACS_data/aus8_coor'])
+load([data_path 'SACS_data/KDau_fullcrts'])
 load([data_path 'SACS_data/aus8_currents'])
 
 
@@ -12,15 +13,15 @@ lon_u = aus8_coor.lon_u;
 lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 
-U_prime_ztop_to_zmid = aus8_currents.ztop_to_zmid.U_prime.mean;
-V_prime_ztop_to_zmid = aus8_currents.ztop_to_zmid.V_prime.mean;
-V_prime_ztop_to_zmid_interp2 = interp2(...
-    lon_v, lat_v, V_prime_ztop_to_zmid, lon_u, lat_u);
+fulU_ztop_to_zmid = KDau_fullcrts.ztop_to_zmid.fulU.mean;
+fulV_ztop_to_zmid = KDau_fullcrts.ztop_to_zmid.fulV.mean;
+fulV_ztop_to_zmid_interp2 = interp2(...
+    lon_v, lat_v, fulV_ztop_to_zmid, lon_u, lat_u);
 
-U_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.U_g_prime.mean;
-V_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.V_g_prime.mean;
-V_g_prime_zmid_to_zbot_interp2 = interp2(...
-    lon_v, lat_v, V_g_prime_zmid_to_zbot, lon_u, lat_u);
+fulU_zmid_to_zbot = KDau_fullcrts.zmid_to_zbot.fulU.mean;
+fulV_zmid_to_zbot = KDau_fullcrts.zmid_to_zbot.fulV.mean;
+fulV_zmid_to_zbot_interp2 = interp2(...
+    lon_v, lat_v, fulV_zmid_to_zbot, lon_u, lat_u);
 
 lon_u_ALLC_repelem = [...
     aus8_currents.lon_u_ALLC(:,1), ...
@@ -77,11 +78,11 @@ x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
 x_ind = [1 1];
 y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
 
-data = {U_prime_ztop_to_zmid*magnif, U_g_prime_zmid_to_zbot*magnif};
-v_data = {V_prime_ztop_to_zmid_interp2*magnif, ...
-    V_g_prime_zmid_to_zbot_interp2*magnif};
+data = {fulU_ztop_to_zmid*magnif, fulU_zmid_to_zbot*magnif};
+v_data = {fulV_ztop_to_zmid_interp2*magnif, ...
+    fulV_zmid_to_zbot_interp2*magnif};
 
-title_chc = {'U''', 'U_{g}'''};
+title_chc = {'U', 'U'};
 z1_chc = {z_top, z_mid};
 z2_chc = {z_mid, z_bot};
 
@@ -222,7 +223,7 @@ for sp = 1 : rowN*colN
         text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
-    h_tit = title(['(' lett(sp) ') Mean CARS $' title_chc{sp} ...
+    h_tit = title(['(' lett(sp) ') Mean KDS75 full $' title_chc{sp} ...
         '$ ($m^{2}/s$) integrated from ' ...
     '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);

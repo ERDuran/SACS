@@ -2,10 +2,10 @@
 clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_coor'])
+load([data_path 'SACS_data/KDau_currents'])
 load([data_path 'SACS_data/aus8_currents'])
-load([data_path 'SACS_data/aus8_currents'])
-load([data_path 'SACS_data/aus8_U_prime'])
-load([data_path 'SACS_data/aus8_V_prime'])
+load([data_path 'SACS_data/KDau_U_prime'])
+load([data_path 'SACS_data/KDau_V_prime'])
 
 a = aus8_coor.a;
 pi180 = aus8_coor.pi180;
@@ -25,10 +25,10 @@ Months{13} = 'mean';
 %% Prep
 for t = 1 : 13
     %
-    U_prime_up = aus8_currents.ztop_to_zmid.U_prime.(Months{t});
-    V_prime_up = aus8_currents.ztop_to_zmid.V_prime.(Months{t});
-    U_g_prime_dw = aus8_currents.zmid_to_zbot.U_g_prime.(Months{t});
-    V_g_prime_dw = aus8_currents.zmid_to_zbot.V_g_prime.(Months{t});
+    U_prime_up = KDau_currents.ztop_to_zmid.U_prime.(Months{t});
+    V_prime_up = KDau_currents.ztop_to_zmid.V_prime.(Months{t});
+    U_g_prime_dw = KDau_currents.zmid_to_zbot.U_g_prime.(Months{t});
+    V_g_prime_dw = KDau_currents.zmid_to_zbot.V_g_prime.(Months{t});
     
     %
     dx_v = NaN(length(lat_v), length(lon_u)-1);
@@ -73,15 +73,15 @@ for t = 1 : 13
     dy_v = repmat(dy_raw, [1 length(lon_v)]);
     
     %
-    aus8_U_prime.(Months{t})(isnan(aus8_U_prime.(Months{t}))) = 0;
-    aus8_V_prime.(Months{t})(isnan(aus8_V_prime.(Months{t}))) = 0;
-    du = aus8_U_prime.(Months{t})(:,2:end) - ...
-        aus8_U_prime.(Months{t})(:,1:end-1);
+    KDau_U_prime.(Months{t})(isnan(KDau_U_prime.(Months{t}))) = 0;
+    KDau_V_prime.(Months{t})(isnan(KDau_V_prime.(Months{t}))) = 0;
+    du = KDau_U_prime.(Months{t})(:,2:end) - ...
+        KDau_U_prime.(Months{t})(:,1:end-1);
     dudx = du ./ dx_u;
     lat_v_repmat = repmat(lat_v,1,length(lon_v));
-    dv = aus8_V_prime.(Months{t})(1:end-1,:).* ...
+    dv = KDau_V_prime.(Months{t})(1:end-1,:).* ...
         cos(lat_v_repmat(1:end-1,:) * pi180) - ...
-        aus8_V_prime.(Months{t})(2:end,:).* ...
+        KDau_V_prime.(Months{t})(2:end,:).* ...
         cos(lat_v_repmat(2:end,:) * pi180);
     lat_u_repmat = repmat(lat_u,1,length(lon_v));
     dvdy = 1./cos(lat_u_repmat * pi180).*dv./dy_v;
@@ -902,7 +902,7 @@ for t = 1 : 13
     row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
     gap_w = gaps(1); % gap width between subplots
     gap_h = gaps(2); % gap height between subplots
-    marg_b = margs(3); % bottom_aus8 margin
+    marg_b = margs(3); % bottom_KDau margin
     marg_t = margs(4); % top margin
     marg_l = margs(1); % left margin
     marg_r = margs(2); % right margin
@@ -933,8 +933,8 @@ for t = 1 : 13
         'SBC $W_{t}c$ real', ...
         'SBC $W_{t}c$ leak')
     axis([115 147 -3 3])
-    title([Months{t} ...
-        ' aus8 SBC transports ($Sv$) VS longitude'])
+    title([Months{t} ... 
+        ' KDS75 SBC transports ($Sv$) VS longitude'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -966,7 +966,7 @@ for t = 1 : 13
         'DRC $W_{t}c$ leak')
     axis([115 147 -17 17])
     title([Months{t} ... 
-        ' aus8 DRC transports ($Sv$) VS longitude'])
+        ' KDS75 DRC transports ($Sv$) VS longitude'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1003,7 +1003,7 @@ for t = 1 : 13
     row_ind = (fliplr(repmat((1:rowN)',1,colN)))';
     gap_w = gaps(1); % gap width between subplots
     gap_h = gaps(2); % gap height between subplots
-    marg_b = margs(3); % bottom_aus8 margin
+    marg_b = margs(3); % bottom_KDau margin
     marg_t = margs(4); % top margin
     marg_l = margs(1); % left margin
     marg_r = margs(2); % right margin
@@ -1021,7 +1021,7 @@ for t = 1 : 13
         y_sp])
     plot(lon_u, SBC_Ut-SBC_Ut_star, 'k-', 'linewidth', 1)
     title([Months{t} ...
-        ' aus8 SBC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
+        ' KDS75 SBC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1035,7 +1035,7 @@ for t = 1 : 13
         y_sp])
     plot(lon_u, DRC_Ut-DRC_Ut_star, 'k-', 'linewidth', 1)
     title([Months{t} ...
-        ' aus8 DRC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
+        ' KDS75 DRC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1048,8 +1048,8 @@ for t = 1 : 13
         x_sp, ...
         y_sp])
     plot(lon_v, SBC_Wtc_leak, 'b:', 'linewidth', 1)
-    title([Months{t} ... 
-        ' aus8 SBC $W_{t}c$ leak ($Sv$) VS longitude'])
+    title([Months{t} ...
+        ' KDS75 SBC $W_{t}c$ leak ($Sv$) VS longitude'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1062,7 +1062,7 @@ for t = 1 : 13
         x_sp, ...
         y_sp])
     plot(lon_v, DRC_Wtc_leak, 'b:', 'linewidth', 1)
-    title('aus8 DRC $W_{t}c$ leak ($Sv$) VS longitude')
+    title('KDS75 DRC $W_{t}c$ leak ($Sv$) VS longitude')
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1080,25 +1080,25 @@ for t = 1 : 13
     
     
     %% save all that stuff !
-    aus8_currents.SBC_Ut.(Months{t}) = SBC_Ut;
-    aus8_currents.SBC_Ut_star.(Months{t}) = SBC_Ut_star;
-    aus8_currents.SBC_Vtnc.(Months{t}) = SBC_Vtnc;
-    aus8_currents.SBC_Vtsc.(Months{t}) = SBC_Vtsc;
-    aus8_currents.SBC_Wtc_real.(Months{t}) = SBC_Wtc_real;
-    aus8_currents.SBC_Wtc_leak.(Months{t}) = SBC_Wtc_leak;
-    aus8_currents.DRC_Ut.(Months{t}) = DRC_Ut;
-    aus8_currents.DRC_Ut_star.(Months{t}) = DRC_Ut_star;
-    aus8_currents.DRC_Vtnc.(Months{t}) = DRC_Vtnc;
-    aus8_currents.DRC_Vtsc.(Months{t}) = DRC_Vtsc;
-    aus8_currents.DRC_Vtsc_up.(Months{t}) = DRC_Vtsc_up;
-    aus8_currents.DRC_Vtsc_dw.(Months{t}) = DRC_Vtsc_dw;
-    aus8_currents.DRC_Wtc_real.(Months{t}) = DRC_Wtc_real;
-    aus8_currents.DRC_Wtc_leak.(Months{t}) = DRC_Wtc_leak;
+    KDau_currents.SBC_Ut.(Months{t}) = SBC_Ut;
+    KDau_currents.SBC_Ut_star.(Months{t}) = SBC_Ut_star;
+    KDau_currents.SBC_Vtnc.(Months{t}) = SBC_Vtnc;
+    KDau_currents.SBC_Vtsc.(Months{t}) = SBC_Vtsc;
+    KDau_currents.SBC_Wtc_real.(Months{t}) = SBC_Wtc_real;
+    KDau_currents.SBC_Wtc_leak.(Months{t}) = SBC_Wtc_leak;
+    KDau_currents.DRC_Ut.(Months{t}) = DRC_Ut;
+    KDau_currents.DRC_Ut_star.(Months{t}) = DRC_Ut_star;
+    KDau_currents.DRC_Vtnc.(Months{t}) = DRC_Vtnc;
+    KDau_currents.DRC_Vtsc.(Months{t}) = DRC_Vtsc;
+    KDau_currents.DRC_Vtsc_up.(Months{t}) = DRC_Vtsc_up;
+    KDau_currents.DRC_Vtsc_dw.(Months{t}) = DRC_Vtsc_dw;
+    KDau_currents.DRC_Wtc_real.(Months{t}) = DRC_Wtc_real;
+    KDau_currents.DRC_Wtc_leak.(Months{t}) = DRC_Wtc_leak;
     disp([Months{t} ' OK!'])
 end
 
 
 %%
-save([data_path 'SACS_data/aus8_currents'], 'aus8_currents')
-disp(['aus8_currents DONE'])
+save([data_path 'SACS_data/KDau_currents'], 'KDau_currents')
+disp(['KDau_currents DONE'])
 
