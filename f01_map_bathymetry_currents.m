@@ -74,7 +74,7 @@ norm_length = desired_length/long_side;
 fig_tick_length = [norm_length; 0.01];
 if cbar_y > cbar_x, long_side = cbar_y; else, long_side = cbar_x; end
 norm_length = desired_length/long_side;
-cbar_tick_length = [norm_length; 0.01];
+cbar_tick_length = norm_length;
 
 set(fig,'units','centimeters','paperunits','centimeters', ...
     'inverthardcopy','off','color',fig_color,...

@@ -5,6 +5,7 @@ play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/KDau_currents'])
 load([data_path 'SACS_data/aus8_currents'])
+load([data_path 'SACS_data/aus8_figures'])
 
 
 %%
@@ -57,7 +58,7 @@ cbar_x = 0.2/screen_ratio;
 cbar_y = rowcols_size(2);
 
 magnif = 10;
-cmap1_cont = -[200 100 50 20 10 5 2 0.5 0]*magnif;
+cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -124,7 +125,7 @@ norm_length = desired_length/long_side;
 fig_tick_length = [norm_length; 0.01];
 if cbar_y > cbar_x, long_side = cbar_y; else, long_side = cbar_x; end
 norm_length = desired_length/long_side;
-cbar_tick_length = [norm_length; 0.01];
+cbar_tick_length = norm_length;
 
 set(fig,'units','centimeters','paperunits','centimeters', ...
     'inverthardcopy','off','color',fig_color,...
@@ -148,7 +149,7 @@ for sp = 1 : rowN*colN
         s = 3;
         ref_magn = 20;
     else
-        s = 3;
+        s = 2.5;
         ref_magn = 60;
     end
     
@@ -160,6 +161,11 @@ for sp = 1 : rowN*colN
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
     hold on
+    
+    for n = 1 : length(aus8_figures.cross.lon(1,:))
+        plot(aus8_figures.cross.lon(1:2,n), ...
+            aus8_figures.cross.lat(1:2,n), '--k')
+    end
     
     n = 6; m = 2;
     quiver(lon_u(1:n:end),lat_u(1:m:end),...
@@ -223,8 +229,8 @@ for sp = 1 : rowN*colN
         text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
-    h_tit = title(['(' lett(sp) ') Mean KDS75 $' title_chc{sp} ...
-        '$ ($m^{2}/s$) integrated from ' ...
+    h_tit = title(['(' lett(sp) ') Mean ZD KDS75 $' title_chc{sp} ...
+        '$ ($m^{2}/s$, shadings) integrated from ' ...
     '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);

@@ -3,7 +3,6 @@ clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/aus8_currents'])
-load([data_path 'SACS_data/aus8_currents'])
 load([data_path 'SACS_data/aus8_U_prime'])
 load([data_path 'SACS_data/aus8_V_prime'])
 

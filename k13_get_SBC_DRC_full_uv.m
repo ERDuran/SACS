@@ -614,7 +614,7 @@ for t = 1 : 5
     
     for n = 1 : length(lon_u)-1
         if Vtn_dw_DRC(n) ~= 0
-            error('Vtn_dw_DRC = 0 somewhere :( !')
+            error('Vtn_dw_DRC ~= 0 somewhere :( !')
         end
     end
     disp('Vtn_dw_DRC = 0 everywhere :)')

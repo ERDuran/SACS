@@ -3,11 +3,11 @@ clearvars('-except', '*_path')
 
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/SmSan02'])
+load([data_path 'SACS_data/aus8_currents'])
+load([data_path 'SACS_data/KDau_fcrt'])
+load([data_path 'SACS_data/aus8_figures'])
 
-
-MTH = {'JFM', 'AMJ', 'JAS', 'OND'};
-aus8_coor.MTH = MTH;
-save([data_path 'SACS_data/aus8_coor'], 'aus8_coor')
+MTH = aus8_coor.MTH;
 lat = aus8_coor.lat;
 lon = aus8_coor.lon;
 lat_u = aus8_coor.lat_u;
@@ -16,13 +16,14 @@ lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 depth_mid = aus8_coor.depth_mid;
 depth = aus8_coor.depth;
+depth_thkn = aus8_coor.depth_thkn;
 
 
 %%
 for t = 1 : 4
     [data.(MTH{t}), ~, kds_att] = ...
         nc2mat([data_path ...
-        'KDS75/KDS75_ncra_y103to109_' MTH{t} '.nc'], ...
+        'KDS75/' MTH{t} '6.nc'], ...
         'ALL');
         
     disp([MTH{t} ' OK!'])
@@ -40,7 +41,6 @@ sw_ocean = -data.JFM.sw_ocean;
 % wt, sw_ocean, yt_ocean, xt_ocean
 % tx_trans, st_ocean, yt_ocean, xu_ocean
 % ty_trans, st_ocean, yu_ocean, xt_ocean
-
 
 
 %%
@@ -230,9 +230,65 @@ for t = 1 : 5
 end
 
 
+%% 1) Define mid pressure and west, east start/end
+%%% BOTTOM PRES
+% pressure of the bottom surface currents
+z_top = aus8_currents.z_top;
+z_mid = aus8_currents.z_mid;
+z_bot = aus8_currents.z_bot;
+% index vector of the bottom surface currents
+z_top_below_ind = find(depth==z_top);
+z_mid_above_ind = find(depth==z_mid)-1;
+z_mid_below_ind = find(depth==z_mid);
+% pressure above the bottom
+z_top_below = depth_mid(z_top_below_ind);
+z_mid_above = depth_mid(z_mid_above_ind);
+z_mid_below = depth_mid(z_mid_below_ind);
+% index vector of currents pressure from surface to interface
+z_mid_above_all_ind = depth_mid >= z_mid_above;
+z_mid_below_all_ind = depth_mid <= z_mid_below;
+%%% BOTTOM PRES
+
+
+%% Prep
+for t = 1 : 5    
+    depth_thkn_perm = permute(depth_thkn, [3 2 1]);
+    depth_thkn_u = repmat(depth_thkn_perm, [length(lat_u), length(lon_u)]);
+    depth_thkn_v = repmat(depth_thkn_perm, [length(lat_v), length(lon_v)]);
+    
+    u_times_depth_thkn_u = KDau_fulu.(MTH{t}) .* depth_thkn_u;
+    U_ztop_to_zmid = ...
+        nansum(u_times_depth_thkn_u(:,:,z_mid_above_all_ind), 3);
+    
+    v_times_depth_thkn_v = KDau_fulv.(MTH{t}) .* depth_thkn_v;
+    V_ztop_to_zmid = ...
+        nansum(v_times_depth_thkn_v(:,:,z_mid_above_all_ind), 3);
+    
+    U_zmid_to_zbot = ...
+        nansum(u_times_depth_thkn_u(:,:,z_mid_below_all_ind), 3);
+    
+    V_zmid_to_zbot = ...
+        nansum(v_times_depth_thkn_v(:,:,z_mid_below_all_ind), 3);
+    
+    W_zmid = KDau_fulw.(MTH{t})(:,:,z_mid_above_ind+1);
+    W_zbot = KDau_fulw.(MTH{t})(:,:,end);
+    
+    U_ztop_to_zmid(U_ztop_to_zmid==0) = NaN;
+    V_ztop_to_zmid(V_ztop_to_zmid==0) = NaN;
+    U_zmid_to_zbot(U_zmid_to_zbot==0) = NaN;
+    V_zmid_to_zbot(V_zmid_to_zbot==0) = NaN;
+    
+    KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t}) = U_ztop_to_zmid;
+    KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t}) = V_ztop_to_zmid;
+    KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t}) = U_zmid_to_zbot;
+    KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t}) = V_zmid_to_zbot;
+    KDau_fcrt.MMM.zmid.fulw.(MTH{t}) = W_zmid;
+    KDau_fcrt.MMM.zbot.fulw.(MTH{t}) = W_zbot;
+    disp([MTH{t} ' OK!'])
+end
+
+
 %%
-save([data_path 'SACS_data/KDau_fulu'], 'KDau_fulu')
-save([data_path 'SACS_data/KDau_fulv'], 'KDau_fulv')
-save([data_path 'SACS_data/KDau_fulw'], 'KDau_fulw')
-disp('KDau_fulu KDau_fulv KDau_fulw DONE')
+save([data_path 'SACS_data/KDau_fcrt'], 'KDau_fcrt')
+disp(['KDau_fcrt DONE'])
 

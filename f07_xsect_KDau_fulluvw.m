@@ -123,17 +123,18 @@ for sp = 1 : rowN*colN
     fulw_fact = 10000;
     if sp == 4
         % create reference arrow
-        depth_ref = -1650; lat_ref = -35.375;
+        depth_ref = -1150; lat_ref = -34.5;
         depth_ref_ind = find(aus8_coor.depth_mid==depth_ref); 
         lat_ref_ind = find(aus8_coor.lat_u==lat_ref+1/16);
-        data{sp}(depth_ref_ind:depth_ref_ind+4,lat_ref_ind-26:lat_ref_ind) = 0;
-        data_contour{sp}(depth_ref_ind:depth_ref_ind+4,lat_ref_ind-26:lat_ref_ind) = 0;
-        fulw{sp}(depth_ref_ind:depth_ref_ind+4,lat_ref_ind-15:lat_ref_ind) = 0;
+        data{sp}(depth_ref_ind:depth_ref_ind+8,lat_ref_ind-18:lat_ref_ind) = 0;
+        data_contour{sp}(depth_ref_ind:depth_ref_ind+8,lat_ref_ind-18:lat_ref_ind) = 0;
+        fulw{sp}(depth_ref_ind:depth_ref_ind+8,lat_ref_ind-18:lat_ref_ind) = 0;
         ref_magn1 = 10;
-        data_contour{sp}(depth_ref_ind+2,lat_ref_ind-0) = ref_magn1;
+        data_contour{sp}(depth_ref_ind+1,lat_ref_ind-5) = ref_magn1;
         
         ref_magn2 = 0.001;
-        fulw{sp}(depth_ref_ind+2,lat_ref_ind-10) = ref_magn2;
+        magnif_2 = 4;
+        fulw{sp}(depth_ref_ind+5,lat_ref_ind-7) = ref_magn2;
     end
     
     colormap(ax, cmaps_custom{sp});
@@ -143,14 +144,6 @@ for sp = 1 : rowN*colN
     caxis([minmax{sp}(1) minmax{sp}(2)]);
     hold on
     
-%     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
-%         -20 : 2 : -2,'--k');
-%     clabel(cn, hn,'fontsize',font_size)
-%     
-%     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
-%         2 : 2 : 20,'-k');
-%     clabel(cn, hn,'fontsize',font_size)
-    
     scaling_fac = 30;
     n = 2;
     u_0 = zeros(size(data_contour{sp}));
@@ -159,13 +152,25 @@ for sp = 1 : rowN*colN
         fulw{sp}(depth_plot_idx,1:n:end)*fulw_fact/scaling_fac, ...
         'k', 'autoscale', 'off')
     
+%     if sp == 4
+%         data_contour{sp}(depth_ref_ind+1,lat_ref_ind-5) = 0;
+%     end
+%     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
+%         -20 : 2 : -2,'--k');
+%     clabel(cn, hn,'fontsize',font_size)
+%     
+%     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
+%         2 : 2 : 20,'-k');
+%     clabel(cn, hn,'fontsize',font_size)
+    
     if sp == 4
-        text(aus8_coor.lat_u(lat_ref_ind-1), depth_mid_for_plot(depth_ref_ind+1+2), ...
+        text(aus8_coor.lat_u(lat_ref_ind-4), depth_mid_for_plot(depth_ref_ind+3)+0.3, ...
             [num2str(ref_magn1) ' $cm/s$'], ...
             'fontsize',font_size)
         
-        text(aus8_coor.lat_u(lat_ref_ind-11), depth_mid_for_plot(depth_ref_ind+1+2), ...
-            [num2str(ref_magn2) ' $\cdot$ $10^{4}$ $cm/s$'], ...
+        text(aus8_coor.lat_u(lat_ref_ind-1), depth_mid_for_plot(depth_ref_ind+7), ...
+            [num2str(ref_magn2*10^magnif_2) ...
+            ' $\cdot$ $10^{-' num2str(magnif_2) '}$ $cm/s$'], ...
             'fontsize',font_size)
     end
     
@@ -265,7 +270,7 @@ for sp = 1 : rowN*colN
             aus8_currents.lon_u_ALLC==aus8_figures.cross.lon(1,sp))],...
             [aus8_currents.z_bot, aus8_currents.z_bot] ...
             /yx_quiver_ratio, ...
-            'm', ...
+            'c', ...
             'linewidth',line_width)
     else
         plot([...
@@ -273,7 +278,7 @@ for sp = 1 : rowN*colN
             aus8_currents.lat_v_SBC_north(end)],...
             [aus8_currents.z_bot, aus8_currents.z_bot] ...
             /yx_quiver_ratio, ...
-            'm', ...
+            'c', ...
             'linewidth',line_width)
     end
     

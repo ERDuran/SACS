@@ -3,8 +3,9 @@ clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
 load([data_path 'SACS_data/aus8_coor'])
-load([data_path 'SACS_data/KDau_fullcrts'])
+load([data_path 'SACS_data/KDau_fcrt'])
 load([data_path 'SACS_data/aus8_currents'])
+load([data_path 'SACS_data/aus8_figures'])
 
 
 %%
@@ -13,15 +14,15 @@ lon_u = aus8_coor.lon_u;
 lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
 
-fulU_ztop_to_zmid = KDau_fullcrts.ztop_to_zmid.fulU.mean;
-fulV_ztop_to_zmid = KDau_fullcrts.ztop_to_zmid.fulV.mean;
-fulV_ztop_to_zmid_interp2 = interp2(...
-    lon_v, lat_v, fulV_ztop_to_zmid, lon_u, lat_u);
+fulu_ztop_to_zmid = KDau_fcrt.ztop_to_zmid.fulu.mean;
+fulv_ztop_to_zmid = KDau_fcrt.ztop_to_zmid.fulv.mean;
+fulv_ztop_to_zmid_interp2 = interp2(...
+    lon_v, lat_v, fulv_ztop_to_zmid, lon_u, lat_u);
 
-fulU_zmid_to_zbot = KDau_fullcrts.zmid_to_zbot.fulU.mean;
-fulV_zmid_to_zbot = KDau_fullcrts.zmid_to_zbot.fulV.mean;
-fulV_zmid_to_zbot_interp2 = interp2(...
-    lon_v, lat_v, fulV_zmid_to_zbot, lon_u, lat_u);
+fulu_zmid_to_zbot = KDau_fcrt.zmid_to_zbot.fulu.mean;
+fulv_zmid_to_zbot = KDau_fcrt.zmid_to_zbot.fulv.mean;
+fulv_zmid_to_zbot_interp2 = interp2(...
+    lon_v, lat_v, fulv_zmid_to_zbot, lon_u, lat_u);
 
 lon_u_ALLC_repelem = [...
     aus8_currents.lon_u_ALLC(:,1), ...
@@ -57,7 +58,7 @@ cbar_x = 0.2/screen_ratio;
 cbar_y = rowcols_size(2);
 
 magnif = 10;
-cmap1_cont = -[200 100 50 20 10 5 2 0.5 0]*magnif;
+cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -78,9 +79,9 @@ x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
 x_ind = [1 1];
 y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
 
-data = {fulU_ztop_to_zmid*magnif, fulU_zmid_to_zbot*magnif};
-v_data = {fulV_ztop_to_zmid_interp2*magnif, ...
-    fulV_zmid_to_zbot_interp2*magnif};
+data = {fulu_ztop_to_zmid*magnif, fulu_zmid_to_zbot*magnif};
+v_data = {fulv_ztop_to_zmid_interp2*magnif, ...
+    fulv_zmid_to_zbot_interp2*magnif};
 
 title_chc = {'U', 'U'};
 z1_chc = {z_top, z_mid};
@@ -124,7 +125,7 @@ norm_length = desired_length/long_side;
 fig_tick_length = [norm_length; 0.01];
 if cbar_y > cbar_x, long_side = cbar_y; else, long_side = cbar_x; end
 norm_length = desired_length/long_side;
-cbar_tick_length = [norm_length; 0.01];
+cbar_tick_length = norm_length;
 
 set(fig,'units','centimeters','paperunits','centimeters', ...
     'inverthardcopy','off','color',fig_color,...
@@ -160,6 +161,11 @@ for sp = 1 : rowN*colN
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
     hold on
+    
+    for n = 1 : length(aus8_figures.cross.lon(1,:))
+        plot(aus8_figures.cross.lon(1:2,n), ...
+            aus8_figures.cross.lat(1:2,n), '--k')
+    end
     
     n = 6; m = 2;
     quiver(lon_u(1:n:end),lat_u(1:m:end),...
@@ -223,8 +229,9 @@ for sp = 1 : rowN*colN
         text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
     end
     
-    h_tit = title(['(' lett(sp) ') Mean KDS75 full $' title_chc{sp} ...
-        '$ ($m^{2}/s$) integrated from ' ...
+    h_tit = title(['(' lett(sp) ') Mean (year 102 to 108) full KDS75 $' ...
+        title_chc{sp} ...
+        '$ ($m^{2}/s$, shadings) integrated from ' ...
     '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
