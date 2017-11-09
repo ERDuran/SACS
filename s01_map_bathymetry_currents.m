@@ -47,7 +47,7 @@ cmaps_cont_length = length(cmaps_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_custom = {cmapcust(cmaps,cmaps_cont)};
 
-font_size = 8*screen_ratio;
+font_size = 9*screen_ratio;
 nan_color = [0 0 0];
 fig_color = [1 1 1];
 
@@ -385,10 +385,6 @@ if ~contains(outputls, scriptname)
 end
 print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-dpng', '-r300')
-print(fig, ...
-    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 % close
