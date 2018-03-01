@@ -47,6 +47,7 @@ cmaps_cont_length = length(cmaps_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_custom = {cmapcust(cmaps,cmaps_cont)};
 
+lett = 'a':'z';
 font_size = 8*screen_ratio;
 nan_color = [0 0 0];
 fig_color = [1 1 1];
@@ -113,7 +114,7 @@ for sp = 1 : rowN*colN
         -32; %15
         -32; %16
         -32; %17
-        -32; %18
+        -33; %18
         -33; %19
         -33; %20
         -34; %21
@@ -130,7 +131,7 @@ for sp = 1 : rowN*colN
         -43; %32
         -43; %33
         ]';
-    merid_Xsect_lat(2,:) = merid_Xsect_lat(1,:) - 5;
+    merid_Xsect_lat(2,:) = merid_Xsect_lat(1,:) - 4;
     merid_Xsect_lon = [115:147; 115:147];
     
     aus8_figures.sect_names = {...
@@ -144,6 +145,14 @@ for sp = 1 : rowN*colN
         aus8_figures.cross.lat(1:2,n) = merid_Xsect_lat(:,lon_n(n));
         plot(merid_Xsect_lon(:,lon_n(n)), ...
             merid_Xsect_lat(:,lon_n(n)), '--k', 'linewidth',1.2)
+        
+        text(merid_Xsect_lon(2,lon_n(n)), ...
+            merid_Xsect_lat(2,lon_n(n)), ...
+            sprintf(['(' lett(n) ')']), ...
+            'verticalalignment','bottom', ...
+            'horizontalalignment','right', ...
+            'fontsize', font_size, ...
+            'color', [0 0 0])
     end
     
     small_arr = 3;
@@ -166,11 +175,11 @@ for sp = 1 : rowN*colN
         'Facecolor', FC_color, 'edgecolor', FC_color)
     text(128.5,-34.1-FC_south, 'FC', 'fontsize', font_size, ...
         'color', FC_color)
-    arrow([146,-44.0-FC_south], [143,-43.8-FC_south], ...
+    arrow([146,-44.0-FC_south], [143,-44.1-FC_south], ...
         big_ar_head, ...
         'Facecolor', FC_color, 'edgecolor', FC_color, ...
         'linewidth', 1.2)
-    text(144,-44.5-FC_south, 'TL', 'fontsize', font_size, ...
+    text(142.5,-44.6-FC_south, 'TL', 'fontsize', font_size, ...
         'color', FC_color)
     
     % LCE
@@ -202,7 +211,7 @@ for sp = 1 : rowN*colN
     
     % ZC
     ZC_south = 0.35;
-    contour(x{sp}(266:310), y{sp}-ZC_south, data{sp}(:,266:310), ...
+    contour(x{sp}(268:310), y{sp}-ZC_south, data{sp}(:,268:310), ...
         [-700 -700], ...
         'color',SBC_color, 'linewidth', 1.1)
     arrow([146.9,-44.21-ZC_south], [147,-44.24-ZC_south], ...

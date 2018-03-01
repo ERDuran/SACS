@@ -50,10 +50,10 @@ z_bot = aus8_currents.z_bot;
 screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [2 1];
-rowcols_size = [14 6]/screen_ratio; % cm
-margs = [0.6 1.2 0.6 0.6]/screen_ratio; % cm
+rowcols_size = [13.8 6]/screen_ratio; % cm
+margs = [0.9 1.5 0.7 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
-plot_cbar_gap = 0.3/screen_ratio;
+plot_cbar_gap = 0.2/screen_ratio;
 cbar_x = 0.2/screen_ratio;
 cbar_y = rowcols_size(2);
 
@@ -73,7 +73,7 @@ cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_y_label = cmaps_cont/magnif;
 
 % lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
-lon_min = 108; lon_max = 153; lat_min = -50; lat_max = -30;
+lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
 
 x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
 x_ind = [1 1];
@@ -83,7 +83,9 @@ data = {fulu_ztop_to_zmid*magnif, fulu_zmid_to_zbot*magnif};
 v_data = {fulv_ztop_to_zmid_interp2*magnif, ...
     fulv_zmid_to_zbot_interp2*magnif};
 
-title_chc = {'U', 'U'};
+title_chc = ...
+    {'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)', ...
+    '{\boldmath{$V_{low}$}} (arrows) and {$U_{low}$} (shadings)'};
 z1_chc = {z_top, z_mid};
 z2_chc = {z_mid, z_bot};
 
@@ -164,7 +166,7 @@ for sp = 1 : rowN*colN
     
     for n = 1 : length(aus8_figures.cross.lon(1,:))
         plot(aus8_figures.cross.lon(1:2,n), ...
-            aus8_figures.cross.lat(1:2,n), '--k')
+            aus8_figures.cross.lat(1:2,n), '--k', 'linewidth',1.2)
     end
     
     n = 6; m = 2;
@@ -201,37 +203,14 @@ for sp = 1 : rowN*colN
     
     if sp <= 1
         h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
-            '--m', 'linewidth', 1);
+            '-m', 'linewidth', 1);
     else
         h = plot(lon_u_ALLC_repelem, lat_v_DRC_south_repelem, ...
-            ':m', 'linewidth', 1);
+            '-m', 'linewidth', 1);
     end
     
-    
-    if sp == 1
-        arrow([139 -33], ...
-            [lon_u_ALLC_repelem(320) lat_v_SBC_north_repelem(320)], 4)
-        text(139, -33, '$y_{CC}$', 'fontsize',font_size)
-        arrow([139 -34], ...
-            [lon_u_ALLC_repelem(320) lat_v_SBC_south_repelem(320)], 4)
-        text(139, -34, '$y_{int}$', 'fontsize',font_size)
-        arrow([139 -35], ...
-            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 4)
-        text(139, -35, 'upper $y_{OF}$', 'fontsize',font_size)
-    end
-    
-    if sp == 2
-        arrow([135 -33.8], ...
-            [131.6 -33.8], 4)
-        text(135, -33.8, '$z_{int}$ area', 'fontsize',font_size)
-        arrow([139 -35], ...
-            [lon_u_ALLC_repelem(320) lat_v_DRC_south_repelem(320)], 4)
-        text(139, -35, 'lower $y_{OF}$', 'fontsize',font_size)
-    end
-    
-    h_tit = title(['(' lett(sp) ') Mean (year 102 to 108) full KDS75 $' ...
-        title_chc{sp} ...
-        '$ ($m^{2}/s$, shadings) integrated from ' ...
+    h_tit = title(['(' lett(sp) ') ' title_chc{sp} ...
+        ' integrated from ' ...
     '$z=' num2str(z1_chc{sp}) '$ to $z=' num2str(z2_chc{sp}) '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
@@ -240,8 +219,14 @@ for sp = 1 : rowN*colN
         'fontsize',font_size,'tickdir','out', ...
         'ticklength',fig_tick_length, ...
         'xtick', lon_min:2:lon_max, 'ytick', lat_min:2:lat_max)
-    if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
+    if row_ind(sp) ~= rowN
+        set(gca,'xticklabel','')
+    else
+        xlabel('Longitude', 'fontsize', font_size)
+    end
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
+    
+    ylabel('Latitude', 'fontsize', font_size)
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
@@ -255,6 +240,12 @@ for sp = 1 : rowN*colN
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
             cbar_x, ...
             cbar_y]);
+        
+        set(get(cbar,'ylabel'),'String', ...
+            'Integrated zonal velocities ($m^{2}/s$)', ...
+            'fontsize',font_size)
+        cbar.Label.Interpreter = 'latex';
+        
         pointycbar(cbar)
     end
 end
@@ -266,6 +257,10 @@ if ~contains(outputls, scriptname)
 end
 print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-dpng', '-r300')
+print(fig, ...
+    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 close

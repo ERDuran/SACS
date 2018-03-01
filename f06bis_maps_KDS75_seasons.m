@@ -13,7 +13,6 @@ lon = aus8_coor.lon;
 depth_mid = aus8_coor.depth_mid;
 depth = aus8_coor.depth;
 depth_thkn = aus8_coor.depth_thkn;
-Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
 
 
 %%
@@ -24,16 +23,16 @@ lon_v = aus8_coor.lon_v;
 
 for t = 1 : 4
     fulu_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t});
+        KDau_fcrt.ztop_to_zmid.fulu.(MTH{t});
     fulv_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t});
+        KDau_fcrt.ztop_to_zmid.fulv.(MTH{t});
     fulv_ztop_to_zmid_interp2.(MTH{t}) = interp2(...
         lon_v, lat_v, fulv_ztop_to_zmid.(MTH{t}), lon_u, lat_u);
     
     fulu_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t});
+        KDau_fcrt.zmid_to_zbot.fulu.(MTH{t});
     fulv_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t});
+        KDau_fcrt.zmid_to_zbot.fulv.(MTH{t});
     fulv_zmid_to_zbot_interp2.(MTH{t}) = interp2(...
         lon_v, lat_v, fulv_zmid_to_zbot.(MTH{t}), lon_u, lat_u);
 end
@@ -42,11 +41,17 @@ z_top = aus8_currents.z_top;
 z_mid = aus8_currents.z_mid;
 z_bot = aus8_currents.z_bot;
 
+Seasons = {'Summer', 'Summer', 'Autumn', 'Autumn', ...
+    'Winter', 'Winter','Spring', 'Spring'};
+U_title = {'up', 'low', 'up', 'low', 'up', 'low', 'up', 'low'};
+U_title2 = {z_top, z_mid, z_top, z_mid, z_top, z_mid, z_top, z_mid};
+U_title3 = {z_mid, z_bot, z_mid, z_bot, z_mid, z_bot, z_mid, z_bot};
+
 
 %% 5) plot maps of U and V SBC
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [4 1];
+rowcols = [4 2];
 rowcols_size = [14 6]/screen_ratio/2; % cm
 margs = [0.9 0.2 1.8 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
@@ -76,9 +81,17 @@ x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
 x_ind = [1 1];
 y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
 
-for t = 1 : 4
-    data{t} = fulu_ztop_to_zmid.(MTH{t})*magnif;
-    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{t})*magnif;
+cc = 0;
+for t = 1 : 2 : 7
+    cc = cc + 1;
+    data{t} = fulu_ztop_to_zmid.(MTH{cc})*magnif;
+    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{cc})*magnif;
+end
+
+cc = 0;
+for t = 2 : 2 : 8
+    cc = cc + 1;
+    data{t} = fulu_zmid_to_zbot.(MTH{cc})*magnif;
 end
 
 title_chc = {'U', 'U', 'U', 'U'};
@@ -142,7 +155,14 @@ for sp = 1 : rowN*colN
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
     
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
+    %title_chc = ...
+    %{'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)', ...
+    %'{\boldmath{$V_{low}$}} (arrows) and {$U_{low}$} (shadings)'};
+    
+    h_tit = title(['(' lett(sp) ') ' Seasons{sp} ...
+        ' {$U_{' U_title{sp} '}$} integrated from ' ...
+        '$z=' num2str(U_title2{sp}) '$ to $z=' num2str(U_title3{sp}) ...
+        '$ $m$'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
     grid
@@ -155,8 +175,12 @@ for sp = 1 : rowN*colN
     else
         xlabel('Longitude')
     end
-    if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
-    ylabel('Latitude')
+    if col_ind(sp) ~= 1
+        set(gca,'yticklabel','')
+    else
+        ylabel('Latitude')
+    end
+    
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
@@ -166,9 +190,9 @@ for sp = 1 : rowN*colN
             'YAxisLocation','right','YTickLabel',cmaps_y_label,...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+            (marg_l+x_sp*(cm(sp)-2)+gap_w*(cm(sp)-2)), ...
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
-            cbar_x, ...
+            cbar_x*2+gap_w, ...
             cbar_y]);
         set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
             'fontsize',font_size)

@@ -5,6 +5,7 @@ play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/aus8_currents'])
 load([data_path 'SACS_data/KDau_fcrt'])
+Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
 
 
 %%
@@ -39,7 +40,7 @@ screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [3 1];
 rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [0.6 0.2 0.6 0.6]/screen_ratio; % cm
+margs = [1 0.2 0.8 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
 plot_cbar_gap = 0.7/screen_ratio;
 cbar_x = rowcols_size(1);
@@ -57,7 +58,7 @@ data_mean = {KDau_fcrt.SBC_Ut.mean, KDau_fcrt.DRC_Ut.mean, ...
     KDau_fcrt.SBC_Wtc.mean};
 
 data_label = ...
-    {'$\mathcal{U}_{SBC}$', '$\mathcal{U}_{FC}$', '$\mathcal{W}_{SBC}$'};
+    {'$\mathcal{U}_{SBCs}$', '$\mathcal{U}_{FC}$', '$\mathcal{W}_{SBCs}$'};
 
 % title_chc = {'U''', 'V''', 'U_{g}''', 'V_{g}'''};
 
@@ -99,19 +100,56 @@ set(fig,'units','centimeters','paperunits','centimeters', ...
     'paperposition',[0 0 fig_x fig_y]*screen_ratio,...
     'position',[0 0 fig_x fig_y]);
 
+line_width = 0.5;
+
 for sp = 1 : rowN*colN
     subplot_x = marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1);
     subplot_y = marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1);
     ax = axes('Units','centimeters', ...
         'Position',[subplot_x,subplot_y,x_sp,y_sp]);
     
-    plot(x{sp}, data{sp})
+    hh = plot([124 124], [-30 30],...
+        'linewidth', line_width+0.2);
+    hhc1 = get(hh,'color');
+    set(hh, 'color', [0.7 0.7 0.7])
+    set(get(get(hh,'Annotation'),'LegendInformation'), ...
+        'IconDisplayStyle','off');
     hold on
+    
+    hh = plot([132 132], [-30 30], 'linestyle', '--', ...
+        'linewidth', line_width+0.2);
+    hhc2 = get(hh,'color');
+    set(hh, 'color', [0.7 0.7 0.7])
+    set(get(get(hh,'Annotation'),'LegendInformation'), ...
+        'IconDisplayStyle','off');
+    
+    hh = plot([141 141], [-30 30], ...
+        'linewidth', line_width+0.2);
+    hhc3 = get(hh,'color');
+    set(hh, 'color', [0.7 0.7 0.7])
+    set(get(get(hh,'Annotation'),'LegendInformation'), ...
+        'IconDisplayStyle','off');
+    
+    hh = plot([1 1], [1 1]);
+    hhc4 = get(hh,'color');
+    set(get(get(hh,'Annotation'),'LegendInformation'), ...
+        'IconDisplayStyle','off');
+    
+    plot(x{sp}(1,:), data{sp}(1,:), 'color', hhc2)
+    plot(x{sp}(1,:), data{sp}(2,:), 'color', hhc4)
+    plot(x{sp}(1,:), data{sp}(3,:), 'color', hhc1)
+    plot(x{sp}(1,:), data{sp}(4,:), 'color', hhc3)
+    
     plot(x{sp}, data_mean{sp}, 'k--')
     
+    plot([124 124], [-30 30], ...
+    'color', [0.5 0.5 0.5], 'linewidth', line_width)
+    plot([141 141], [-30 30], ...
+    'color', [0.5 0.5 0.5], 'linewidth', line_width)
+
     axis(axis_setup{sp})
     
-    h_tit = title(['(' lett(sp) ') Full KDS75 ' data_label{sp}], ...
+    h_tit = title(['(' lett(sp) ') ' data_label{sp}], ...
         'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
     grid
@@ -119,7 +157,7 @@ for sp = 1 : rowN*colN
     x_tick_label = num2cell(x_tick);
 
     if sp == 3
-        MTH_l = MTH;
+        MTH_l = Seasons;
         MTH_l{5} = 'mean';
         h_leg = legend(MTH_l);
         set(h_leg,'units','centimeters', 'orientation','vertical', ...
@@ -146,8 +184,13 @@ for sp = 1 : rowN*colN
             'ytick', lat_min{sp}:0.5:lat_max{sp})
     end
 
-    if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
+    if row_ind(sp) ~= rowN
+        set(gca,'xticklabel','')
+    else
+        xlabel('Longitude')
+    end
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
+    ylabel('Transport ($Sv$)')
     
 end
 
@@ -158,6 +201,10 @@ if ~contains(outputls, scriptname)
 end
 print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-dpng', '-r300')
+print(fig, ...
+    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 

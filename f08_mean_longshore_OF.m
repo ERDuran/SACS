@@ -55,9 +55,9 @@ screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [1 1];
 rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [0.6 0.2 1.2 0.6]/screen_ratio; % cm
+margs = [1.1 0.2 1.8 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
-plot_cbar_gap = 0.7/screen_ratio;
+plot_cbar_gap = 1/screen_ratio;
 cbar_x = rowcols_size(1);
 cbar_y = 0.2/screen_ratio;
 
@@ -135,7 +135,7 @@ for sp = 1 : rowN*colN
     
     
     h_tit = title(['(' lett(sp) ') ' ...
-        ' Mean ZD CARS $V_g''$ ($cm/s$) along $y_{OF}$'], ...
+        ' CARS $v_g''$ ($cm/s$) along $y_{OFs}$'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = 115;
     grid
@@ -144,6 +144,8 @@ for sp = 1 : rowN*colN
         'ticklength',fig_tick_length, ...
         'xtick', 115:2:147, ...
         'ytick', -2000:200:0)
+    xlabel('Longitude')
+    ylabel('Depth ($m$)')
 %     if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 %     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
     
@@ -159,6 +161,10 @@ for sp = 1 : rowN*colN
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
             cbar_x, ...
             cbar_y]);
+        set(get(cbar,'xlabel'),'String','$v_{g}''$ (cm/s)', ...
+            'fontsize',font_size)
+        cbar.Label.Interpreter = 'latex';
+        
         pointycbar(cbar)
     end
 end
@@ -170,6 +176,10 @@ if ~contains(outputls, scriptname)
 end
 print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-dpng', '-r300')
+print(fig, ...
+    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 close
