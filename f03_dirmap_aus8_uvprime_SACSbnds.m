@@ -5,6 +5,7 @@ play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 load([data_path 'SACS_data/aus8_coor'])
 load([data_path 'SACS_data/aus8_currents'])
 load([data_path 'SACS_data/aus8_figures'])
+load([data_path 'SACS_data/KDau_fcrt'])
 
 
 %%
@@ -22,6 +23,16 @@ U_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.U_g_prime.mean;
 V_g_prime_zmid_to_zbot = aus8_currents.zmid_to_zbot.V_g_prime.mean;
 V_g_prime_zmid_to_zbot_interp2 = interp2(...
     lon_v, lat_v, V_g_prime_zmid_to_zbot, lon_u, lat_u);
+
+U_prime_ztop_to_zmid_K = KDau_fcrt.ztop_to_zmid.fulu.mean;
+V_prime_ztop_to_zmid_K = KDau_fcrt.ztop_to_zmid.fulv.mean;
+V_prime_ztop_to_zmid_interp2_K = interp2(...
+    lon_v, lat_v, V_prime_ztop_to_zmid_K, lon_u, lat_u);
+
+U_g_prime_zmid_to_zbot_K = KDau_fcrt.zmid_to_zbot.fulu.mean;
+V_g_prime_zmid_to_zbot_K = KDau_fcrt.zmid_to_zbot.fulv.mean;
+V_g_prime_zmid_to_zbot_interp2_K = interp2(...
+    lon_v, lat_v, V_g_prime_zmid_to_zbot_K, lon_u, lat_u);
 
 lon_u_ALLC_repelem = [...
     aus8_currents.lon_u_ALLC(:,1), ...
@@ -48,13 +59,10 @@ z_bot = aus8_currents.z_bot;
 %% 5) plot maps of U and V SBC
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [2 1];
-rowcols_size = [13.8 6]/screen_ratio; % cm
-margs = [0.9 1.5 0.7 0.6]/screen_ratio; % cm
-gaps = [0.4 0.8]/screen_ratio; % cm
-plot_cbar_gap = 0.2/screen_ratio;
-cbar_x = 0.2/screen_ratio;
-cbar_y = rowcols_size(2);
+rowcols = [4 1];
+rowcols_size = [12 4.2]/screen_ratio; % cm
+margs = [1.6 0.3 1.9 0.7]/screen_ratio; % cm
+gaps = [0.4 0.7]/screen_ratio; % cm
 
 magnif = 10;
 cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
@@ -74,19 +82,24 @@ cmaps_y_label = cmaps_cont/magnif;
 % lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
 lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
 
-x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
-x_ind = [1 1];
-y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
+x_chc = {aus8_coor.lon_u, aus8_coor.lon_v, aus8_coor.lon_u, aus8_coor.lon_v};
+x_ind = [1 1 1 1];
+y_chc = {aus8_coor.lat_u, aus8_coor.lat_v, aus8_coor.lat_u, aus8_coor.lat_v};
 
-data = {U_prime_ztop_to_zmid*magnif, U_g_prime_zmid_to_zbot*magnif};
+data = {U_prime_ztop_to_zmid*magnif, U_g_prime_zmid_to_zbot*magnif, ...
+    U_prime_ztop_to_zmid_K*magnif, U_g_prime_zmid_to_zbot_K*magnif};
 v_data = {V_prime_ztop_to_zmid_interp2*magnif, ...
-    V_g_prime_zmid_to_zbot_interp2*magnif};
+    V_g_prime_zmid_to_zbot_interp2*magnif, ...
+    V_prime_ztop_to_zmid_interp2_K*magnif, ...
+    V_g_prime_zmid_to_zbot_interp2_K*magnif};
 
 title_chc = ...
     {'{\boldmath{$V_{up}''$}} (arrows) and {$U_{up}''$} (shadings)', ...
+    '{\boldmath{$V_{low}''$}} (arrows) and {$U_{low}''$} (shadings)', ...
+    '{\boldmath{$V_{up}''$}} (arrows) and {$U_{up}''$} (shadings)', ...
     '{\boldmath{$V_{low}''$}} (arrows) and {$U_{low}''$} (shadings)'};
-z1_chc = {z_top, z_mid};
-z2_chc = {z_mid, z_bot};
+z1_chc = {z_top, z_mid, z_top, z_mid};
+z2_chc = {z_mid, z_bot, z_mid, z_bot};
 
 for sp = 1 : rowcols(1)*rowcols(2)
     minmax{sp} = [cmaps_cont(1) cmaps_cont(end)];
@@ -120,6 +133,10 @@ marg_r = margs(2); % right margin
 fig_x = marg_l+colN*x_sp+gap_w*(colN-1)+marg_r;
 fig_y = marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t;
 
+plot_cbar_gap = -1.1/screen_ratio;
+cbar_x = x_sp;
+cbar_y = 0.2/screen_ratio;
+
 desired_length = 0.05/screen_ratio; %cm
 if y_sp > x_sp, long_side = y_sp; else, long_side = x_sp; end
 norm_length = desired_length/long_side;
@@ -149,8 +166,14 @@ for sp = 1 : rowN*colN
     if sp == 1
         s = 3;
         ref_magn = 20;
-    else
-        s = 2.5;
+    elseif sp == 2
+        s = 2.75;
+        ref_magn = 60;
+    elseif sp == 3
+        s = 3;
+        ref_magn = 20;
+    elseif sp == 4
+        s = 3.5;
         ref_magn = 60;
     end
     
@@ -248,19 +271,30 @@ for sp = 1 : rowN*colN
     ylabel('Latitude', 'fontsize', font_size)
     
     if sp == rowN*colN
+        rectangle('Position',[105 -51 47.75 41.5], ...
+            'EdgeColor', [0 0 0], 'linewidth', 1, ...
+            'Clipping', 'off')
+        text(106.5, -33.5, '\textbf{MOM01-75z}', 'Rotation',90,...
+            'fontsize', font_size+2)
+        rectangle('Position',[105 -9.0 47.75 39.25], ...
+            'EdgeColor', [0 0 0], 'linewidth', 1, ...
+            'Clipping', 'off')
+        text(106.5, 7, '\textbf{CARS-aus8}', 'Rotation',90,...
+            'fontsize', font_size+2)
+        
         ax = axes('visible', 'off');
         colormap(ax, cmaps);
-        cbar = colorbar;
-        set(cbar,'ytick',cmaps_linspace, ...
-            'YAxisLocation','right','YTickLabel',cmaps_y_label,...
+        cbar = colorbar('horizontal');
+        set(cbar,'xtick',cmaps_linspace, ...
+            'XTickLabel',cmaps_y_label,...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
-            (marg_l+x_sp*(cm(sp))+gap_w*(cm(sp)-1)+plot_cbar_gap), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)), ...
+            marg_l, ...
+            marg_b+plot_cbar_gap, ...
             cbar_x, ...
             cbar_y]);
         
-        set(get(cbar,'ylabel'), ...
+        set(get(cbar,'xlabel'), ...
             'String','Integrated zonal velocities ($m^{2}/s$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
