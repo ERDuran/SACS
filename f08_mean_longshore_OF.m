@@ -27,11 +27,13 @@ depth_mid = aus8_coor.depth_mid;
 
 u_g_prime = aus8_u_g_prime.mean;
 v_g_prime = aus8_v_g_prime.mean;
+v = KDau_fulv.mean;
 
 
 %% DRC Vts up
 vt_lon_v = lon_v(57:312);
 vt_g_prime_DRC = zeros(length(depth_mid), length(vt_lon_v));
+vt_DRC = zeros(length(depth_mid), length(vt_lon_v));
 
 % in between cases
 for jj = 1 : length(vt_lon_v)
@@ -42,8 +44,12 @@ for jj = 1 : length(vt_lon_v)
     V_Vts_prime_up_DRC_now = ...
         v_g_prime(lat_ind_V_Vts_prime_up_DRC, lon_v_ind, :);
     V_Vts_prime_up_DRC = V_Vts_prime_up_DRC_now;
-    
     vt_g_prime_DRC(:,jj) = squeeze(V_Vts_prime_up_DRC);
+    
+    V_Vts_up_DRC_now = ...
+        v(lat_ind_V_Vts_prime_up_DRC, lon_v_ind, :);
+    V_Vts_up_DRC = V_Vts_up_DRC_now;
+    vt_DRC(:,jj) = squeeze(V_Vts_up_DRC);
 end
 
 
@@ -53,16 +59,16 @@ depth_mid_for_plot(end) = -2000;
 
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [1 1];
+rowcols = [2 1];
 rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [1.1 0.2 1.8 0.6]/screen_ratio; % cm
-gaps = [0.4 0.8]/screen_ratio; % cm
-plot_cbar_gap = 1/screen_ratio;
+margs = [1.1 0.6 2.8 0.6]/screen_ratio; % cm
+gaps = [0.4 1.2]/screen_ratio; % cm
+plot_cbar_gap = 2.1/screen_ratio;
 cbar_x = rowcols_size(1);
 cbar_y = 0.2/screen_ratio;
 
 magnif = 1000;
-cmap1_cont = -[20 10 8 6 4 2 1 0.5 0.1 0]*magnif;
+cmap1_cont = -[10 8 6 4 2 1 0.5 0.1 0]*magnif;
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -125,26 +131,110 @@ for sp = 1 : rowN*colN
         'Position',[subplot_x,subplot_y,x_sp,y_sp]);
     
     colormap(ax, cmaps_custom);
-    pcolor(x, y, vt_g_prime_DRC*100*magnif)
-    axis([115 147 -2000 0])
-    shading interp
-    caxis([minmax(1) minmax(2)]);
     
-    hold on
-    plot([115 147], [-250 -250], '-b', 'linewidth', 0.3)
+    if sp == 1
+        pcolor(x, y, vt_g_prime_DRC*100*magnif)
+        axis([115 147 -2000 0])
+        shading interp
+        caxis([minmax(1) minmax(2)]);
+        hold on
+        plot([115 147], [-250 -250], '-b', 'linewidth', 0.3)
+        h_tit = title(['(' lett(sp) ') ' ...
+            ' CARS-aus8 $v_g''$ ($cm/s$) along $y_{OF}$'], ...
+        'horizontalalignment','left', 'fontsize',font_size);
+        h_tit.Position(1) = 115;
+        grid
+        set(ax,'layer','top','color',nan_color,...
+            'fontsize',font_size,'tickdir','out', ...
+            'ticklength',fig_tick_length, ...
+            'xtick', 115:2:147, ...
+            'ytick', -2000:200:0)
+        xlabel('Longitude')
+    else
+        pcolor(x, y, vt_DRC*100*magnif)
+        axis([115 147 -2000 0])
+        shading interp
+        caxis([minmax(1) minmax(2)]);
+        hold on
+        plot([115 147], [-250 -250], '-b', 'linewidth', 0.3)
+        h_tit = title(['(' lett(sp) ') ' ...
+            ' MOM01-75z $v$ ($cm/s$) along $y_{OF}$'], ...
+        'horizontalalignment','left', 'fontsize',font_size);
+        h_tit.Position(1) = 115;
+        grid
+        set(ax,'layer','top','color',nan_color,...
+            'fontsize',font_size,'tickdir','out', ...
+            'ticklength',fig_tick_length, ...
+            'xtick', 115:2:147, ...
+            'ytick', -2000:200:0)
+        
+        small_arr = 3;
+        % Cape Leeuwin
+        hh = arrow([115,-2450], [115,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(115,-2500,'Cape Leeuwin', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');
+        % Albany
+        hh = arrow([118,-2450], [118,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(118,-2500,'Albany', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');
+        % Cape Pasley
+        hh = arrow([123.4,-2450], [123.4,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(123.4,-2500,'Cape Pasley', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');
+        % West GAB
+        hh = arrow([128,-2450], [128,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(128,-2500,'West GAB', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');  
+        % East GAB
+        hh = arrow([132,-2450], [132,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(132,-2500,'East GAB', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');  
+        % Cape Carnot
+        hh = arrow([135.7,-2450], [135.7,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(135.7,-2500,'Cape Carnot', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');  
+        % Portland
+        hh = arrow([141.3,-2450], [141.3,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(141.3,-2500,'Portland', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');  
+        %  King Is.
+        hh = arrow([144,-2450], [144,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(144,-2500,' King Island', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');  
+        % South East Cape
+        hh = arrow([146.7,-2450], [146.7,-2250], small_arr, ...
+            'Facecolor', 'k', 'edgecolor', 'k');
+        text(146.7,-2500,'SE C.', 'fontsize', font_size, ...
+            'color', 'k','Rotation',-45)
+        set(get(get(hh,'Annotation'),'LegendInformation'), ...
+            'IconDisplayStyle','off');
+    end
     
     
-    h_tit = title(['(' lett(sp) ') ' ...
-        ' CARS $v_g''$ ($cm/s$) along $y_{OFs}$'], ...
-    'horizontalalignment','left', 'fontsize',font_size);
-    h_tit.Position(1) = 115;
-    grid
-    set(ax,'layer','top','color',nan_color,...
-        'fontsize',font_size,'tickdir','out', ...
-        'ticklength',fig_tick_length, ...
-        'xtick', 115:2:147, ...
-        'ytick', -2000:200:0)
-    xlabel('Longitude')
     ylabel('Depth ($m$)')
 %     if row_ind(sp) ~= rowN, set(gca,'xticklabel',''), end
 %     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
@@ -161,7 +251,7 @@ for sp = 1 : rowN*colN
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
             cbar_x, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$v_{g}''$ (cm/s)', ...
+        set(get(cbar,'xlabel'),'String','$v$ (cm/s)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         

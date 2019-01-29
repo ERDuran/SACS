@@ -92,6 +92,7 @@ cc = 0;
 for t = 2 : 2 : 8
     cc = cc + 1;
     data{t} = fulu_zmid_to_zbot.(MTH{cc})*magnif;
+    v_data{t} = fulv_zmid_to_zbot_interp2.(MTH{cc})*magnif;
 end
 
 title_chc = {'U', 'U', 'U', 'U'};
@@ -181,6 +182,10 @@ for sp = 1 : rowN*colN
         ylabel('Latitude')
     end
     
+%     if ~mod(sp,2)
+%         hold on
+%         plot([110, 152], [-40, -40], 'k:')
+%     end
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
@@ -194,7 +199,7 @@ for sp = 1 : rowN*colN
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
             cbar_x*2+gap_w, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
+        set(get(cbar,'xlabel'),'String','$U$ ($m^{2}/s$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         

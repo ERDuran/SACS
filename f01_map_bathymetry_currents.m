@@ -39,7 +39,7 @@ cmap2_cont = ...
     [-200 : 10 : 0];
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
-cmap1 = othercolor('BuPu9', lvl_cmap1);
+cmap1 = othercolor('Purples9', lvl_cmap1);
 cmap2 = flipud(othercolor('Paired8', lvl_cmap2));
 cmaps = [cmap1; cmap2];
 cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
@@ -97,7 +97,7 @@ for sp = 1 : rowN*colN
     
     % sections
     merid_Xsect_lat = [ ...
-        -34; %1
+        -34.5; %1
         -35; %2
         -35; %3
         -35; %4
@@ -105,7 +105,7 @@ for sp = 1 : rowN*colN
         -34; %6
         -34; %7
         -34; %8
-        -34; %9
+        -34.5; %9
         -34; %10
         -33; %11
         -33; %12
@@ -123,13 +123,13 @@ for sp = 1 : rowN*colN
         -36; %24
         -37; %25
         -37; %26
-        -38; %27
+        -38.25; %27
         -38; %28
         -39; %29
-        -40; %30
+        -40.5; %30
         -42; %31
         -43; %32
-        -43; %33
+        -43.5; %33
         ]';
     merid_Xsect_lat(2,:) = merid_Xsect_lat(1,:) - 4;
     merid_Xsect_lon = [115:147; 115:147];
@@ -223,36 +223,36 @@ for sp = 1 : rowN*colN
         'Facecolor', [0 0 0], 'edgecolor', [0 0 0])
     
     % CCs
-    CC1 = [127, -32.7];
+    CC1 = [127, -32.6];
     arrow([CC1(1), CC1(2)], [CC1(1)+4, CC1(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
-    arrow([CC1(1)+4, CC1(2)], [CC1(1), CC1(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
+    arrow([CC1(1)+4/2, CC1(2)], [CC1(1), CC1(2)], ...
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
     CC2 = [132.7, -32.8];
     arrow([CC2(1), CC2(2)], [CC2(1)+1.8, CC2(2)-1.8], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
-    arrow([CC2(1)+1.8, CC2(2)-1.8], [CC2(1), CC2(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
-    CC3 = [149, -32]; % reference arrow
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
+    arrow([CC2(1)+1.8/2, CC2(2)-1.8/2], [CC2(1), CC2(2)], ...
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
+    CC3 = [111, -46.5]; % reference arrow
     arrow([CC3(1), CC3(2)], [CC3(1)+2.3, CC3(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
-    arrow([CC3(1)+2.3, CC3(2)], [CC3(1), CC3(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
+    arrow([CC3(1)+2.3/2, CC3(2)], [CC3(1), CC3(2)], ...
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
     text(CC3(1)+0.5, CC3(2)-0.7, 'CC', 'fontsize', font_size, ...
-        'color', [1 1 0])
+        'color', [0 0 0])
     CC4 = [145, -39.9];
     arrow([CC4(1), CC4(2)], [CC4(1)+2.3, CC4(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
-    arrow([CC4(1)+2.3, CC4(2)], [CC4(1), CC4(2)], ...
-        big_ar_head-3, 'linewidth', 1, ...
-        'Facecolor', [1 1 0], 'edgecolor', [1 1 0])
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
+    arrow([CC4(1)+2.3/2, CC4(2)], [CC4(1), CC4(2)], ...
+        big_ar_head-2, 'linewidth', 0.5, ...
+        'Facecolor', [1 1 0], 'edgecolor', [0 0 0])
 
     % OFs
     OF1 = [120, -36.5];
@@ -277,6 +277,24 @@ for sp = 1 : rowN*colN
     else, set(gca,'xtick',108:2:152,'ytick',-50:2:-30), end
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
 end
+
+
+x1 = 114;
+x2 = 125;
+y1 = -37.25;
+y2 = -36.5;
+aa = 1/2*sqrt((x2-x1)^2+(y2-y1)^2);
+bb = aa*sqrt(1*10^-2);
+tt = linspace(0,2*pi);
+XX = aa*cos(tt);
+YY = bb*sin(tt);
+ww = atan2(y2-y1,x2-x1);
+xx = (x1+x2)/2 + XX*cos(ww) - YY*sin(ww);
+yy = (y1+y2)/2 + XX*sin(ww) + YY*cos(ww);
+text(110.5,-37.5,sprintf('Albany\nHigh'), 'fontsize', font_size)
+arrow([112.75,-37.25], [114,-37.25], small_arr, ...
+    'Facecolor', [0 0 0], 'edgecolor', [0 0 0])
+plot(xx,yy,'color',[0.25,0.25,0.25],'LineStyle',':')
 
 
 % 8) place landmarks
@@ -380,8 +398,8 @@ text(137.5,-43.75,sprintf('Slanted sector'), ...
     'color', [0 0 0])
 
 
-xlabel('Longitude', 'fontsize', font_size)
-ylabel('Latitude', 'fontsize', font_size)
+xlabel('Longitude ($^{\circ}$E)', 'fontsize', font_size)
+ylabel('Latitude ($^{\circ}$N)', 'fontsize', font_size)
 
 ax = axes('visible', 'off');
 colormap(ax, cmaps);
@@ -410,6 +428,10 @@ print(fig, ...
     '-dpng', '-r300')
 print(fig, ...
     ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
+    '_fig' num2str(fig_n) '_'], ...
+    '-dpng', '-r300')
+print(fig, ...
+    ['~/Duran2018/SACS/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 % close

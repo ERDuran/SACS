@@ -2,51 +2,78 @@
 clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
-load([data_path 'SACS_data/aus8_coor'])
-load([data_path 'SACS_data/aus8_currents'])
-load([data_path 'SACS_data/KDau_fcrt'])
-load([data_path 'SACS_data/aus8_figures'])
-
-MTH = aus8_coor.MTH;
-lat = aus8_coor.lat;
-lon = aus8_coor.lon;
-depth_mid = aus8_coor.depth_mid;
-depth = aus8_coor.depth;
-depth_thkn = aus8_coor.depth_thkn;
-Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
-
+load([data_path 'SACS_data/hgt2000_cars2009'])
+% temperature
+[temp_data, temp_gen_att, temp_att] = ...
+    nc2mat([data_path ...
+    'KDS75_cp/seasonal_climatology.nc'], ...
+    'ALL');
 
 %%
-lat_u = aus8_coor.lat_u;
-lon_u = aus8_coor.lon_u;
-lat_v = aus8_coor.lat_v;
-lon_v = aus8_coor.lon_v;
-
-for t = 1 : 4
-    fulu_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t});
-    fulv_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t});
-    fulv_ztop_to_zmid_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_ztop_to_zmid.(MTH{t}), lon_u, lat_u);
-    
-    fulu_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t});
-    fulv_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t});
-    fulv_zmid_to_zbot_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_zmid_to_zbot.(MTH{t}), lon_u, lat_u);
+days_in_months = [...
+    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+time_step = NaN(1,12);
+time_step(1) = days_in_months(1)/2;
+for p = 2 : 12
+    time_step(p) = ...
+        time_step(p-1) + days_in_months(p-1)/2 + days_in_months(p)/2;
 end
 
-z_top = aus8_currents.z_top;
-z_mid = aus8_currents.z_mid;
-z_bot = aus8_currents.z_bot;
+Months = {...
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', ...
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'};
+
+% time cycle setup
+time_serie = 2 * pi / 365 * time_step;
+
+for ll = 1 : 12
+    temp_monthly = ...
+        ... % mean component
+        Var.mean + ...
+        ... % annual component
+        Var.an_cos*cos(time_serie(ll)) + ...
+        Var.an_sin*sin(time_serie(ll)) + ...
+        ... % semi-annual component
+        Var.sa_cos*cos(2*time_serie(ll)) + ...
+        Var.sa_sin*sin(2*time_serie(ll));
+    
+    aus8_monthly.(Months{ll}) = temp_monthly;
+    disp([Months{ll} ' OK!'])
+end
+
+
+JFM = aus8_monthly.Jan;
+JFM(:,:,2) = aus8_monthly.Feb;
+JFM(:,:,3) = aus8_monthly.Mar;
+hgt2000 = mean(JFM,3)';
+
+JFM = aus8_monthly.Apr;
+JFM(:,:,2) = aus8_monthly.May;
+JFM(:,:,3) = aus8_monthly.Jun;
+hgt2000(:,:,2) = mean(JFM,3)';
+
+JFM = aus8_monthly.Jul;
+JFM(:,:,2) = aus8_monthly.Aug;
+JFM(:,:,3) = aus8_monthly.Sep;
+hgt2000(:,:,3) = mean(JFM,3)';
+
+JFM = aus8_monthly.Oct;
+JFM(:,:,2) = aus8_monthly.Nov;
+JFM(:,:,3) = aus8_monthly.Dec;
+hgt2000(:,:,4) = mean(JFM,3)';
+
+hgt2000 = hgt2000 - nanmean(nanmean(hgt2000))*1.115;
+
+sea_level = permute(temp_data.sea_level, ([2 1 3]));
 
 
 %% 5) plot maps of U and V SBC
+Seasons = {'summer', 'summer', 'autumn', 'autumn', ...
+    'winter', 'winter','spring', 'spring'};
+
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [4 1];
+rowcols = [4 2];
 rowcols_size = [14 6]/screen_ratio/2; % cm
 margs = [0.9 0.2 1.8 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
@@ -54,8 +81,15 @@ plot_cbar_gap = 1/screen_ratio;
 cbar_x = rowcols_size(1);
 cbar_y = 0.2/screen_ratio;
 
-magnif = 10;
-cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
+% lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
+lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
+
+x_chc = {Var.lon, temp_data.xt_ocean+360};
+x_ind = [1 2];
+y_chc = {Var.lat, temp_data.yt_ocean};
+
+magnif = 1000;
+cmap1_cont = -[0.3 0.2 0.15 0.1 0.075 0.05 0.025 0.01 0.001 0]*magnif;
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -68,30 +102,28 @@ cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
 cmaps_cont_length = length(cmaps_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_y_label = cmaps_cont/magnif;
-
-% lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
-lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
-
-x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
-x_ind = [1 1];
-y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
-
-for t = 1 : 4
-    data{t} = fulu_ztop_to_zmid.(MTH{t})*magnif;
-    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{t})*magnif;
+cc = 0;
+for t = 1 : 2 : 7
+    cc = cc + 1;
+    data{t} = hgt2000(:,:,cc)*magnif;
+    minmax{t} = [cmaps_cont(1) cmaps_cont(end)];
+    cmaps_custom{t} = cmapcust(cmaps,cmaps_cont);
+    axis_setup{t} = [lon_min lon_max lat_min lat_max];
+    x{t} = x_chc{x_ind(1)};
+    y{t} = y_chc{x_ind(1)};
+    U_title{t} = 'CARS2009';
 end
 
-title_chc = {'U', 'U', 'U', 'U'};
-z1_chc = {z_top, z_mid};
-z2_chc = {z_mid, z_bot};
-
-for sp = 1 : rowcols(1)*rowcols(2)
-    minmax{sp} = [cmaps_cont(1) cmaps_cont(end)];
-    cmaps_custom{sp} = cmapcust(cmaps,cmaps_cont);
-    
-    axis_setup{sp} = [lon_min lon_max lat_min lat_max];
-    x{sp} = x_chc{x_ind(1)};
-    y{sp} = y_chc{x_ind(1)};
+cc = 0;
+for t = 2 : 2 : 8
+    cc = cc + 1;
+    data{t} = sea_level(:,:,cc)*magnif;
+    minmax{t} = [cmaps_cont(1) cmaps_cont(end)];
+    cmaps_custom{t} = cmapcust(cmaps,cmaps_cont);
+    axis_setup{t} = [lon_min lon_max lat_min lat_max];
+    x{t} = x_chc{x_ind(2)};
+    y{t} = y_chc{x_ind(2)};
+    U_title{t} = 'MOM01-75z';
 
 end
 
@@ -142,10 +174,12 @@ for sp = 1 : rowN*colN
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
     
-    hold on
-    contour(x{sp}, y{sp}, v_data{sp})
+%     title_chc = ...
+%     {'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)', ...
+%     '{\boldmath{$V_{low}$}} (arrows) and {$U_{low}$} (shadings)'};
     
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
+    h_tit = title(['(' lett(sp) ') ' U_title{sp} ' ' Seasons{sp} ...
+        ' sea level anomaly'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
     grid
@@ -158,22 +192,30 @@ for sp = 1 : rowN*colN
     else
         xlabel('Longitude')
     end
-    if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
-    ylabel('Latitude')
+    if col_ind(sp) ~= 1
+        set(gca,'yticklabel','')
+    else
+        ylabel('Latitude')
+    end
+%     
+%     if ~mod(sp,2)
+    hold on
+    plot([110, 152], [-42, -42], 'k:')
+%     end
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
         colormap(ax, cmaps);
         cbar = colorbar('horizontal');
         set(cbar,'ytick',cmaps_linspace, ...
-            'YAxisLocation','right','YTickLabel',cmaps_y_label,...
+            'YAxisLocation','right','YTickLabel',cmaps_y_label*magnif,...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
+            (marg_l+x_sp*(cm(sp)-2)+gap_w*(cm(sp)-2)), ...
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
-            cbar_x, ...
+            cbar_x*2+gap_w, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
+        set(get(cbar,'xlabel'),'String','$\eta$ ($mm$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         
@@ -195,8 +237,3 @@ print(fig, ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 close
-
-
-%%
-play(bird_f_path,[1 (get(bird_f_path, 'SampleRate')*3)]);
-

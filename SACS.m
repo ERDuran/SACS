@@ -11,7 +11,7 @@ addpath(genpath('~/Dropbox/matlab_functions'))
 addpath(genpath('~/Dropbox/ghostscript-9.21'))
 addpath(genpath('~/Dropbox/xpdfbin-mac-3.04'))
 figures_path = '~/Dropbox/SACS/figures/';
-data_path = '~/Dropbox/Data/';
+data_path = '~/CARS/';
 disp('OK, all set')
     
 set(groot, 'defaultColorbarTickLabelInterpreter','latex');

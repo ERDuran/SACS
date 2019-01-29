@@ -54,16 +54,16 @@ screen_ratio = 0.75;
 fig_n = 1;
 rowcols = [4 1];
 rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [0.9 0.2 1.8 0.6]/screen_ratio; % cm
+margs = [0.9 0.3 1.8 0.6]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
 plot_cbar_gap = 1/screen_ratio;
 cbar_x = rowcols_size(1);
 cbar_y = 0.2/screen_ratio;
 
 magnif = 1000;
-cmap1_cont = [0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25]*magnif;
+cmap1_cont = [0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225]*magnif;
 lvl_cmap1 = length(cmap1_cont)-1;
-cmap1 = othercolor('BuPu8', lvl_cmap1);
+cmap1 = othercolor('Purples8', lvl_cmap1);
 % cmap1(end,:) = [1 1 1];
 cmaps_cont_length = length(cmap1_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
@@ -173,7 +173,7 @@ for sp = 1 : rowN*colN
 %             'fontsize',font_size)
 %     end
     
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
+    h_tit = title(['(' lett(sp) ') ' Seasons{sp} ' wind stress'], ...
     'horizontalalignment','left', 'fontsize',font_size);
     h_tit.Position(1) = axis_setup{sp}(1);
     grid

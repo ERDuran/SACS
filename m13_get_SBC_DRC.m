@@ -1098,6 +1098,6 @@ end
 
 
 %%
-save([data_path 'SACS_data/aus8_currents'], 'aus8_currents')
-disp(['aus8_currents DONE'])
+% save([data_path 'SACS_data/aus8_currents'], 'aus8_currents')
+% disp(['aus8_currents DONE'])
 

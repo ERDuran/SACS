@@ -13,42 +13,79 @@ lon = aus8_coor.lon;
 depth_mid = aus8_coor.depth_mid;
 depth = aus8_coor.depth;
 depth_thkn = aus8_coor.depth_thkn;
-Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
 
-
-%%
-lat_u = aus8_coor.lat_u;
-lon_u = aus8_coor.lon_u;
-lat_v = aus8_coor.lat_v;
-lon_v = aus8_coor.lon_v;
-
-for t = 1 : 4
-    fulu_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t});
-    fulv_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t});
-    fulv_ztop_to_zmid_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_ztop_to_zmid.(MTH{t}), lon_u, lat_u);
+[kds_var, ~, kds_att] = ...
+        nc2mat([data_path ...
+        'KDS75/uv_trimesters.nc'], ...
+        'ALL');
     
-    fulu_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t});
-    fulv_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t});
-    fulv_zmid_to_zbot_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_zmid_to_zbot.(MTH{t}), lon_u, lat_u);
+lon_ori = kds_var.xu_ocean +360;
+lat_ori = kds_var.yu_ocean;
+z_ori = kds_var.st_ocean;
+time = kds_var.time;
+v_orig = kds_var.v;
+size(v_orig)
+
+
+%% 1st interp: Latitude
+lat_hr = -40;
+v_temp_lat = NaN(length(lon_ori), length(z_ori), length(time));
+for j = 1 : length(lon_ori)
+    for k = 1 : length(z_ori)
+        for t = 1 : length(time)
+            v_temp_lat(j,k,t) = ...
+                interp1(lat_ori, squeeze(v_orig(j,:,k,t)), lat_hr);
+            
+        end
+    end
+    disp(['lon = ' num2str(lon_ori(j))])
+end
+            
+%% 2nd interp: Depth
+z_hr = -depth_mid;
+v_temp_lat_z = NaN(length(lon_ori), length(z_hr), length(time));
+for j = 1 : length(lon_ori)
+    for t = 1 : length(time)
+        v_temp_lat_z(j,:,t) = ...
+            interp1(z_ori, squeeze(v_temp_lat(j,:,t)), z_hr);
+        
+    end
+    disp(['lon = ' num2str(lon_ori(j))])
 end
 
-z_top = aus8_currents.z_top;
-z_mid = aus8_currents.z_mid;
-z_bot = aus8_currents.z_bot;
+%% 3rd interp: Lon
+lon_hr = lon;
+v_hr = NaN(length(lon_hr), length(z_hr), length(time));
+for k = 1 : length(z_hr)
+    for t = 1 : length(time)
+        v_hr(:,k,t) = ...
+            interp1(lon_ori, squeeze(v_temp_lat_z(:,k,t)), lon_hr);
+        
+    end
+    disp(['z = ' num2str(z_hr(k))])
+end
+
+%% 4th integration between 250 and 2000 m: z
+V_hr = NaN(length(lon_hr), length(time));
+for j = 1 : length(lon_hr)
+    for t = 1 : length(time)
+        V_hr_now = squeeze(v_hr(j, z_hr>=250, t));
+        V_hr_times_depth_thkn = V_hr_now .* depth_thkn(z_hr>=250)';
+        V_hr(j,t) = nansum(V_hr_times_depth_thkn);
+        
+    end
+    disp(['lon = ' num2str(lon_ori(j))])
+end
+
+V_hr(V_hr==0) = NaN;
 
 
 %% 5) plot maps of U and V SBC
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [4 1];
-rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [0.9 0.2 1.8 0.6]/screen_ratio; % cm
+rowcols = [1 1];
+rowcols_size = [13 20]/screen_ratio/2; % cm
+margs = [1.4 0.2 1.8 1]/screen_ratio; % cm
 gaps = [0.4 0.8]/screen_ratio; % cm
 plot_cbar_gap = 1/screen_ratio;
 cbar_x = rowcols_size(1);
@@ -69,32 +106,13 @@ cmaps_cont_length = length(cmaps_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
 cmaps_y_label = cmaps_cont/magnif;
 
-% lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
-lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
-
-x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
-x_ind = [1 1];
-y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
-
-for t = 1 : 4
-    data{t} = fulu_ztop_to_zmid.(MTH{t})*magnif;
-    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{t})*magnif;
-end
-
-title_chc = {'U', 'U', 'U', 'U'};
-z1_chc = {z_top, z_mid};
-z2_chc = {z_mid, z_bot};
-
 for sp = 1 : rowcols(1)*rowcols(2)
     minmax{sp} = [cmaps_cont(1) cmaps_cont(end)];
     cmaps_custom{sp} = cmapcust(cmaps,cmaps_cont);
-    
-    axis_setup{sp} = [lon_min lon_max lat_min lat_max];
-    x{sp} = x_chc{x_ind(1)};
-    y{sp} = y_chc{x_ind(1)};
 
 end
 
+Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
 lett = 'a':'z';
 font_size = 8*screen_ratio;
 nan_color = [0.7 0.7 0.7];
@@ -137,29 +155,43 @@ for sp = 1 : rowN*colN
         'Position',[subplot_x,subplot_y,x_sp,y_sp]);
     
     colormap(ax, cmaps_custom{sp});
-    pcolor(x{sp}, y{sp}, data{sp})
-    axis(axis_setup{sp})
+    pcolor(lon,1:28,V_hr'*magnif)
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
+    axis([110 152 1 28])
     
-    hold on
-    contour(x{sp}, y{sp}, v_data{sp})
+    %title_chc = ...
+    %{'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)', ...
+    %'{\boldmath{$V_{low}$}} (arrows) and {$U_{low}$} (shadings)'};
     
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
+    h_tit = title({'Seasonality of $V_{low}$ along $40^{\circ}S$', ...
+        'integrated from  $z=250$ to $z=2000$ $m$'}, ...
     'horizontalalignment','left', 'fontsize',font_size);
-    h_tit.Position(1) = axis_setup{sp}(1);
+    h_tit.Position(1) = 110;
     grid
     set(ax,'layer','top','color',nan_color,...
         'fontsize',font_size,'tickdir','out', ...
         'ticklength',fig_tick_length, ...
-        'xtick', lon_min:4:lon_max, 'ytick', lat_min:4:lat_max)
+        'xtick', 110:4:152, 'ytick', 1:28, 'yticklabel', Seasons)
     if row_ind(sp) ~= rowN
         set(gca,'xticklabel','')
     else
         xlabel('Longitude')
     end
-    if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
-    ylabel('Latitude')
+    if col_ind(sp) ~= 1
+        set(gca,'yticklabel','')
+    else
+        ylabel('Season')
+    end
+    
+    hold on
+    plot([110 152], [2 2], 'k--')
+    plot([110 152], [6 6], 'k--')
+    plot([110 152], [10 10], 'k--')
+    plot([110 152], [14 14], 'k--')
+    plot([110 152], [18 18], 'k--')
+    plot([110 152], [22 22], 'k--')
+    plot([110 152], [26 26], 'k--')
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
@@ -173,7 +205,7 @@ for sp = 1 : rowN*colN
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
             cbar_x, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
+        set(get(cbar,'xlabel'),'String','$V$ ($m^{2}/s$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         
@@ -187,11 +219,11 @@ if ~contains(outputls, scriptname)
     mkdir(figures_path, scriptname)
 end
 print(fig, ...
-    [figures_path mfilename '/' scriptname(1:3) ...
+    [figures_path mfilename '/f12_plot_Rossby_waves/f12' ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 print(fig, ...
-    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
+    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/f12' ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
 close

@@ -2,45 +2,96 @@
 clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
-load([data_path 'SACS_data/aus8_coor'])
-load([data_path 'SACS_data/aus8_currents'])
+load([data_path 'SACS_data/aus8_coor'], 'aus8_coor')
+load([data_path 'SACS_data/KDau_tau'], 'KDau_tau')
 load([data_path 'SACS_data/KDau_fcrt'])
-load([data_path 'SACS_data/aus8_figures'])
-
 MTH = aus8_coor.MTH;
 lat = aus8_coor.lat;
 lon = aus8_coor.lon;
 depth_mid = aus8_coor.depth_mid;
 depth = aus8_coor.depth;
 depth_thkn = aus8_coor.depth_thkn;
-Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
-
-
-%%
 lat_u = aus8_coor.lat_u;
 lon_u = aus8_coor.lon_u;
 lat_v = aus8_coor.lat_v;
 lon_v = aus8_coor.lon_v;
+Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
+a = aus8_coor.a;
+pi180 = aus8_coor.pi180;
 
+
+%%
+tau_x.JFM = ...
+    (KDau_tau.tau_x.Jan + KDau_tau.tau_x.Feb + KDau_tau.tau_x.Mar)/3;
+tau_x.AMJ = ...
+    (KDau_tau.tau_x.Apr + KDau_tau.tau_x.May + KDau_tau.tau_x.Jun)/3;
+tau_x.JAS = ...
+    (KDau_tau.tau_x.Jul + KDau_tau.tau_x.Aug + KDau_tau.tau_x.Sep)/3;
+tau_x.OND = ...
+    (KDau_tau.tau_x.Oct + KDau_tau.tau_x.Nov + KDau_tau.tau_x.Dec)/3;
+
+%
+tau_y.JFM = ...
+    (KDau_tau.tau_y.Jan + KDau_tau.tau_y.Feb + KDau_tau.tau_y.Mar)/3;
+tau_y.AMJ = ...
+    (KDau_tau.tau_y.Apr + KDau_tau.tau_y.May + KDau_tau.tau_y.Jun)/3;
+tau_y.JAS = ...
+    (KDau_tau.tau_y.Jul + KDau_tau.tau_y.Aug + KDau_tau.tau_y.Sep)/3;
+tau_y.OND = ...
+    (KDau_tau.tau_y.Oct + KDau_tau.tau_y.Nov + KDau_tau.tau_y.Dec)/3;
+
+%
 for t = 1 : 4
-    fulu_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t});
-    fulv_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t});
-    fulv_ztop_to_zmid_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_ztop_to_zmid.(MTH{t}), lon_u, lat_u);
-    
-    fulu_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t});
-    fulv_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t});
-    fulv_zmid_to_zbot_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_zmid_to_zbot.(MTH{t}), lon_u, lat_u);
+    tau_x_interp2.(MTH{t}) = interp2(lon_v, lat_v, tau_x.(MTH{t}), ...
+        lon_v,lat_u);
+    tau_y_interp2.(MTH{t}) = interp2(lon_u, lat_u, tau_y.(MTH{t}), ...
+        lon_v,lat_u);
+    speed_interp2.(MTH{t}) = ...
+        sqrt(tau_x_interp2.(MTH{t}).^2 + tau_y_interp2.(MTH{t}).^2);
 end
 
-z_top = aus8_currents.z_top;
-z_mid = aus8_currents.z_mid;
-z_bot = aus8_currents.z_bot;
+% include open boundary phi
+% dx for phi position
+lat_phi = lat_v(2:end-1);
+lon_phi = lon_v;
+dx_phi = NaN(length(lat_phi), length(lon_phi)-1);
+for ii = 1 : length(lat_phi)
+    dx_now = a * cos(lat_phi(ii) * pi180) .* ...
+        (lon_phi(2:end) - lon_phi(1:end-1)) * pi180;
+    
+    dx_phi(ii,:) = dx_now;
+end
+% dy for phi position
+lat_phi = lat_u;
+lon_phi = lon_u(2:end-1);
+dy_phi = NaN(length(lat_phi)-1, length(lon_phi));
+for jj = 1 : length(lon_phi)
+    dy_now = a * (lat_phi(1:end-1) - lat_phi(2:end)) * pi180;
+    
+    dy_phi(:,jj) = dy_now;
+end
+
+for t = 1 : 4
+    dtauy = tau_y.(MTH{t})(1:end-1,2:end-1) - tau_y.(MTH{t})(2:end,2:end-1);
+    dx = dx_phi;
+    dtauydx = dtauy./dx;
+    
+    dtaux = tau_x.(MTH{t})(2:end-1,2:end) - tau_x.(MTH{t})(2:end-1,1:end-1);
+    dy = dy_phi;
+    dtauxdy = dtaux./dy;
+    
+    wind_curl.(MTH{t}) = dtauydx - dtauxdy;
+end
+
+
+%%
+close
+
+pcolor(wind_curl.JAS)
+shading interp
+axis ij
+caxis([-0.0000001 0.0000001])
+colorbar
 
 
 %% 5) plot maps of U and V SBC
@@ -54,45 +105,34 @@ plot_cbar_gap = 1/screen_ratio;
 cbar_x = rowcols_size(1);
 cbar_y = 0.2/screen_ratio;
 
-magnif = 10;
-cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
-cmap2_cont = -fliplr(cmap1_cont);
-lvl_cmap1 = length(cmap1_cont)-1;
-lvl_cmap2 = length(cmap2_cont)-1;
-cmap1 = flipud(othercolor('Blues8', lvl_cmap1));
-cmap2 = othercolor('Reds8', lvl_cmap2);
-cmap1(end,:) = [1 1 1];
-cmap2(1,:) = [1 1 1];
-cmaps = [cmap1; cmap2];
-cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
-cmaps_cont_length = length(cmaps_cont);
-cmaps_linspace = linspace(0,1,cmaps_cont_length);
-cmaps_y_label = cmaps_cont/magnif;
-
-% lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
 lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
 
-x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
-x_ind = [1 1];
-y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
+magnif_2 = 10;
+cmap1_cont_2 = -[5 4 2 1 0.5 0.2 0.1 0] * magnif_2;
+cmap2_cont_2 = -fliplr(cmap1_cont_2);
+lvl_cmap1_2 = length(cmap1_cont_2)-1;
+lvl_cmap2_2 = length(cmap2_cont_2)-1;
+cmap1_2 = flipud(othercolor('Greens8', lvl_cmap1_2));
+cmap2_2 = othercolor('Oranges8', lvl_cmap2_2);
+cmap1_2(end,:) = [1 1 1];
+cmap2_2(1,:) = [1 1 1];
+cmaps_2 = [cmap1_2; cmap2_2];
+cmaps_cont_2 = [cmap1_cont_2 cmap2_cont_2(2:end)];
+cmaps_cont_length_2 = length(cmaps_cont_2);
+cmaps_linspace_2 = linspace(0,1,cmaps_cont_length_2);
+cmaps_y_label_2 = cmaps_cont_2/magnif_2;
 
-for t = 1 : 4
-    data{t} = fulu_ztop_to_zmid.(MTH{t})*magnif;
-    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{t})*magnif;
-end
-
-title_chc = {'U', 'U', 'U', 'U'};
-z1_chc = {z_top, z_mid};
-z2_chc = {z_mid, z_bot};
-
-for sp = 1 : rowcols(1)*rowcols(2)
-    minmax{sp} = [cmaps_cont(1) cmaps_cont(end)];
-    cmaps_custom{sp} = cmapcust(cmaps,cmaps_cont);
+t = 0;
+for sp = 1:4
+    t = t + 1;
+    minmax{sp} = [cmaps_cont_2(1) cmaps_cont_2(end)];
+    cmaps_custom{sp} = cmapcust(cmaps_2,cmaps_cont_2);
     
     axis_setup{sp} = [lon_min lon_max lat_min lat_max];
-    x{sp} = x_chc{x_ind(1)};
-    y{sp} = y_chc{x_ind(1)};
-
+    
+    x{sp} = lon_u(2:end-1);
+    y{sp} = lat_v(2:end-1);
+    data{sp} = wind_curl.(MTH{t})*10000000*magnif_2;
 end
 
 lett = 'a':'z';
@@ -130,24 +170,25 @@ set(fig,'units','centimeters','paperunits','centimeters', ...
     'paperposition',[0 0 fig_x fig_y]*screen_ratio,...
     'position',[0 0 fig_x fig_y]);
 
+t = 0;
+q = 0;
 for sp = 1 : rowN*colN
     subplot_x = marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1);
     subplot_y = marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1);
     ax = axes('Units','centimeters', ...
         'Position',[subplot_x,subplot_y,x_sp,y_sp]);
     
-    colormap(ax, cmaps_custom{sp});
-    pcolor(x{sp}, y{sp}, data{sp})
-    axis(axis_setup{sp})
+    q = q + 1;
+    colormap(ax, cmaps_custom{q});
+    pcolor(x{q}, y{q}, data{q})
+    axis(axis_setup{q})
     shading interp
-    caxis([minmax{sp}(1) minmax{sp}(2)]);
+    caxis([minmax{q}(1) minmax{q}(2)]);
+    %hold on
     
-    hold on
-    contour(x{sp}, y{sp}, v_data{sp})
-    
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
-    'horizontalalignment','left', 'fontsize',font_size);
-    h_tit.Position(1) = axis_setup{sp}(1);
+    h_tit = title(['(' lett(sp) ') ' Seasons{sp} ' wind stress curl'], ...
+        'horizontalalignment','left', 'fontsize',font_size);
+    h_tit.Position(1) = axis_setup{q}(1);
     grid
     set(ax,'layer','top','color',nan_color,...
         'fontsize',font_size,'tickdir','out', ...
@@ -158,25 +199,25 @@ for sp = 1 : rowN*colN
     else
         xlabel('Longitude')
     end
-    if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
     ylabel('Latitude')
+    if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
-        colormap(ax, cmaps);
+        colormap(ax, cmaps_2);
         cbar = colorbar('horizontal');
-        set(cbar,'ytick',cmaps_linspace, ...
-            'YAxisLocation','right','YTickLabel',cmaps_y_label,...
+        set(cbar,'ytick',cmaps_linspace_2, ...
+            'XTickLabel',cmaps_y_label_2,...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
             (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
             (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
             cbar_x, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
+        set(get(cbar,'xlabel'),'String', ...
+            '$\nabla \times \tau$ ($10^{-7} N/m^{3}$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
-        
         pointycbar(cbar)
     end
 end
@@ -199,4 +240,6 @@ close
 
 %%
 play(bird_f_path,[1 (get(bird_f_path, 'SampleRate')*3)]);
+
+
 

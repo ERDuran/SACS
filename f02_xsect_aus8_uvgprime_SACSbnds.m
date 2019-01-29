@@ -14,6 +14,26 @@ load([data_path 'SACS_data/KDau_fulv'])
 load([data_path 'SACS_data/KDau_fulw'])
 
 
+%%
+% I'm sorry I misread what you wrote here last time. I think what reviewer 
+% asks for is doable and would be better as a visualization of the 
+% structure of the flow. Suppose that we somehow define a cross-shore 
+% direction. Then the alongshore direction is also defined. Let the angle 
+% of the alongshore direction be ? from east (positive counterclockwise). 
+% Then you multiply the velocity vector (u,v) by the rotation matrix 
+% (cos?, ?sin?; sin?, cos?) and you get the vector 
+% (alongshore vel, crossshore vel).  So, it's doable.  The SBC's 
+% "alongshore vel" will be positive and the FC's "alongshore vel." will be 
+% negative.  So, they can be easily distinguishable.
+% We don't want to do it only because it's hard to define cross-shore 
+% section at each location.  In addition, zonal flow is good enough to 
+% visualize SBC (FC) because it almost always has eastward (westward) 
+% velocity in annual mean. The only exception is at the XXX section, where 
+% the meridional component. I think these two statements will serve as our 
+% defense.
+
+"
+
 %% plot map
 depth_mid_for_plot = aus8_coor.depth_mid;
 depth_mid_for_plot(end) = -2000;
@@ -147,6 +167,8 @@ for sp = 1 : rowN*colN
     
     [cn, hn] = contour(x_contour{sp},y{sp},data_contour{sp}, ...
         [0 0],'-k', 'linewidth', 0.1);
+    clabel(cn, hn,'fontsize',font_size)
+    
     
     line_width = 1;
     if find(ismember(lon_u_SBC_north_OK,aus8_figures.cross.lon(1,bsp)))
@@ -294,15 +316,15 @@ for sp = 1 : rowN*colN
     end
     
     if sp == rowN*colN
-        rectangle('Position',[-61.5 -2400 18.75 5100], ...
+        rectangle('Position',[-62 -2400 18.75 5125], ...
             'EdgeColor', [0 0 0], 'linewidth', 1, ...
             'Clipping', 'off')
-        text(-61.0, -150, '\textbf{MOM01-75z}', 'Rotation',90,...
+        text(-61.5, -150, '\textbf{MOM01-75z}', 'Rotation',90,...
             'fontsize', font_size+2)
-        rectangle('Position',[-61.5 2800 18.75 5000], ...
+        rectangle('Position',[-62 2800 18.75 5000], ...
             'EdgeColor', [0 0 0], 'linewidth', 1, ...
             'Clipping', 'off')
-        text(-61.0, 4900, '\textbf{CARS-aus8}', 'Rotation',90,...
+        text(-61.5, 4900, '\textbf{CARS-aus8}', 'Rotation',90,...
             'fontsize', font_size+2)
         
         ax = axes('visible', 'off');
@@ -316,7 +338,7 @@ for sp = 1 : rowN*colN
             marg_b+plot_cbar_gap, ...
             cbar_x, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$u_{g}''$ (cm/s)', ...
+        set(get(cbar,'xlabel'),'String','$u$ (cm/s)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         
@@ -324,7 +346,6 @@ for sp = 1 : rowN*colN
         
     end
 end
-
 
 
 outputls = ls(figures_path);

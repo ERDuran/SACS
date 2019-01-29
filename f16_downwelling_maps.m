@@ -1,61 +1,32 @@
-%%
+%% fig 2: meridional cross sections of zonal velocity differences
 clearvars('-except', '*_path')
 play(bird_i_path,[1 (get(bird_i_path, 'SampleRate')*3)]);
 
 load([data_path 'SACS_data/aus8_coor'])
-load([data_path 'SACS_data/aus8_currents'])
-load([data_path 'SACS_data/KDau_fcrt'])
+load([data_path 'SACS_data/KDau_fulw'])
 load([data_path 'SACS_data/aus8_figures'])
+load([data_path 'SACS_data/SmSan02'])
 
-MTH = aus8_coor.MTH;
-lat = aus8_coor.lat;
-lon = aus8_coor.lon;
-depth_mid = aus8_coor.depth_mid;
-depth = aus8_coor.depth;
-depth_thkn = aus8_coor.depth_thkn;
-Seasons = {'Summer', 'Autumn', 'Winter', 'Spring'};
-
+topo_binavg = SmSan02.topo_binavg;
+topo_binavg(topo_binavg==0) = NaN;
 
 %%
-lat_u = aus8_coor.lat_u;
-lon_u = aus8_coor.lon_u;
-lat_v = aus8_coor.lat_v;
-lon_v = aus8_coor.lon_v;
-
-for t = 1 : 4
-    fulu_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulu.(MTH{t});
-    fulv_ztop_to_zmid.(MTH{t}) = ...
-        KDau_fcrt.MMM.ztop_to_zmid.fulv.(MTH{t});
-    fulv_ztop_to_zmid_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_ztop_to_zmid.(MTH{t}), lon_u, lat_u);
-    
-    fulu_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulu.(MTH{t});
-    fulv_zmid_to_zbot.(MTH{t}) = ...
-        KDau_fcrt.MMM.zmid_to_zbot.fulv.(MTH{t});
-    fulv_zmid_to_zbot_interp2.(MTH{t}) = interp2(...
-        lon_v, lat_v, fulv_zmid_to_zbot.(MTH{t}), lon_u, lat_u);
-end
-
-z_top = aus8_currents.z_top;
-z_mid = aus8_currents.z_mid;
-z_bot = aus8_currents.z_bot;
+depth = aus8_coor.depth;
+lon = aus8_coor.lon_v;
+lat = aus8_coor.lat_u;
+fulw = KDau_fulw.mean(:,:,31);
 
 
 %% 5) plot maps of U and V SBC
 screen_ratio = 0.75;
 fig_n = 1;
-rowcols = [4 1];
-rowcols_size = [14 6]/screen_ratio/2; % cm
-margs = [0.9 0.2 1.8 0.6]/screen_ratio; % cm
-gaps = [0.4 0.8]/screen_ratio; % cm
-plot_cbar_gap = 1/screen_ratio;
-cbar_x = rowcols_size(1);
-cbar_y = 0.2/screen_ratio;
+rowcols = [1 1];
+rowcols_size = [12 4.2]/screen_ratio; % cm
+margs = [1.0 0.3 1.9 0.7]/screen_ratio; % cm
+gaps = [0.4 0.7]/screen_ratio; % cm
 
-magnif = 10;
-cmap1_cont = -[200 100 60 20 5 2 0.5 0]*magnif;
+magnif = 1000000;
+cmap1_cont = -[10 5 2 1 0.5 0.25 0.1 0]/100000*magnif;
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -72,26 +43,22 @@ cmaps_y_label = cmaps_cont/magnif;
 % lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
 lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
 
-x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
-x_ind = [1 1];
-y_chc = {aus8_coor.lat_u, aus8_coor.lat_v};
+x_chc = {lon};
+x_ind = [1];
+y_chc = {lat};
 
-for t = 1 : 4
-    data{t} = fulu_ztop_to_zmid.(MTH{t})*magnif;
-    v_data{t} = fulv_ztop_to_zmid_interp2.(MTH{t})*magnif;
-end
+data = {fulw*magnif};
 
-title_chc = {'U', 'U', 'U', 'U'};
-z1_chc = {z_top, z_mid};
-z2_chc = {z_mid, z_bot};
+title_chc = ...
+    {'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)'};
 
 for sp = 1 : rowcols(1)*rowcols(2)
     minmax{sp} = [cmaps_cont(1) cmaps_cont(end)];
     cmaps_custom{sp} = cmapcust(cmaps,cmaps_cont);
     
     axis_setup{sp} = [lon_min lon_max lat_min lat_max];
-    x{sp} = x_chc{x_ind(1)};
-    y{sp} = y_chc{x_ind(1)};
+    x{sp} = x_chc{x_ind(sp)};
+    y{sp} = y_chc{x_ind(sp)};
 
 end
 
@@ -117,6 +84,10 @@ marg_r = margs(2); % right margin
 fig_x = marg_l+colN*x_sp+gap_w*(colN-1)+marg_r;
 fig_y = marg_b+rowN*y_sp+gap_h*(rowN-1)+marg_t;
 
+plot_cbar_gap = -1.1/screen_ratio;
+cbar_x = x_sp;
+cbar_y = 0.2/screen_ratio;
+
 desired_length = 0.05/screen_ratio; %cm
 if y_sp > x_sp, long_side = y_sp; else, long_side = x_sp; end
 norm_length = desired_length/long_side;
@@ -135,45 +106,56 @@ for sp = 1 : rowN*colN
     subplot_y = marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1);
     ax = axes('Units','centimeters', ...
         'Position',[subplot_x,subplot_y,x_sp,y_sp]);
-    
+        
     colormap(ax, cmaps_custom{sp});
     pcolor(x{sp}, y{sp}, data{sp})
     axis(axis_setup{sp})
     shading interp
     caxis([minmax{sp}(1) minmax{sp}(2)]);
-    
     hold on
-    contour(x{sp}, y{sp}, v_data{sp})
     
-    h_tit = title(['(' lett(sp) ') ' Seasons{sp}], ...
-    'horizontalalignment','left', 'fontsize',font_size);
+%     contour(aus8_coor.lon,aus8_coor.lat,topo_binavg, [-500 -500], '--')
+    contour(aus8_coor.lon,aus8_coor.lat,topo_binavg, [-1000 -1000], 'k-')
+    
+    for n = 1 : length(aus8_figures.cross.lon(1,:))
+        plot(aus8_figures.cross.lon(1:2,n), ...
+            aus8_figures.cross.lat(1:2,n), '--k', 'linewidth',1.2)
+    end
+    
+    
+    h_tit = title(['(' lett(sp) ') Vertical velocity at z = -250 m depth in MOM01.'], ...
+    'horizontalalignment','left', 'fontsize',font_size, ...
+    'Interpreter','latex');
     h_tit.Position(1) = axis_setup{sp}(1);
     grid
     set(ax,'layer','top','color',nan_color,...
         'fontsize',font_size,'tickdir','out', ...
         'ticklength',fig_tick_length, ...
-        'xtick', lon_min:4:lon_max, 'ytick', lat_min:4:lat_max)
+        'xtick', lon_min:2:lon_max, 'ytick', lat_min:2:lat_max)
     if row_ind(sp) ~= rowN
         set(gca,'xticklabel','')
     else
-        xlabel('Longitude')
+        xlabel('Longitude ($^{\circ}$E)', 'fontsize', font_size)
     end
     if col_ind(sp) ~= 1, set(gca,'yticklabel',''), end
-    ylabel('Latitude')
+    
+    ylabel('Latitude ($^{\circ}$N)', 'fontsize', font_size)
     
     if sp == rowN*colN
         ax = axes('visible', 'off');
         colormap(ax, cmaps);
         cbar = colorbar('horizontal');
-        set(cbar,'ytick',cmaps_linspace, ...
-            'YAxisLocation','right','YTickLabel',cmaps_y_label,...
+        set(cbar,'xtick',cmaps_linspace, ...
+            'XTickLabel',cmaps_y_label,...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
-            (marg_l+x_sp*(cm(sp)-1)+gap_w*(cm(sp)-1)), ...
-            (marg_b+y_sp*(rm(sp)-1)+gap_h*(rm(sp)-1)-plot_cbar_gap), ...
+            marg_l, ...
+            marg_b+plot_cbar_gap, ...
             cbar_x, ...
             cbar_y]);
-        set(get(cbar,'xlabel'),'String','$U_{up}$ ($m^{2}/s$)', ...
+        
+        set(get(cbar,'xlabel'), ...
+            'String','$w$ ($m/s$)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         
@@ -190,11 +172,11 @@ print(fig, ...
     [figures_path mfilename '/' scriptname(1:3) ...
     '_fig' num2str(fig_n) '_'], ...
     '-dpng', '-r300')
-print(fig, ...
-    ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
-    '_fig' num2str(fig_n) '_'], ...
-    '-dpng', '-r300')
-close
+% print(fig, ...
+%     ['~/Duran2017/SACS/10319442jbhpxfsdfvwy/' scriptname(1:3) ...
+%     '_fig' num2str(fig_n) '_'], ...
+%     '-dpng', '-r300')
+% close
 
 
 %%

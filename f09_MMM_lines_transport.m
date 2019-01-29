@@ -34,6 +34,21 @@ for t = 1 : 4
     DRC_Ut(t,:) = KDau_fcrt.DRC_Ut.(MTH{t});
 end
 
+LCE_u = lon_u >= 115 & lon_u <= 124;
+zSAC_u = lon_u >= 124 & lon_u <= 132;
+sSAC_u = lon_u >= 132 & lon_u <= 141;
+ZC_u = lon_u >= 141 & lon_u <= 147;
+
+SBC_Ut_mean(:,1) = mean(SBC_Ut(:,LCE_u),2);
+SBC_Ut_mean(:,2) = mean(SBC_Ut(:,zSAC_u),2);
+SBC_Ut_mean(:,3) = mean(SBC_Ut(:,sSAC_u),2);
+SBC_Ut_mean(:,4) = mean(SBC_Ut(:,ZC_u),2)
+
+DRC_Ut_mean(:,1) = mean(DRC_Ut(:,LCE_u),2);
+DRC_Ut_mean(:,2) = mean(DRC_Ut(:,zSAC_u),2);
+DRC_Ut_mean(:,3) = mean(DRC_Ut(:,sSAC_u),2);
+DRC_Ut_mean(:,4) = mean(DRC_Ut(:,lon_u >= 141 & lon_u <= 144),2)
+
 
 %%
 screen_ratio = 0.75;
@@ -48,7 +63,7 @@ cbar_y = 0.2/screen_ratio;
 
 
 lon_min = 115; lon_max = 147; 
-lat_min = {-1.5,-20,-4}; lat_max = {2,7.5,0};
+lat_min = {-1.5,-20,-4}; lat_max = {2,10,0};
 
 x_chc = {aus8_coor.lon_u, aus8_coor.lon_v};
 x_ind = [1 1 2];
@@ -58,7 +73,7 @@ data_mean = {KDau_fcrt.SBC_Ut.mean, KDau_fcrt.DRC_Ut.mean, ...
     KDau_fcrt.SBC_Wtc.mean};
 
 data_label = ...
-    {'$\mathcal{U}_{SBCs}$', '$\mathcal{U}_{FC}$', '$\mathcal{W}_{SBCs}$'};
+    {'$\mathcal{U}_{SBC}$', '$\mathcal{U}_{FC}$', '$\mathcal{W}_{SBC}$'};
 
 % title_chc = {'U''', 'V''', 'U_{g}''', 'V_{g}'''};
 
@@ -155,6 +170,45 @@ for sp = 1 : rowN*colN
     grid
     x_tick = lon_min:2:lon_max;
     x_tick_label = num2cell(x_tick);
+    
+    if sp == 1
+        text(119, 1.8, num2str(round(SBC_Ut_mean(2,1)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(127, 1.8, num2str(round(SBC_Ut_mean(2,2)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(135, 1.8, num2str(round(SBC_Ut_mean(2,3)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(143, 1.8, num2str(round(SBC_Ut_mean(2,4)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        
+        text(119, -1.3, num2str(round(SBC_Ut_mean(1,1)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(127, -1.3, num2str(round(SBC_Ut_mean(1,2)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(135, -1.3, num2str(round(SBC_Ut_mean(1,3)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(143, -1.3, num2str(round(SBC_Ut_mean(1,4)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        
+    elseif sp == 2
+        text(119, 7.5, num2str(round(DRC_Ut_mean(2,1)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(127, 7.5, num2str(round(DRC_Ut_mean(2,2)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(135, 7.5, num2str(round(DRC_Ut_mean(2,3)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        text(143, 7.5, num2str(round(DRC_Ut_mean(2,4)*10)/10), 'color', hhc4, ...
+            'fontsize',font_size)
+        
+        text(119, -17.5, num2str(round(DRC_Ut_mean(1,1)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(127, -17.5, num2str(round(DRC_Ut_mean(1,2)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(135, -17.5, num2str(round(DRC_Ut_mean(1,3)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+        text(143, -17.5, num2str(round(DRC_Ut_mean(1,4)*10)/10), 'color', hhc2, ...
+            'fontsize',font_size)
+    end
 
     if sp == 3
         MTH_l = Seasons;
@@ -175,13 +229,19 @@ for sp = 1 : rowN*colN
             'ticklength',fig_tick_length, ...
             'fontsize',font_size,'tickdir','out', ...
             'xtick', x_tick, 'xticklabel', x_tick_label, ...
-            'ytick', lat_min{sp}:2.5:lat_max{sp})
-    else
+            'ytick', -20:5:10)
+    elseif sp == 3
         set(ax,'layer','top','color',nan_color,...
             'ticklength',fig_tick_length, ...
             'fontsize',font_size,'tickdir','out', ...
             'xtick', x_tick, 'xticklabel', x_tick_label, ...
             'ytick', lat_min{sp}:0.5:lat_max{sp})
+    else
+        set(ax,'layer','top','color',nan_color,...
+            'ticklength',fig_tick_length, ...
+            'fontsize',font_size,'tickdir','out', ...
+            'xtick', x_tick, 'xticklabel', x_tick_label, ...
+            'ytick', -2:0.5:2)
     end
 
     if row_ind(sp) ~= rowN
