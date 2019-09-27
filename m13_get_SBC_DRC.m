@@ -990,7 +990,7 @@ for t = 1 : 13
     gaps = [1.5 2]; % cm
     cmaps_levels = 12;
     
-    font_size = 12;
+    font_size = 18;
     fig_color = [1 1 1];
     
     fig = figure(fig_n);
@@ -1019,8 +1019,10 @@ for t = 1 : 13
         x_sp, ...
         y_sp])
     plot(lon_u, SBC_Ut-SBC_Ut_star, 'k-', 'linewidth', 1)
+%     title([Months{t} ...
+%         ' aus8 SBC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
     title([Months{t} ...
-        ' aus8 SBC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
+        ' aus8 SBC transport ($U_{SBC}$)'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1033,8 +1035,10 @@ for t = 1 : 13
         x_sp, ...
         y_sp])
     plot(lon_u, DRC_Ut-DRC_Ut_star, 'k-', 'linewidth', 1)
+%     title([Months{t} ...
+%         ' aus8 DRC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
     title([Months{t} ...
-        ' aus8 DRC $U_{t}-U_{t}^{*}$ ($Sv$) leak included VS longitude'])
+        ' aus8 FC transport ($U_{FC}$)'])
     grid
     set(gca,'layer','top','color',fig_color,...
         'fontsize',font_size,'tickdir','out')
@@ -1073,8 +1077,8 @@ for t = 1 : 13
     end
     export_fig(fig, ...
         [figures_path mfilename '/' scriptname(1:3) ...
-        '_fig' num2str(fig_n) '_' num2str(t)], ...
-        '-m1')
+        '_fig2' num2str(fig_n) '_' num2str(t)], ...
+        '-m2')
     close
     
     

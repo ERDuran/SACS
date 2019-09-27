@@ -291,7 +291,7 @@ for sp = 1 : rowN*colN
         ylabel('Depth (m)')
     end
     if row_ind(sp) == 2
-        xlabel('Latitude')
+        xlabel('Latitude ($^{\circ}N$)')
     end
     
     if sp == rowN*colN

@@ -298,10 +298,10 @@ for sp = 1 : rowN*colN
     if col_ind(sp) ~= 1
         set(gca,'yticklabel','')
     else
-        ylabel('Depth (m)')
+        ylabel('z (m)')
     end
     if row_ind(sp) == 4
-        xlabel('Latitude')
+        xlabel('Latitude ($^{\circ}N$)')
     end
     
     if sp == rowN*colN-1
@@ -309,13 +309,14 @@ for sp = 1 : rowN*colN
         colormap(ax, cmaps);
         cbar = colorbar('horizontal') ;
         set(cbar,'ytick',cmaps_linspace, ...
-            'YAxisLocation','right','YTickLabel',cmaps_y_label,...
+            'YAxisLocation','right','YTickLabel',...
+        [cmaps_y_label(1:7), 0, cmaps_y_label(9:end)],...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
             (marg_l), ...
             (marg_b - plot_cbar_gap), ...
             cbar_x, cbar_y]);
-        set(get(cbar,'ylabel'),'String','$w$ ($\mu$m/s = $10^{-4}$cm/s)', ...
+        set(get(cbar,'ylabel'),'String','$w$ ($10^{-4}$ cm/s)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         

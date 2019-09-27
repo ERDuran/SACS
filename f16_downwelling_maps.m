@@ -25,8 +25,8 @@ rowcols_size = [12 4.2]/screen_ratio; % cm
 margs = [1.0 0.3 1.9 0.7]/screen_ratio; % cm
 gaps = [0.4 0.7]/screen_ratio; % cm
 
-magnif = 1000000;
-cmap1_cont = -[10 5 2 1 0.5 0.25 0.1 0]/100000*magnif;
+magnif = 100;
+cmap1_cont = -[100 50 20 10 5 2.5 0.5 0];
 cmap2_cont = -fliplr(cmap1_cont);
 lvl_cmap1 = length(cmap1_cont)-1;
 lvl_cmap2 = length(cmap2_cont)-1;
@@ -38,7 +38,7 @@ cmaps = [cmap1; cmap2];
 cmaps_cont = [cmap1_cont cmap2_cont(2:end)];
 cmaps_cont_length = length(cmaps_cont);
 cmaps_linspace = linspace(0,1,cmaps_cont_length);
-cmaps_y_label = cmaps_cont/magnif;
+cmaps_y_label = cmaps_cont;
 
 % lon_min = 115; lon_max = 147; lat_min = -47; lat_max = -32;
 lon_min = 110; lon_max = 152; lat_min = -48; lat_max = -31;
@@ -47,7 +47,8 @@ x_chc = {lon};
 x_ind = [1];
 y_chc = {lat};
 
-data = {fulw*magnif};
+w_conv = 10^4;
+data = {fulw*magnif*w_conv};
 
 title_chc = ...
     {'{\boldmath{$V_{up}$}} (arrows) and {$U_{up}$} (shadings)'};
@@ -146,7 +147,8 @@ for sp = 1 : rowN*colN
         colormap(ax, cmaps);
         cbar = colorbar('horizontal');
         set(cbar,'xtick',cmaps_linspace, ...
-            'XTickLabel',cmaps_y_label,...
+            'XTickLabel',...
+            [cmaps_y_label(1:7), 0, cmaps_y_label(9:end)],...
             'fontsize',font_size,'ticklength',cbar_tick_length)
         set(cbar,'units','centimeters','position', [...
             marg_l, ...
@@ -155,7 +157,7 @@ for sp = 1 : rowN*colN
             cbar_y]);
         
         set(get(cbar,'xlabel'), ...
-            'String','$w$ ($m/s$)', ...
+            'String','$w$ ($10^{-4}$ cm/s)', ...
             'fontsize',font_size)
         cbar.Label.Interpreter = 'latex';
         
